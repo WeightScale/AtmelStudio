@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
+    <title>Калибровка</title>
+    <link rel="shortcut icon" href="favicon.png" type="image/png">
+    <link rel="stylesheet" type="text/css" href="global.css">
+    <script>
+        function setMax(){
+            var formData = new FormData();
+            formData.append('weightStep', document.getElementById('step_id').value);
+            formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
+            formData.append('weightFilter', document.getElementById('filter_id').value);
+            formData.append('weightMax', document.getElementById('max_weight_id').value);
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                if (this.readyState === 4 && this.status === 200){
+                    if (this.responseText !== null){
+                        document.getElementById('form_max').disabled = true;
+                        var f = document.createElement('fieldset');
+                        f.id = 'form_zero';
+                        f.innerHTML = "<legend>Нулевой вес</legend>" +
+                            "<form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='Установить ноль'/></form>";
+                        document.body.appendChild(f);
+                    }
+                }
+            };
+            request.open('POST','calibr.html',true);
+            request.send(formData);
+        }
+        function setZero(){
+            var request = new XMLHttpRequest();
+            var formData = new FormData();
+            formData.append('zero', true);
+            request.onreadystatechange = function(){
+                if (this.readyState === 4 && this.status === 200){
+                    if (this.responseText !== null){
+                        document.getElementById('form_zero').disabled = true;
+                        var f = document.createElement('fieldset');
+                        f.id = 'form_weight';
+                        f.innerHTML = "<legend>Калиброваный вес</legend>" +
+                            "<form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.</p>" +
+                            "<table><tr><td><input title='Введите значение веса установленого на весах' type='number' step='any' max='100000' id='id_cal_weight' placeholder='Калиброваный вес'/></td>" +
+                            "<td><input type='submit' value='Установить'/></td></tr></table></form>";
+                        document.body.appendChild(f);
+                    }
+                }
+            };
+            request.open('POST','calibr.html',true);
+            request.send(formData);
+        }
+        function setWeight(){
+            var formData = new FormData();
+            formData.append('weightCal', document.getElementById('id_cal_weight').value);
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                if (this.readyState === 4){
+                    if(this.status === 200){
+                        if (this.responseText !== null){
+                            document.getElementById('form_weight').disabled = true;
+                            var f = document.createElement('fieldset');
+                            f.id = 'form_seal';
+                            f.innerHTML = "<legend>Пломбировка</legend>" +
+                                "<form action='javascript:setSeal()'><left><p>Сохранение процесса калибровки. Данные калибровки сохраняются в память весов.</p>" +
+                                "<input type='submit' value='Опломбировать'/></left></form>";
+                            document.body.appendChild(f);
+                        }
+                    }else if(this.status === 400){
+                        alert(this.responseText);
+                    }
+                }
+            };
+            request.open('POST','calibr.html',true);
+            request.send(formData);
+        }
+        function setSeal(){
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                if (this.readyState === 4 && this.status === 200){
+                    window.location.replace("/");
+                }
+            };
+            request.open('GET','/seal',true);
+            request.send(null);
+        }
+        function GetSettings() {
+            var http_request = new XMLHttpRequest();
+            http_request.overrideMimeType('application/json');
+            http_request.onreadystatechange = function(){
+                if (http_request.readyState === 4  ){
+                    var json = JSON.parse(http_request.responseText);
+                    var date = json.date;
+                    for (entry in date) {
+                        if(document.getElementById(entry)!== null)
+                            document.getElementById(entry).value=date[entry];
+                    }
+                    document.body.style.visibility = 'visible';
+                }
+            };
+            http_request.open("GET", "/settings.json", true);
+            http_request.send(null);
+        }
+        window.onload = function () {
+            GetSettings();
+        };
+        function saveValue(){
+            var formData = new FormData();
+            formData.append('weightStep', document.getElementById('step_id').value);
+            formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
+            formData.append('weightFilter', document.getElementById('filter_id').value);
+            formData.append('weightMax', document.getElementById('max_weight_id').value);
+            formData.append('update', true);
+            var http_request = new XMLHttpRequest();
+            http_request.onreadystatechange = function(){
+                if (this.readyState === 4 && this.status === 200){
+                    if (this.responseText !== null){
+                        window.open("/","_self");
+                    }
+                }
+            };
+            http_request.onerror = function(){alert("Ошибка");};
+            http_request.open('POST','calibr.html',true);
+            http_request.send(formData);
+        };
+    </script>
+</head>
+<body style="visibility: hidden">
+<a href="/settings.html" class="btn btn--s btn--blue">&lt;</a>&nbsp;&nbsp;<strong>Калибровка</strong>
+<hr>
+<fieldset id="form_max" style="visibility: visible">
+    <legend>Общии настройки</legend>
+    <form action='javascript:setMax()'>
+        <table>
+            <tr>
+                <td>Шаг измерения</td>
+                <td>
+                    <select id="step_id" title="Введите шаг измерения" style="width: 100%">
+                        <option name="шаг 1" value="1"> 1 </option>
+                        <option name="шаг 5" value="5"> 5 </option>
+                        <option name="шаг 10" value="10"> 10 </option>
+                        <option name="шаг 20" value="20"> 20 </option>
+                        <option name="шаг 50" value="50"> 50 </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Точность измерения</td>
+                <td>
+                    <select id="accuracy_id" title="Введите шаг измерения" style="width: 100%">
+                        <option name="0" value="0"> 0 </option>
+                        <option name="0.0" value="1"> 0.0 </option>
+                        <option name="0.00" value="2"> 0.00 </option>
+                        <option name="0.000" value="3"> 0.000 </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>Фильтер</td>
+                <td>
+                    <select id="filter_id" title="Введите значение фильтра" style="width: 100%">
+                        <option name="низкий" value="1">НИЗКИЙ</option>
+                        <option name="средний" value="5">СРЕДНИЙ</option>
+                        <option name="высокий" value="10">ВЫСОКИЙ</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>НВП</td>
+                <td><input title="Введите значение максимального веса" type='number' min='1' max='100000' id='max_weight_id' name='max_weight' placeholder='Найбольший предел'></td>
+            </tr>
+            <tr>
+                <td><a href="javascript:saveValue();">сохранить и выйти</a></td>
+                <td><input type='submit' value='ДАЛЬШЕ >>' style="width: 100%"/></td>
+
+            </tr>
+        </table>
+    </form>
+</fieldset>
+</body>
+</html>
