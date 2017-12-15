@@ -55,8 +55,7 @@ int getCountsOfDigits(long number) {
 	return count;
 }
 
-void BrowserServerClass::init(){
-	
+void BrowserServerClass::init(){	
 	on("/weight", [this](){
 		char buffer[10];
 		SCALES.setWeight(SCALES.get_units());
