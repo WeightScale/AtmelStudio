@@ -141,7 +141,7 @@ void connectWifi() {
 	#endif
 
 	WiFi.disconnect();
-	/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
+	/* */
 	int n = WiFi.scanNetworks();
 	if (n == 0)
 		return;
