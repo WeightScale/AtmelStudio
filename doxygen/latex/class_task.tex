@@ -1,0 +1,99 @@
+\hypertarget{class_task}{\section{Task Class Reference}
+\label{class_task}\index{Task@{Task}}
+}
+Inheritance diagram for Task\-:\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[height=2.000000cm]{class_task}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_task_a8176da7a88e02377b57598c9a4409d74}{{\bfseries Task} (void($\ast$callback)(void)=N\-U\-L\-L, unsigned long \-\_\-interval=0)}\label{class_task_a8176da7a88e02377b57598c9a4409d74}
+
+\item 
+\hypertarget{class_task_a4988948f4115c37f1e7291282475301d}{virtual void {\bfseries set\-Interval} (unsigned long \-\_\-interval)}\label{class_task_a4988948f4115c37f1e7291282475301d}
+
+\item 
+\hypertarget{class_task_a4ba998243774e64e8b206e0648c94686}{virtual bool {\bfseries should\-Run} (unsigned long time)}\label{class_task_a4ba998243774e64e8b206e0648c94686}
+
+\item 
+\hypertarget{class_task_ad90f78a90f598e863077b319d532b498}{bool {\bfseries should\-Run} ()}\label{class_task_ad90f78a90f598e863077b319d532b498}
+
+\item 
+\hypertarget{class_task_a5601d9a37b0b7675dadfb0b4ee396937}{void {\bfseries on\-Run} (void($\ast$callback)(void))}\label{class_task_a5601d9a37b0b7675dadfb0b4ee396937}
+
+\item 
+\hypertarget{class_task_a034b41e0d81a3dc01804bbc3f73a25f2}{virtual void \hyperlink{class_task_a034b41e0d81a3dc01804bbc3f73a25f2}{run} ()}\label{class_task_a034b41e0d81a3dc01804bbc3f73a25f2}
+
+\begin{DoxyCompactList}\small\item\em Запуск \end{DoxyCompactList}\item 
+\hypertarget{class_task_a8fc7f3a2f5ebd910f22d1134d0dfcb2f}{void {\bfseries resume} ()}\label{class_task_a8fc7f3a2f5ebd910f22d1134d0dfcb2f}
+
+\item 
+\hypertarget{class_task_a495138236c4f8dbbf39accb50a225805}{void {\bfseries pause} ()}\label{class_task_a495138236c4f8dbbf39accb50a225805}
+
+\item 
+\hypertarget{class_task_a7d3567d532005b7d512a262c05ea7660}{void {\bfseries update\-Cache} ()}\label{class_task_a7d3567d532005b7d512a262c05ea7660}
+
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+\hypertarget{class_task_ab8eae16bcc9a58902bfcb2d87aa2ca76}{bool {\bfseries enabled}}\label{class_task_ab8eae16bcc9a58902bfcb2d87aa2ca76}
+
+\item 
+\hypertarget{class_task_a718368e89530280279009e82295cd162}{int {\bfseries Task\-I\-D}}\label{class_task_a718368e89530280279009e82295cd162}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+void \hyperlink{class_task_a9b1f636a11b890e151389bfd619e314e}{runned} (unsigned long time)
+\item 
+\hypertarget{class_task_aedc80bdcbb46b2a17f49aa2f7ddaa613}{void {\bfseries runned} ()}\label{class_task_aedc80bdcbb46b2a17f49aa2f7ddaa613}
+
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+unsigned long \hyperlink{class_task_a3066331ddfd597f1b93e032c4da86e28}{interval}
+\item 
+unsigned long \hyperlink{class_task_a98a9b91b4fff2ca30790e6c4884fe2c8}{last\-\_\-run}
+\item 
+unsigned long \hyperlink{class_task_a4de078e5174a6c9ae0b34cd378f766c5}{\-\_\-cached\-\_\-next\-\_\-run}
+\item 
+\hypertarget{class_task_a6de6283b5a02b73db41a1c6abfbdcaaf}{boolean {\bfseries Paused} = false}\label{class_task_a6de6283b5a02b73db41a1c6abfbdcaaf}
+
+\item 
+\hypertarget{class_task_a370a6b60a07d7a6a4fedfa04c2958876}{void($\ast$ {\bfseries \-\_\-on\-Run} )(void)}\label{class_task_a370a6b60a07d7a6a4fedfa04c2958876}
+
+\end{DoxyCompactItemize}
+
+
+\subsection{Member Function Documentation}
+\hypertarget{class_task_a9b1f636a11b890e151389bfd619e314e}{\index{Task@{Task}!runned@{runned}}
+\index{runned@{runned}!Task@{Task}}
+\subsubsection[{runned}]{\setlength{\rightskip}{0pt plus 5cm}void Task\-::runned (
+\begin{DoxyParamCaption}
+\item[{unsigned long}]{time}
+\end{DoxyParamCaption}
+)\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_task_a9b1f636a11b890e151389bfd619e314e}
+I\-M\-P\-O\-R\-T\-A\-N\-T! Run after all calls to \hyperlink{class_task_a034b41e0d81a3dc01804bbc3f73a25f2}{run()} Updates last\-\_\-run and cache next run. N\-O\-T\-E\-: This M\-U\-S\-T be called if extending this class and implementing \hyperlink{class_task_a034b41e0d81a3dc01804bbc3f73a25f2}{run()} method 
+
+\subsection{Member Data Documentation}
+\hypertarget{class_task_a4de078e5174a6c9ae0b34cd378f766c5}{\index{Task@{Task}!\-\_\-cached\-\_\-next\-\_\-run@{\-\_\-cached\-\_\-next\-\_\-run}}
+\index{\-\_\-cached\-\_\-next\-\_\-run@{\-\_\-cached\-\_\-next\-\_\-run}!Task@{Task}}
+\subsubsection[{\-\_\-cached\-\_\-next\-\_\-run}]{\setlength{\rightskip}{0pt plus 5cm}unsigned long Task\-::\-\_\-cached\-\_\-next\-\_\-run\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_task_a4de078e5174a6c9ae0b34cd378f766c5}
+Запланированый пробег в милисекундах \hypertarget{class_task_a3066331ddfd597f1b93e032c4da86e28}{\index{Task@{Task}!interval@{interval}}
+\index{interval@{interval}!Task@{Task}}
+\subsubsection[{interval}]{\setlength{\rightskip}{0pt plus 5cm}unsigned long Task\-::interval\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_task_a3066331ddfd597f1b93e032c4da86e28}
+Интервал между запусками \hypertarget{class_task_a98a9b91b4fff2ca30790e6c4884fe2c8}{\index{Task@{Task}!last\-\_\-run@{last\-\_\-run}}
+\index{last\-\_\-run@{last\-\_\-run}!Task@{Task}}
+\subsubsection[{last\-\_\-run}]{\setlength{\rightskip}{0pt plus 5cm}unsigned long Task\-::last\-\_\-run\hspace{0.3cm}{\ttfamily [protected]}}}\label{class_task_a98a9b91b4fff2ca30790e6c4884fe2c8}
+Последнее время запкска в милисекундах 
+
+The documentation for this class was generated from the following files\-:\begin{DoxyCompactItemize}
+\item 
+Task.\-h\item 
+Task.\-cpp\end{DoxyCompactItemize}
