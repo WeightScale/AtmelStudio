@@ -99,7 +99,7 @@ void setup() {
 void takeBlink() {
 	bool led = !digitalRead(LED);
 	digitalWrite(LED, led);	
-	taskBlink.setInterval(led ? COUNT_FLASH/SCALES.getFilter() : COUNT_BLINK);
+	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH/SCALES.getFilter());
 }
 
 /**/
