@@ -212,7 +212,7 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 			if (browserServer.argName(i)=="date"){
 				DateTimeClass DateTime(browserServer.arg("date"));
 				Rtc.SetDateTime(DateTime.toRtcDateTime());
-				String message = "<div>Р”Р°С‚Р° СЃРёРЅС…СЂРѕРЅРёР·РёСЂРѕРІР°РЅР°<br/>";
+				String message = "<div>Дата время установлена<br/>";
 				message+=getDateTime()+"</div>";
 				browserServer.send(200, "text/html", message);
 				return;
@@ -291,7 +291,7 @@ void ScalesClass::scaleCalibrateSaveValue() {
 			browserServer.send(200, "text/html", "");
 			mathRound();			
 		}else{
-			browserServer.send(400, "text/html", "РћС€РёР±РєР°");
+			browserServer.send(400, "text/html", "Ошибка°");
 		}
 	//}
 }
@@ -492,11 +492,11 @@ void ScalesClass::updateSettings(){
 	//set_offset(_settings.adc_offset);
 }
 
-/* Р¤СѓРЅРєС†РёСЏ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ Р·РЅР°С‡РµРЅРёСЏ
-	value - С‡РёСЃР»РѕРІРѕРµ Р·РЅР°С‡РµРЅРёРµ
-	digits - РєРѕР»РёС‡РµСЃС‚РІРѕ С†РёС„СЂ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№
-	accuracy - С‚РѕС‡РЅРѕСЃС‚СЊ РїРѕСЃР»РµРґРЅРёС… С†РёС„СЂ (1, 2, 5, ...)
-	string - СЃС‚СЂРѕРєР° РґР»СЏ Р·Р°РїРёСЃРё РѕС‚С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРЅРѕРіРѕ С‡РёСЃР»Р° 
+/*! Функция для форматирования значения веса
+	value - Форматируемое значение
+	digits - Количество знаков после запятой
+	accuracy - Точновть шага значений (1, 2, 5, ...)
+	string - Выходная строка отфармотронова значение 
 */
 void ScalesClass::formatValue(d_type value, /*int digits, int accuracy,*/ char* string){
 	//d_type r = pow(10.0, _settings.accuracy) / _settings.step; // РјРЅРѕР¶РёС‚РµР»СЊ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ
@@ -505,8 +505,8 @@ void ScalesClass::formatValue(d_type value, /*int digits, int accuracy,*/ char* 
 }
 
 void powerOff(){
-	SCALES.power_down(); // РѕС‚РєР»СЋС‡Р°РµРј РїРёС‚Р°РЅРёРµ РѕС‚ РґР°С‚С‡РёРєР°
-	digitalWrite(EN_NCP, LOW); // РІС‹РєР»СЋС‡Р°РµРј РїРёС‚Р°РЅРёРµ
+	SCALES.power_down(); /// Выключаем ацп
+	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 }
 
 

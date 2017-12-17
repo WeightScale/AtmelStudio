@@ -34,8 +34,8 @@
 
 TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
-Task taskBattery(takeBattery, 20000);					/* 20 ��������� ����� ������� */
-Task taskPower(powerOff, 600000);						/* 10 ����� ����������� � ��������� */
+Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
+Task taskPower(powerOff, 600000);						/* 10 минут бездействия и выключаем */
 
 
 unsigned int COUNT_FLASH = 500;
@@ -118,14 +118,14 @@ void takeBattery(){
 void powerSwitchInterrupt(){
 	unsigned int t=0;
 	delay(100);
-	if(digitalRead(PWR_SW)==HIGH){ // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ?
+	if(digitalRead(PWR_SW)==HIGH){ // 
 		digitalWrite(LED, HIGH);
-		while(digitalRead(PWR_SW)==HIGH){ // пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ?
+		while(digitalRead(PWR_SW)==HIGH){ // 
 			delay(100);
 			t++;			
-			if(t >40){ //пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ 4 пїЅпїЅпїЅпїЅпїЅпїЅпїЅ?
+			if(t >40){ // 
 				digitalWrite(LED, HIGH);
-				while(digitalRead(PWR_SW) == HIGH){delay(10);};// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
+				while(digitalRead(PWR_SW) == HIGH){delay(10);};// 
 				powerOff();
 				//ESP.reset();				
 				break;
@@ -141,13 +141,13 @@ void connectWifi() {
 	#endif
 
 	WiFi.disconnect();
-	/* пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ */
+	/*!  */
 	int n = WiFi.scanNetworks();
 	if (n == 0)
 		return;
 	else{		
 		for (int i = 0; i < n; ++i)	{
-			/* пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ */
+			/*!  */
 			if(WiFi.SSID(i) == SCALES.getSSID().c_str()){ 
 				WiFi.begin ( SCALES.getSSID().c_str(), SCALES.getPASS().c_str());
 				int connRes = WiFi.waitForConnectResult();
