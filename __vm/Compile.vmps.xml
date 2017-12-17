@@ -21,12 +21,12 @@
 51		pinMode(EN_NCP, OUTPUT);
 52		digitalWrite(EN_NCP, HIGH);
 53		pinMode(LED, OUTPUT);	
-54		pinMode(PWR_SW, INPUT);
-55	
-56		while (digitalRead(PWR_SW) == HIGH){
-57			delay(100);	
-58		};
-59		
+54		digitalWrite(LED, HIGH);
+55		pinMode(PWR_SW, INPUT);
+56	
+57		while (digitalRead(PWR_SW) == HIGH){
+58			delay(100);	
+59		};
 </Source>
       </BreakPoint>
     </BreakPoints>

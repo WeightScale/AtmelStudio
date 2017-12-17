@@ -51,6 +51,7 @@ void setup() {
 	pinMode(EN_NCP, OUTPUT);
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);	
+	digitalWrite(LED, HIGH);
 	pinMode(PWR_SW, INPUT);
 
 	while (digitalRead(PWR_SW) == HIGH){
