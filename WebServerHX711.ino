@@ -51,7 +51,7 @@ void setup() {
 	pinMode(EN_NCP, OUTPUT);
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);	
-	digitalWrite(LED, HIGH);
+	//digitalWrite(LED, HIGH);
 	pinMode(PWR_SW, INPUT);
 
 	while (digitalRead(PWR_SW) == HIGH){
@@ -107,12 +107,13 @@ void takeBlink() {
 void takeBattery(){
 	//unsigned int charge = ((SCALES.getBattery(1) - MIN_CHG)/DIAPAZONE)*100;
 	unsigned int charge = SCALES.getBattery(1);
-	if (charge <= MIN_CHG ){
+	charge = map(charge,MIN_CHG,MAX_CHG,0,100);
+	/*if (charge <= MIN_CHG ){
 		charge = MIN_CHG;
 	}else if(charge > MAX_CHG){
 		charge = MAX_CHG;
 	}
-	charge = ((charge - MIN_CHG) / DIAPAZONE) * 100;		
+	charge = ((charge - MIN_CHG) / DIAPAZONE) * 100;*/		
 	SCALES.setCharge(charge);
 }
 
