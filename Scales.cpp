@@ -13,19 +13,15 @@ ScalesClass::ScalesClass(byte dout, byte pd_sck) : HX711(dout, pd_sck){
 
 ScalesClass::~ScalesClass(){}
 
-void ScalesClass::begin(){	
-	//ScaleMemClass::init();
+void ScalesClass::begin(){
 	loadSettings();	
 	
-	reset();
-	set_step(_settings.step);
+	reset();	
 	set_filter(_settings.filter);
 	set_scale(_settings.scale);
 	set_offset(_settings.adc_offset);
 	ADCFilter.SetCurrent(_settings.adc_offset);
 	mathRound();
-	//updateSettings();
-	//tare();	
 }
 
 void ScalesClass::setSSID(const String& ssid){
@@ -327,10 +323,8 @@ int ScalesClass::getBattery(int times){
 	return times == 0?sum :sum / times;	
 }
 
-void ScalesClass::mathScale(){
-	//_settings.scale = (double)((double)accurateWeight / (double)((double)calibrateWeight - (double)calibrateZero));
+void ScalesClass::mathScale(){	
 	_settings.scale = calibrateWeight - calibrateZero;
-	//_settings.scale = (double)((double)((double)calibrateWeight - (double)calibrateZero)/(double)accurateWeight );
 	_settings.scale /= accurateWeight;
 	_settings.adc_offset = calibrateZero;
 }
@@ -492,8 +486,7 @@ void ScalesClass::detectStable(){
 	}
 }
 
-void ScalesClass::updateSettings(){
-	set_step(_settings.step);
+void ScalesClass::updateSettings(){	
 	set_filter(_settings.filter);
 	set_scale(_settings.scale);
 	//set_offset(_settings.adc_offset);
@@ -516,25 +509,7 @@ void powerOff(){
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 }
 
-//==============================Filter================================================
-/*
-d_type ScalesClass::filter(d_type data, / *d_type prev_data,* / d_type delta_data, d_type filter_step, d_type filter_cof){
-	d_type temp,temp1;
-	static d_type filter_count = 1, prev_data;
-	
-	if((data - prev_data) > delta_data || (prev_data - data) > delta_data)
-		filter_count = 1;
-	else
-		if((filter_count - filter_step) > filter_cof)
-			filter_count -= filter_step;
-		else
-			filter_count = filter_cof;
-	temp = data *  filter_count;
-	temp1 = (1- filter_count) * prev_data;
-	prev_data = temp +temp1;
-	//temp += (1- filter_count) * prev_weight;
-	return prev_data;
-}*/
+
 
 
 
