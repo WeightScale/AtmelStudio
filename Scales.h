@@ -42,6 +42,7 @@ typedef struct {
 	unsigned char filter;				/*  */
 	unsigned char step;					/*  */
 	int accuracy;					/*  */
+	//unsigned char w_filter; /*! Значение для фильтра от 1-100 % */
 	unsigned int max;					/*  */
 	d_type scale;
 	String scaleName;
@@ -101,10 +102,11 @@ class ScalesClass : public HX711/*, public ScaleMemClass*/{
 		void formatValue(d_type value, /*int digits, int accuracy,*/ char* string);
 		unsigned char getFilter(){return _settings.filter;}	
 		void mathRound(){_round = pow(10.0, _settings.accuracy) / _settings.step;} // множитель для округления}
+		//d_type filter(d_type data, /*d_type prev_data,*/ d_type delta_data, d_type filter_step, d_type filter_cof);
 			
 		
 		/*friend ScaleMemClass;*/
-		friend HX711;		
+		friend HX711;	
 };
 
 void powerOff();

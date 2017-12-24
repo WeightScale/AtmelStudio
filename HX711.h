@@ -1,13 +1,15 @@
 #ifndef HX711_h
 #define HX711_h
 
-typedef float d_type;
+#include "Filter.h"
 
 #if ARDUINO >= 100
 	#include "Arduino.h"
 #else
 	#include "WProgram.h"
 #endif
+
+typedef float d_type;
 
 class HX711 {
 	private:
@@ -17,7 +19,7 @@ class HX711 {
 		long OFFSET;	// used for tare weight
 		d_type SCALE;	// used to return weight in grams, kg, ounces, whatever
 		unsigned char FILTER;
-		unsigned char STEP;
+		unsigned char STEP;		
 		bool pinsConfigured;
 
 	public:
@@ -60,9 +62,13 @@ class HX711 {
 		void set_filter(unsigned char);		
 		//unsigned char get_filter(){return FILTER;};		
 		void set_step(unsigned char step = 1){STEP = step;};		
-		unsigned char get_step(){return STEP;};			
+		unsigned char get_step(){return STEP;};	
+		//void setFWEIGHT(unsigned char f){fWEIGHT = constrain(f, 1, 100);};		
 		void reset();
+		//void stable();
 };
+
+extern ExponentialFilter<long> ADCFilter;
 
 #endif /* HX711_h */
 

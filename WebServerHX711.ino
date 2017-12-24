@@ -1,4 +1,3 @@
-
 //#define SERIAL_DEDUG
 #include <ESP8266WiFi.h>
 #include <IPAddress.h>
@@ -19,6 +18,7 @@
 #include "tools.h"
 #include "BrowserServer.h"
 #include "Scales.h"
+#include "Task.h"
 
 /*
    This example serves a "hello world" on a WLAN and a SoftAP at the same time.

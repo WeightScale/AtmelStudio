@@ -57,8 +57,9 @@ int getCountsOfDigits(long number) {
 
 void BrowserServerClass::init(){	
 	on("/weight", [this](){
-		char buffer[10];
+		char buffer[10];		
 		SCALES.setWeight(SCALES.get_units());
+		//SCALES.setWeight(SCALES.filter(SCALES.get_units(), 0.01, 0.1, 0.1));
 		//SCALES.formatValue(SCALES.get_units(), buffer);
 		SCALES.formatValue(SCALES.getWeight(), buffer);							
 		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(SCALES.getCharge())+"}"));

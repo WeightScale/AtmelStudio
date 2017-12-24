@@ -22,9 +22,10 @@ void ScalesClass::begin(){
 	set_filter(_settings.filter);
 	set_scale(_settings.scale);
 	set_offset(_settings.adc_offset);
+	ADCFilter.SetCurrent(_settings.adc_offset);
 	mathRound();
 	//updateSettings();
-	//tare(get_filter());	
+	//tare();	
 }
 
 void ScalesClass::setSSID(const String& ssid){
@@ -271,6 +272,9 @@ void ScalesClass::scaleCalibrateSaveValue() {
 			}if (browserServer.argName(i) == "weightFilter") {
 				_settings.filter = browserServer.arg(i).toInt();
 				flag = true;
+			}if (browserServer.argName(i) == "weightFilter1") {
+				ADCFilter.SetWeight(browserServer.arg(i).toInt());
+				flag = true;
 			}else if (browserServer.argName(i) == "zero") {
 				calibrateZero = read_average(_settings.filter);				
 				flag = true;
@@ -395,7 +399,8 @@ bool ScalesClass::saveDate() {
 	json["date"]["accuracy_id"] = _settings.accuracy;
 	json["date"]["max_weight_id"] = _settings.max;
 	json["date"]["adc_offset"] = _settings.adc_offset;
-	json["date"]["scale"] = _settings.scale;	
+	json["date"]["scale"] = _settings.scale;
+	json["date"]["wfilter_id"] = ADCFilter.GetWeight();	
 
 	//TODO add AP data to html
 	File saveFile = SPIFFS.open(SETTINGS_FILE, "w");
@@ -425,6 +430,7 @@ bool ScalesClass::loadSettings() {
 		_settings.adc_offset = 0;
 		_settings.max = 1000;
 		_settings.scale = 1;
+		ADCFilter.SetWeight(20);
 		serverFile.close();
 		return false;
 	}
@@ -460,6 +466,7 @@ bool ScalesClass::loadSettings() {
 	_settings.step = json["date"]["step_id"];
 	_settings.accuracy = json["date"]["accuracy_id"];
 	_settings.scale = json["date"]["scale"];
+	ADCFilter.SetWeight(json["date"]["wfilter_id"]);
 	return true;
 }
 
@@ -509,6 +516,25 @@ void powerOff(){
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 }
 
+//==============================Filter================================================
+/*
+d_type ScalesClass::filter(d_type data, / *d_type prev_data,* / d_type delta_data, d_type filter_step, d_type filter_cof){
+	d_type temp,temp1;
+	static d_type filter_count = 1, prev_data;
+	
+	if((data - prev_data) > delta_data || (prev_data - data) > delta_data)
+		filter_count = 1;
+	else
+		if((filter_count - filter_step) > filter_cof)
+			filter_count -= filter_step;
+		else
+			filter_count = filter_cof;
+	temp = data *  filter_count;
+	temp1 = (1- filter_count) * prev_data;
+	prev_data = temp +temp1;
+	//temp += (1- filter_count) * prev_weight;
+	return prev_data;
+}*/
 
 
 
