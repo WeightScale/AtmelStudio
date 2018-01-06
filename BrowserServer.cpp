@@ -101,10 +101,10 @@ void BrowserServerClass::init(){
 			return this->requestAuthentication(); 
 		handleFileList();});
 	//load editor
-	on("/edit.html", HTTP_GET, [this](){
+	on("/editor.html", HTTP_GET, [this](){
 		if (!this->checkAuth())
 			return this->requestAuthentication();
-		if(!handleFileRead("/edit.html")) 
+		if(!handleFileRead("/editor.html")) 
 			send(404, "text/plain", "FileNotFound");});
 	//create file
 	on("/edit", HTTP_PUT, [this](){
