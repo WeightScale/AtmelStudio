@@ -23,7 +23,7 @@ using namespace ArduinoJson;
 #define STABLE_NUM_MAX 10
 #define STABLE_DELTA_STEP 10
 #define MAX_EVENTS 100
-#define MAX_CHG 980
+#define MAX_CHG 1013//980 
 #define MIN_CHG 720
 //#define DIAPAZONE (MAX_CHG - MIN_CHG)
 
@@ -35,6 +35,7 @@ extern TaskController taskController;		/*  */
 extern Task taskBlink;								/*  */
 extern Task taskBattery;							/*  */
 extern Task taskPower;
+extern void connectWifi();
 
 typedef struct {
 	//unsigned int pwr_time;			/*  */
@@ -57,6 +58,7 @@ class ScalesClass : public HX711/*, public ScaleMemClass*/{
 	protected:	
 	d_type _weight=-1, _weight_temp;
 	d_type _round; /* множитиль для округления */
+	d_type _stable_step; /* шаг для стабилизации */
 	unsigned char _stable_num = 0;
 	bool isStable = false;
 	settings_t _settings;
@@ -101,7 +103,10 @@ class ScalesClass : public HX711/*, public ScaleMemClass*/{
 		unsigned int getCharge(){return charge;}
 		void formatValue(d_type value, /*int digits, int accuracy,*/ char* string);
 		unsigned char getFilter(){return _settings.filter;}	
-		void mathRound(){_round = pow(10.0, _settings.accuracy) / _settings.step;} // множитель для округления}
+		void mathRound(){
+			_round = pow(10.0, _settings.accuracy) / _settings.step; // множитель для округления}
+			_stable_step = 1/_round;} 
+		d_type getRound(){return _round;};
 		//d_type filter(d_type data, /*d_type prev_data,*/ d_type delta_data, d_type filter_step, d_type filter_cof);
 			
 		

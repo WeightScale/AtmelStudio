@@ -2,14 +2,14 @@
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include <StreamString.h>
-#include <ArduinoOTA.h>
+//#include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include "BrowserServer.h"
 #include "handleHttp.h"
 #include "Scales.h"
 
 /* */
-ESP8266HTTPUpdateServer httpUpdater;
+//ESP8266HTTPUpdateServer httpUpdater;
 /* Soft AP network parameters */
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
@@ -59,8 +59,6 @@ void BrowserServerClass::init(){
 	on("/weight", [this](){
 		char buffer[10];		
 		SCALES.setWeight(SCALES.get_units());
-		//SCALES.setWeight(SCALES.filter(SCALES.get_units(), 0.01, 0.1, 0.1));
-		//SCALES.formatValue(SCALES.get_units(), buffer);
 		SCALES.formatValue(SCALES.getWeight(), buffer);							
 		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(SCALES.getCharge())+"}"));
 		SCALES.detectStable();
@@ -92,8 +90,6 @@ void BrowserServerClass::init(){
 		}
 	});
 	on("/events.html", [this](){
-		/*if (!isAuthentified())
-			return this->requestAuthentication();*/
 		handleFileRead("/events.html");});
 	//list directory
 	on("/list", HTTP_GET, [this](){
@@ -169,11 +165,11 @@ void BrowserServerClass::init(){
 			if(!Update.begin(maxSketchSpace)){//start with max available size
 				Update.printError(Serial);
 			}
-			} else if(upload.status == UPLOAD_FILE_WRITE){
+		} else if(upload.status == UPLOAD_FILE_WRITE){
 			if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
 				Update.printError(Serial);
 			}
-			} else if(upload.status == UPLOAD_FILE_END){
+		} else if(upload.status == UPLOAD_FILE_END){
 			if(Update.end(true)){ //true to set the size to the current progress
 				#if defined SERIAL_DEDUG
 					Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
@@ -189,11 +185,12 @@ void BrowserServerClass::init(){
 		if (!this->checkAuth())
 			return this->requestAuthentication();
 		this->send_wwwauth_configuration_html();
+		taskPower.pause();
 	});
-	on("/admin/restart", [this]() {	
+	/*on("/admin/restart", [this]() {	
 		if (!this->checkAuth())
 			return this->requestAuthentication();
-		this->restart_esp();});	
+		this->restart_esp();});*/	
 	/*on("/admin/wwwauth", [this]() {
 		if (!this->checkAuth())
 			return this->requestAuthentication();

@@ -1,4 +1,4 @@
-#include <EEPROM.h>
+//#include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #include <FS.h>
 #include <ArduinoJson.h>
@@ -232,11 +232,16 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 				//continue;
 			}else if (browserServer.argName(i) == "ssid") {
 				_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg(i));
+				//connect = _settings.scaleWlanSSID.length() > 0;
+				if(_settings.scaleWlanSSID.length() > 0)
+					connectWifi();
 				flag = true;
 				//continue;
 			}else if (browserServer.argName(i) == "key") {
 				_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg(i));
-				connect = _settings.scaleWlanKey.length() > 0;
+				//connect = _settings.scaleWlanKey.length() > 0;
+				if(_settings.scaleWlanSSID.length() > 0)
+					connectWifi();
 				flag = true;
 				//continue;
 			}
@@ -467,8 +472,8 @@ bool ScalesClass::loadSettings() {
 
 /* */
 void ScalesClass::detectStable(){
-	if(abs(_weight) > 10){
-		if (_weight_temp /*- _settings.step*/ <= _weight && _weight_temp /*+ _settings.step*/ >= _weight ) {
+	if(abs(_weight) > _stable_step){
+		if (_weight_temp == _weight/*_weight_temp <= _weight && _weight_temp >= _weight && _weight != 0*/ ) {
 			if (_stable_num <= STABLE_NUM_MAX){
 				if (_stable_num == STABLE_NUM_MAX) {
 					if (!isStable){
@@ -508,6 +513,7 @@ void ScalesClass::formatValue(d_type value, /*int digits, int accuracy,*/ char* 
 void powerOff(){
 	SCALES.power_down(); /// Выключаем ацп
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
+	ESP.reset();
 }
 
 

@@ -1,4 +1,4 @@
-#include <EEPROM.h>
+//#include <EEPROM.h>
 #include "handleHttp.h"
 #include "tools.h"
 #include "Scales.h"

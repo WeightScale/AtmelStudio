@@ -8,12 +8,27 @@
     <title>Калибровка</title>
     <link rel="shortcut icon" href="favicon.png" type="image/png">
     <link rel="stylesheet" type="text/css" href="global.css">
+    <style>
+        table {width: 100%;}
+        input{
+            width:auto;text-align: right;
+            font-size:18px;
+            height:auto;
+        }
+        select{
+            width:auto;
+            font-size:18px;
+            height:auto;
+            border:1px solid #ccc;
+        }
+    </style>
     <script>
         function setMax(){
             var formData = new FormData();
             formData.append('weightStep', document.getElementById('step_id').value);
             formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
             formData.append('weightFilter', document.getElementById('filter_id').value);
+            formData.append('weightFilter1', document.getElementById('wfilter_id').value);
             formData.append('weightMax', document.getElementById('max_weight_id').value);
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
@@ -23,7 +38,7 @@
                         var f = document.createElement('fieldset');
                         f.id = 'form_zero';
                         f.innerHTML = "<legend>Нулевой вес</legend>" +
-                            "<form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='Установить ноль'/></form>";
+                            "<form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form>";
                         document.body.appendChild(f);
                     }
                 }
@@ -42,9 +57,9 @@
                         var f = document.createElement('fieldset');
                         f.id = 'form_weight';
                         f.innerHTML = "<legend>Калиброваный вес</legend>" +
-                            "<form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.</p>" +
-                            "<table><tr><td><input title='Введите значение веса установленого на весах' type='number' step='any' max='100000' id='id_cal_weight' placeholder='Калиброваный вес'/></td>" +
-                            "<td><input type='submit' value='Установить'/></td></tr></table></form>";
+                            "<form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.Значение вводится с точностью которое выбрано в пункте Точность измерения.</p>" +
+                            "<table><tr><td><input title='Введите значение веса установленого на весах' type='number' step='any' max='100000' id='id_cal_weight' required placeholder='Калиброваный вес'/></td></tr>" +
+                            "<tr><td><input type='submit' value='УСТАНОВИТЬ'/></td></tr></table></form>";
                         document.body.appendChild(f);
                     }
                 }
@@ -65,7 +80,7 @@
                             f.id = 'form_seal';
                             f.innerHTML = "<legend>Пломбировка</legend>" +
                                 "<form action='javascript:setSeal()'><left><p>Сохранение процесса калибровки. Данные калибровки сохраняются в память весов.</p>" +
-                                "<input type='submit' value='Опломбировать'/></left></form>";
+                                "<input type='submit' value='ОПЛОМБИРОВАТЬ'/></left></form>";
                             document.body.appendChild(f);
                         }
                     }else if(this.status === 400){
@@ -136,9 +151,20 @@
     <form action='javascript:setMax()'>
         <table>
             <tr>
+                <td>Точность измерения</td>
+                <td>
+                    <select id="accuracy_id" title="Выбор точности с которым будет измерения" style="width: 100%">
+                        <option name="0" value="0"> 0 </option>
+                        <option name="0.0" value="1"> 0.0 </option>
+                        <option name="0.00" value="2"> 0.00 </option>
+                        <option name="0.000" value="3"> 0.000 </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
                 <td>Шаг измерения</td>
                 <td>
-                    <select id="step_id" title="Введите шаг измерения" style="width: 100%">
+                    <select id="step_id" title="Выбор шага измерения" style="width: 100%">
                         <option name="шаг 1" value="1"> 1 </option>
                         <option name="шаг 5" value="5"> 5 </option>
                         <option name="шаг 10" value="10"> 10 </option>
@@ -148,30 +174,19 @@
                 </td>
             </tr>
             <tr>
-                <td>Точность измерения</td>
+                <td>Кол-во измерений</td>
                 <td>
-                    <select id="accuracy_id" title="Введите шаг измерения" style="width: 100%">
-                        <option name="0" value="0"> 0 </option>
-                        <option name="0.0" value="1"> 0.0 </option>
-                        <option name="0.00" value="2"> 0.00 </option>
-                        <option name="0.000" value="3"> 0.000 </option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <td>Измерение</td>
-                <td>
-                    <select id="filter_id" title="Введите значение количество измерений АЦП" style="width: 100%">
-                        <option name="одно" value="1">ОДИНО</option>
+                    <select id="filter_id" title="Выбор количества измерений АЦП" style="width: 100%">
+                        <option name="одно" value="1">ОДИН</option>
+                        <option name="два" value="2">ДВА</option>
                         <option name="пять" value="5">ПЯТЬ</option>
-                        <option name="десять" value="10">ДЕСЯТЬ</option>
                     </select>
                 </td>
             </tr>
             <tr>
-                <td>Фильтер1</td>
+                <td>Филтер</td>
                 <td>
-                    <select id="wfilter_id" title="Введите значение фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
+                    <select id="wfilter_id" title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
                         <option name="5%" value="5">5 %</option>
                         <option name="10%" value="10">10 %</option>
                         <option name="20%" value="20">20 %</option>

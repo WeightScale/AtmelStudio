@@ -11,12 +11,12 @@
 #include <ESP8266WiFi.h>
 #include <IPAddress.h>
 #include <WiFiClient.h>
-#include <ESP8266HTTPUpdateServer.h>
+//#include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
 #include <ESP8266mDNS.h>
 #include <FS.h>
-#include <ArduinoOTA.h>
+//#include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include "Scales.h"
 
@@ -74,7 +74,7 @@ extern const char *myHostname;
 extern const char *softAP_ssid;
 extern const char *softAP_password;
 
-extern ESP8266HTTPUpdateServer httpUpdater;
+//extern ESP8266HTTPUpdateServer httpUpdater;
 extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
