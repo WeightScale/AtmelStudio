@@ -49,7 +49,6 @@ template<> class ExponentialFilter<float>{
 	float m_fCurrent;
 
 	public:
-	ExponentialFilter() : m_fWeightNew(1.0f), m_fCurrent(0.0f){}
 	ExponentialFilter(float fWeightNew, float fInitial)	: m_fWeightNew(fWeightNew/100.0), m_fCurrent(fInitial){}
 
 

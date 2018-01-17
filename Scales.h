@@ -23,9 +23,9 @@ using namespace ArduinoJson;
 #define STABLE_NUM_MAX 10
 #define STABLE_DELTA_STEP 10
 #define MAX_EVENTS 100
-#define MAX_CHG 980
-#define MIN_CHG 720
-//#define DIAPAZONE (MAX_CHG - MIN_CHG)
+#define MAX_CHG 1013.0f
+#define MIN_CHG 720.0f
+#define DIAPAZONE (MAX_CHG - MIN_CHG)
 
 #define EN_NCP  12							/* сигнал включения питания  */
 #define PWR_SW  13							/* сигнал от кнопки питания */
@@ -38,7 +38,7 @@ extern Task taskPower;
 
 typedef struct {
 	//unsigned int pwr_time;			/*  */
-	long adc_offset;		/*  */
+	long int adc_offset;		/*  */
 	unsigned char filter;				/*  */
 	unsigned char step;					/*  */
 	int accuracy;					/*  */

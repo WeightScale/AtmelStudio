@@ -246,7 +246,7 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 				//browserServer.send(200, "text/html", "");
 				handleFileRead(browserServer.uri());
 			}else{
-				browserServer.send(400, "text/html", "Ошибка ");
+				browserServer.send(400, "text/html", "РћС€РёР±РєР°");
 			}
 		}
 	//}
@@ -291,7 +291,7 @@ void ScalesClass::scaleCalibrateSaveValue() {
 			browserServer.send(200, "text/html", "");
 			mathRound();			
 		}else{
-			browserServer.send(400, "text/html", "Ошибка ");
+			browserServer.send(400, "text/html", "Ошибка°");
 		}
 	//}
 }
@@ -324,9 +324,8 @@ int ScalesClass::getBattery(int times){
 }
 
 void ScalesClass::mathScale(){	
-	//_settings.scale = calibrateWeight - calibrateZero;
-	//_settings.scale =  float(calibrateWeight - calibrateZero) / accurateWeight;
-	_settings.scale = accurateWeight / float(calibrateWeight - calibrateZero);	
+	_settings.scale = calibrateWeight - calibrateZero;
+	_settings.scale /= accurateWeight;
 	_settings.adc_offset = calibrateZero;
 }
 
@@ -479,7 +478,7 @@ void ScalesClass::detectStable(){
 				}
 				_stable_num++;
 			}
-		} else { 
+		} else {
 			_stable_num=0;
 			isStable = false;
 		}

@@ -23,6 +23,12 @@
 #define ARDUINO 10803
 #define ARDUINO_ESP8266_ESP01
 #define ARDUINO_ARCH_ESP8266
+//
+void takeBlink();
+void takeBattery();
+void powerSwitchInterrupt();
+void connectWifi();
+//
 
 #include "common.h" 
 #include "pins_arduino.h" 
