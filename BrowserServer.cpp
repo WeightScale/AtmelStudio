@@ -2,17 +2,22 @@
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include <StreamString.h>
+#include <ESP8266httpUpdate.h>
 //#include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include "BrowserServer.h"
 #include "handleHttp.h"
 #include "Scales.h"
+#include "Version.h"
 
 /* */
 //ESP8266HTTPUpdateServer httpUpdater;
 /* Soft AP network parameters */
 IPAddress apIP(192, 168, 4, 1);
 IPAddress netMsk(255, 255, 255, 0);
+
+//IPAddress ip(192,168,1,100);			// Надо сделать настройки ip адреса
+//IPAddress gateway(192,168,1,1);
 
 BrowserServerClass browserServer(80);
 DNSServer dnsServer;
@@ -66,7 +71,8 @@ void BrowserServerClass::init(){
 	});
 	on("/tape", [this](){
 		SCALES.tare();
-		this->send(204, "text/html", "");});
+		this->send(204, "text/html", "");
+	});
 	on("/",[this](){
 		if (!handleFileRead("/index.html"))	
 			this->send(404, "text/plain", "FileNotFound");
@@ -75,7 +81,8 @@ void BrowserServerClass::init(){
 	on("/settings.html", [this]() {
 		if (!isAuthentified())
 			return this->requestAuthentication();
-		handlePropSave();});
+		handlePropSave();
+	});
 	on("/scale/values", handleScaleProp);
 	on("/calibr.html", [this]() {
 		if (!isAuthentified())
@@ -127,7 +134,23 @@ void BrowserServerClass::init(){
 			if(!handleFileRead(uri()))
 				return send(404, "text/plain", "FileNotFound");		
 		}		
-	});	
+	});
+	/*on("/httpupdate", HTTP_GET, [this]() {
+		if (!this->checkAuth())
+			return this->requestAuthentication();
+		t_httpUpdate_return ret = ESPhttpUpdate.update("sdb.net.ua", 80, "/esp/update.php", "wshx711_v_" + String(SKETCH_VERSION));
+		switch(ret) {
+			case HTTP_UPDATE_FAILED:
+				this->send(404, "text/plain", "Обновление выполнить не удалось");
+			break;
+			case HTTP_UPDATE_NO_UPDATES:
+				this->send(304, "text/plain", "Обновление не требуется");
+			break;
+			case HTTP_UPDATE_OK:
+				this->send(200, "text/plain", "Обновление успешно!");
+			break;
+		}
+	});	*/
 	on("/update", HTTP_GET, [this]() {	
 		if (!this->checkAuth())
 			return this->requestAuthentication();	
@@ -206,7 +229,7 @@ void BrowserServerClass::init(){
 			return this->requestAuthentication();
 		handleFileRead("/settings.json");
 	});
-	on("/generate_204", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
+	//on("/generate_204", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
 	//on("/fwlink", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.	
 	
 	const char * headerkeys[] = {"User-Agent","Cookie"} ;
@@ -304,6 +327,7 @@ bool BrowserServerClass::checkAuth() {
 
 }
 
+/*
 void BrowserServerClass::restart_esp() {
 	String message = "<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>";
 	message += "<meta http-equiv='refresh' content='10; URL=/admin.html'>Please Wait....Configuring and Restarting.";
@@ -311,7 +335,7 @@ void BrowserServerClass::restart_esp() {
 	SPIFFS.end(); // SPIFFS.end();
 	delay(1000);
 	ESP.restart();
-}
+}*/
 
 // convert a single hex digit character to its integer value (from https://code.google.com/p/avr-netino/)
 unsigned char BrowserServerClass::h2int(char c) {
@@ -335,8 +359,6 @@ String BrowserServerClass::urldecode(String input){ // (based on https://code.go
 		c = input[t];
 		if (c == '+') c = ' ';
 		if (c == '%') {
-
-
 			t++;
 			c = input[t];
 			t++;

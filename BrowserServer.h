@@ -53,7 +53,7 @@ class BrowserServerClass : public ESP8266WebServer{
 		void init();
 		void send_update_firmware_values_html();
 		void send_wwwauth_configuration_html();
-		void restart_esp();		
+		//void restart_esp();		
 		String getContentType(String filename);	
 		bool isValidType(String filename);	
 		void setUpdateMD5();
@@ -78,6 +78,8 @@ extern const char *softAP_password;
 extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
+//extern IPAddress ip;			// Надо сделать настройки ip адреса
+//extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 
 bool handleFileRead(String path);

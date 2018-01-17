@@ -31,6 +31,7 @@
  * 
  * This is a captive portal because through the softAP it will redirect any http request to http://192.168.4.1/
  */
+
 void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);
 void takeBlink();
@@ -159,6 +160,7 @@ void connectWifi() {
 			/*!  */
 			if(WiFi.SSID(i) == SCALES.getSSID().c_str()){
 				WiFi.begin ( SCALES.getSSID().c_str(), SCALES.getPASS().c_str());
+				//WiFi.config(ip, gateway, netMsk);									// Надо сделать настройки ip адреса
 				int connRes = WiFi.waitForConnectResult();
 				#if defined SERIAL_DEDUG
 					Serial.print ( "connRes: " );
@@ -190,22 +192,19 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
 	WiFi.softAP(softAP_ssid, softAP_password,evt.channel); //Устанавливаем канал как роутера
 	// Setup MDNS responder
-	if (MDNS.begin(myHostname)) {
+	if (MDNS.begin(myHostname, WiFi.localIP())) {
 		// Add service to MDNS-SD
 		MDNS.addService("http", "tcp", 80);
 	}
 	COUNT_FLASH = 50;
 	COUNT_BLINK = 3000;
 	SCALES.saveEvent("ip", SCALES.getIp());
-	//attachInterrupt(digitalPinToInterrupt(PWR_SW), powerSwitchInterrupt, RISING);
 }
 
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {	
 	taskConnectWiFi.resume();
 	COUNT_FLASH = 500;
 	COUNT_BLINK = 500;
-	//connectWifi();
-	//attachInterrupt(digitalPinToInterrupt(PWR_SW), powerSwitchInterrupt, RISING);
 }
 
 

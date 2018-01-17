@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script>
+        var IPText;
+        function CheckIP(IPText){
+            ipParts = IPText.split(".");
+            if(ipParts.length===4){
+                for(i=0;i<4;i++){
+                    TheNum = parseInt(ipParts[i]);
+                    if(TheNum >= 0 && TheNum <= 255){}
+                    else{break;}
+                }
+                if(i==4)
+                    return true;
+            }
+            alert("Вы ввели неправельный формат IP адреса");
+            return false;
+        }
+        function validForm(element) {
+            var controls = document.getElementById("form_ip").elements;
+            for(var i = 0; i < controls.length; i++){
+                if(!CheckIP(controls[i].value)){
+                    controls[i].value = "";
+                    controls[i].focus();
+                    return;
+                }
+            }
+        }
+
+        /**
+         * @return {boolean}
+         */
+        function ValidateIPaddress(inputText){
+            var ipformat = /^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/;
+            if(inputText.value.match(ipformat)){
+                document.form1.text1.focus();
+                return true;
+            }
+            else{
+                alert("Вы ввели неправельный формат IP адреса");
+                document.form1.text1.focus();
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+<form name="Test" id="form_ip" onsubmit="return test();">
+    <input type="text" name="ip">
+    <input type="text" name="gateway">
+    <input type="text" name="subnet">
+</form>
+<form name="form1" action="#">
+        <input type='text' name='text1'/>
+        <!--<input type="submit" name="submit" value="Submit" onclick="ValidateIPaddress(document.form1.text1)"/>-->
+        <input type="button" value="Test IP" onclick="validForm(this);">
+</form>
+</body>
+</html>
