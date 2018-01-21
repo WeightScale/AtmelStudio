@@ -3,10 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        .error {
+            background: red;
+        }
+    </style>
     <script>
-        var IPText;
-        function CheckIP(IPText){
-            ipParts = IPText.split(".");
+        function setOnBlur( input){
+            setTimeout( function(){
+                if (document.activeElement===input) {
+                    input.onblur=function(){
+                        if (input.value.length === 0 || !CheckIP(input)){
+                            setTimeout( function(){
+                                input.classList.add("error");
+                                input.focus()
+                            },0 )
+                        }
+                        else {
+                            input.classList.remove("error");
+                            input.onblur=null
+                        }
+                    }
+                }
+            },0)
+        }
+        function CheckIP(input){
+            ipParts = input.value.split(".");
             if(ipParts.length===4){
                 for(i=0;i<4;i++){
                     TheNum = parseInt(ipParts[i]);
@@ -14,13 +36,15 @@
                     else{break;}
                 }
                 if(i==4)
+                //input.classList.remove("error");
                     return true;
             }
-            alert("Вы ввели неправельный формат IP адреса");
+            //input.classList.add("error");
+            //input.focus();
             return false;
         }
         function validForm(element) {
-            var controls = document.getElementById("form_ip").elements;
+            var controls = document.forms["form_ip"].elements;
             for(var i = 0; i < controls.length; i++){
                 if(!CheckIP(controls[i].value)){
                     controls[i].value = "";
@@ -48,10 +72,10 @@
     </script>
 </head>
 <body>
-<form name="Test" id="form_ip" onsubmit="return test();">
-    <input type="text" name="ip">
-    <input type="text" name="gateway">
-    <input type="text" name="subnet">
+<form name="Test" id="form_ip" >
+    <input type="text" id="id_ip" name="ip" onfocus="setOnBlur(this)">
+    <input type="text" id="id_gateway" name="gateway" onfocus="setOnBlur(this)">
+    <input type="text" id="id_subnet" name="subnet" onfocus="setOnBlur(this)">
 </form>
 <form name="form1" action="#">
         <input type='text' name='text1'/>

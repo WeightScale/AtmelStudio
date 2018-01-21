@@ -16,6 +16,9 @@ ScalesClass::~ScalesClass(){}
 void ScalesClass::begin(){
 	loadSettings();	
 	
+	//lanIp.fromString(_settings.scaleLanIp);
+	//gateway.fromString(_settings.scaleGateway);
+	
 	reset();	
 	set_filter(_settings.filter);
 	set_scale(_settings.scale);
@@ -205,12 +208,26 @@ bool ScalesClass::eventToServer(const String& date, const String& type, const St
 void ScalesClass::sendScaleSettingsSaveValue() {
 	//if (browserServer.args() > 0){  // Save Settings
 		bool flag = false;
+		if (browserServer.hasHeader("x-SETNET")){
+			flag = true;
+			_settings.autoIp = false;
+			if (browserServer.hasArg("auto"))
+				_settings.autoIp = true;				 			
+			_settings.scaleLanIp = browserServer.urldecode(browserServer.arg("lan_ip"));			
+			_settings.scaleGateway = browserServer.urldecode(browserServer.arg("gateway"));
+			_settings.scaleSubnet = browserServer.urldecode(browserServer.arg("subnet"));
+			_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg("ssid"));
+			_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg("key"));
+			connectWifi();				
+			goto out;
+		}
+		
 		for (uint8_t i = 0; i < browserServer.args(); i++) {
 			if (browserServer.argName(i)=="date"){
 				DateTimeClass DateTime(browserServer.arg("date"));
 				Rtc.SetDateTime(DateTime.toRtcDateTime());
 				String message = "<div>Дата время установлена<br/>";
-				message+=getDateTime()+"</div>";
+				message += getDateTime()+"</div>";
 				browserServer.send(200, "text/html", message);
 				return;
 			}
@@ -230,6 +247,30 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 				_settings.scalePass = browserServer.urldecode(browserServer.arg(i));
 				flag = true;
 				//continue;
+			}/*else if (browserServer.argName(i) == "auto") {
+				_settings.autoIp = true;
+				flag = true;
+				//continue;
+			}else if (browserServer.argName(i) == "lan_ip") {
+				_settings.scaleLanIp = browserServer.urldecode(browserServer.arg(i));
+				//if(_settings.scaleWlanSSID.length() > 0)
+					//connectWifi();
+				flag = true;
+				//continue;
+			}else if (browserServer.argName(i) == "gateway") {
+				_settings.scaleGateway = browserServer.urldecode(browserServer.arg(i));
+				//connect = _settings.scaleWlanSSID.length() > 0;
+				//if(_settings.scaleWlanSSID.length() > 0)
+				//connectWifi();
+				flag = true;
+				//continue;
+			}else if (browserServer.argName(i) == "subnet") {
+				_settings.scaleSubnet = browserServer.urldecode(browserServer.arg(i));
+				//connect = _settings.scaleWlanSSID.length() > 0;
+				//if(_settings.scaleWlanSSID.length() > 0)
+				//connectWifi();
+				flag = true;
+				//continue;
 			}else if (browserServer.argName(i) == "ssid") {
 				_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg(i));
 				//connect = _settings.scaleWlanSSID.length() > 0;
@@ -244,11 +285,12 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 					connectWifi();
 				flag = true;
 				//continue;
-			}
+			}*/
 		}
+		out:;
 		if(flag){
 			if (saveSettings()){
-				//browserServer.send(200, "text/html", "");
+				//browserServer.send(200, "text/html", "OK");
 				handleFileRead(browserServer.uri());
 			}else{
 				browserServer.send(400, "text/html", "Ошибка ");
@@ -356,6 +398,10 @@ bool ScalesClass::saveSettings() {
 	
 	json["scale"]["id_name_admin"] = _settings.scaleName;
 	json["scale"]["id_pass_admin"] = _settings.scalePass;
+	json["scale"]["id_auto"] = _settings.autoIp;
+	json["scale"]["id_lan_ip"] = _settings.scaleLanIp;
+	json["scale"]["id_gateway"] = _settings.scaleGateway;
+	json["scale"]["id_subnet"] = _settings.scaleSubnet;
 	json["scale"]["id_ssid"] = _settings.scaleWlanSSID;
 	json["scale"]["id_key"] = _settings.scaleWlanKey;
 	
@@ -420,6 +466,10 @@ bool ScalesClass::loadSettings() {
 	if (!serverFile) {
 		_settings.scaleName = "admin";
 		_settings.scalePass = "1234";
+		_settings.autoIp = true;
+		_settings.scaleLanIp = "192.198.1.100";
+		_settings.scaleGateway = "192.168.1.1";
+		_settings.scaleSubnet = "255.255.255.0";
 		_settings.scaleWlanSSID = "";
 		_settings.scaleWlanKey = "";
 		_settings.hostUrl = "";
@@ -456,6 +506,10 @@ bool ScalesClass::loadSettings() {
 	}	
 	_settings.scaleName = json["scale"]["id_name_admin"].asString();
 	_settings.scalePass = json["scale"]["id_pass_admin"].asString();
+	_settings.autoIp = json["scale"]["id_auto"];
+	_settings.scaleLanIp = json["scale"]["id_lan_ip"].asString();
+	_settings.scaleGateway = json["scale"]["id_gateway"].asString();
+	_settings.scaleSubnet = json["scale"]["id_subnet"].asString();
 	_settings.scaleWlanSSID = json["scale"]["id_ssid"].asString();
 	_settings.scaleWlanKey = json["scale"]["id_key"].asString();
 	_settings.hostUrl = json["server"]["id_host"].asString();

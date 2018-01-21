@@ -46,8 +46,12 @@ typedef struct {
 	//unsigned char w_filter; /*! Значение для фильтра от 1-100 % */
 	unsigned int max;					/*  */
 	d_type scale;
+	bool autoIp;
 	String scaleName;
 	String scalePass;
+	String scaleLanIp;
+	String scaleGateway;
+	String scaleSubnet;
 	String scaleWlanSSID;
 	String scaleWlanKey;
 	String hostUrl;
@@ -81,6 +85,8 @@ class ScalesClass : public HX711/*, public ScaleMemClass*/{
 		String& getNameAdmin(){return _settings.scaleName;};
 		String& getPassAdmin(){return _settings.scalePass;};
 		String& getSSID(){return _settings.scaleWlanSSID;};
+		String& getLanIp(){return _settings.scaleLanIp;};
+		String& getGateway(){return _settings.scaleGateway;};
 		void setSSID(const String&);
 		String& getPASS(){return _settings.scaleWlanKey;};
 		void setPASS(const String&);
@@ -107,6 +113,8 @@ class ScalesClass : public HX711/*, public ScaleMemClass*/{
 			_round = pow(10.0, _settings.accuracy) / _settings.step; // множитель для округления}
 			_stable_step = 1/_round;} 
 		d_type getRound(){return _round;};
+		bool isAuto(){return _settings.autoIp;};
+		
 		//d_type filter(d_type data, /*d_type prev_data,*/ d_type delta_data, d_type filter_step, d_type filter_cof);
 			
 		

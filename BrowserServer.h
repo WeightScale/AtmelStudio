@@ -78,8 +78,8 @@ extern const char *softAP_password;
 extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
-//extern IPAddress ip;			// Надо сделать настройки ip адреса
-//extern IPAddress gateway;
+extern IPAddress lanIp;			// Надо сделать настройки ip адреса
+extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 
 bool handleFileRead(String path);

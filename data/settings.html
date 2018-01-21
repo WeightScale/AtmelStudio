@@ -8,6 +8,13 @@
     <title>Настройки</title>
     <link rel="stylesheet" type="text/css" href="global.css">
     <style>
+        .error {
+            background: red;
+        }
+        input:focus {
+            background: #FA6;
+            outline: none;
+        }
         table {width: 100%;}
         input{
             width:auto;text-align: right;
@@ -15,6 +22,31 @@
         }
     </style>
     <script>
+        function setOnBlur( input){
+            setTimeout( function(){
+                if (document.activeElement===input) {
+                    input.onblur=function(){
+                        if(input.value.length === 0 || !CheckIP(input)){
+                            setTimeout( function(){input.focus()},0)
+                        }else
+                            input.onblur=null
+                    }
+                }
+            },0)
+        }
+        function CheckIP(input){
+            ipParts = input.value.split(".");
+            if(ipParts.length===4){
+                for(i=0;i<4;i++){
+                    TheNum = parseInt(ipParts[i]);
+                    if(TheNum >= 0 && TheNum <= 255){}
+                    else{break;}
+                }
+                if(i==4)
+                    return true;
+            }
+            return false;
+        }
         function sendDateTime(){
             var formData = new FormData();
             var date = new Date();
@@ -100,7 +132,30 @@
             var win = window.open(url, '_blank');
             win.focus();
         }
+        function enableAuthFields(check){
+            if(check.checked){
+                document.getElementById("id_table_net").style.display = "none";
+            }else {
+                document.getElementById("id_table_net").style.display = "";
+            }
 
+        }
+        function submitFrm(frm) {
+            var formData = new FormData(frm);
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                if (this.readyState === 4 ){
+                    if (this.status === 200){
+                        alert("OK")
+                    }else if (this.status === 400){
+                        alert("ERROR")
+                    }
+                }
+            };
+            request.open('POST','/settings.html',true);
+            request.setRequestHeader('x-SETNET', 'set');
+            request.send(formData);
+        }
     </script>
 </head>
 <body style="visibility: hidden">
@@ -124,23 +179,35 @@
     </table>
     <hr>
     <h5 align='left'><b>Точка доступа WiFi роутера</b></h5>
-    <form method='POST' >
-        <table>
+    <form id="form_id" action='#'>
+        Получать IP:
+        <input type="checkbox" id="id_auto" name="auto" onclick='enableAuthFields(this);'>
+        <table id="id_table_net" >
             <tr>
                 <td>IP:</td>
-                <td id="id_lan_ip"></td>
+                <td><input id="id_lan_ip" type="text" name="lan_ip" onfocus="setOnBlur(this)"></td>
             </tr>
+            <tr>
+                <td>ШЛЮЗ:</td>
+                <td><input id="id_gateway" type="text" name="gateway" onfocus="setOnBlur(this)"></td>
+            </tr>
+            <tr>
+                <td>МАСКА:</td>
+                <td><input id="id_subnet" type="text" name="subnet" onfocus="setOnBlur(this)"></td>
+            </tr>
+        </table>
+        <table>
             <tr>
                 <td>СЕТЬ:</td>
                 <td><input id="id_ssid" name="ssid" placeholder='имя сети'></td>
             </tr>
             <tr>
                 <td>КЛЮЧ:</td>
-                <td><input type="password" id="id_key" name="key" placeholder='пароль'></td>
+                <td><input id="id_key" type="password"  name="key" placeholder='пароль'></td>
             </tr>
             <tr>
                 <td></td>
-                <td><input type='submit' value='СОХРАНИТЬ'/></td>
+                <td><input type='submit' value='СОХРАНИТЬ' onclick='submitFrm(document.getElementById("form_id"));'/></td>
             </tr>
         </table>
     </form>

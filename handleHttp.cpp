@@ -14,13 +14,14 @@ void handleScaleProp(){
 	values += "id_local_host|http://"+String(myHostname)+".local|div\n";
 	values += "id_ap_ssid|" + String(softAP_ssid) + "|div\n";
 	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
-	values += "id_lan_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
+	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
 	browserServer.send(200, "text/plain", values);
 }
 
 /** Handle the WLAN save form and redirect to WLAN config page again */
 void handlePropSave() {
-	bool rec = false;	
+	bool rec = false;
+	
 		
 	if (browserServer.args() > 0){ // Save Settings			
 		SCALES.sendScaleSettingsSaveValue();		

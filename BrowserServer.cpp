@@ -13,11 +13,12 @@
 /* */
 //ESP8266HTTPUpdateServer httpUpdater;
 /* Soft AP network parameters */
-IPAddress apIP(192, 168, 4, 1);
+//IPAddress apIP(192, 168, 4, 1);
+IPAddress apIP(192,168,4,1);
 IPAddress netMsk(255, 255, 255, 0);
 
-//IPAddress ip(192,168,1,100);			// Надо сделать настройки ip адреса
-//IPAddress gateway(192,168,1,1);
+IPAddress lanIp;			// Надо сделать настройки ip адреса
+IPAddress gateway;
 
 BrowserServerClass browserServer(80);
 DNSServer dnsServer;
@@ -135,7 +136,7 @@ void BrowserServerClass::init(){
 				return send(404, "text/plain", "FileNotFound");		
 		}		
 	});
-	/*on("/httpupdate", HTTP_GET, [this]() {
+	on("/httpupdate", HTTP_GET, [this]() {
 		if (!this->checkAuth())
 			return this->requestAuthentication();
 		t_httpUpdate_return ret = ESPhttpUpdate.update("sdb.net.ua", 80, "/esp/update.php", "wshx711_v_" + String(SKETCH_VERSION));
@@ -150,7 +151,7 @@ void BrowserServerClass::init(){
 				this->send(200, "text/plain", "Обновление успешно!");
 			break;
 		}
-	});	*/
+	});	
 	on("/update", HTTP_GET, [this]() {	
 		if (!this->checkAuth())
 			return this->requestAuthentication();	
@@ -232,7 +233,7 @@ void BrowserServerClass::init(){
 	//on("/generate_204", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
 	//on("/fwlink", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.	
 	
-	const char * headerkeys[] = {"User-Agent","Cookie"} ;
+	const char * headerkeys[] = {"User-Agent","Cookie","x-SETNET"} ;
 	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
 	//ask server to track these headers
 	collectHeaders(headerkeys, headerkeyssize );

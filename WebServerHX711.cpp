@@ -3,18 +3,13 @@
 #include <IPAddress.h>
 #include <WiFiClient.h>
 #include <ESP8266HTTPClient.h>
-//#include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266WebServer.h>
 #include <DNSServer.h>
 #include <ESP8266mDNS.h>
 #include <FS.h>
 #include <Arduino.h>
-//#include <ArduinoOTA.h>
 #include <ArduinoJson.h>
-//#include <EEPROM.h>
 #include "DateTime.h"
-//#include "Terminal.h"
-//#include "ScaleMem.h"
 #include "tools.h"
 #include "BrowserServer.h" 
 #include "Scales.h"
@@ -149,8 +144,8 @@ void powerSwitchInterrupt(){
 void connectWifi() {
 	#if defined SERIAL_DEDUG
 		Serial.println("Connecting as wifi client...");
-	#endif	
-	WiFi.disconnect();
+	#endif
+	WiFi.disconnect(false);
 	/*!  */
 	int n = WiFi.scanNetworks();	
 	if (n == 0){		
@@ -160,7 +155,11 @@ void connectWifi() {
 			/*!  */
 			if(WiFi.SSID(i) == SCALES.getSSID().c_str()){
 				WiFi.begin ( SCALES.getSSID().c_str(), SCALES.getPASS().c_str());
-				//WiFi.config(ip, gateway, netMsk);									// Надо сделать настройки ip адреса
+				if (!SCALES.isAuto()){
+					if (lanIp.fromString(SCALES.getLanIp()) && gateway.fromString(SCALES.getGateway())){
+						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
+					}
+				}				
 				int connRes = WiFi.waitForConnectResult();
 				#if defined SERIAL_DEDUG
 					Serial.print ( "connRes: " );
