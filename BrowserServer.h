@@ -23,8 +23,12 @@
 #define countof(a) (sizeof(a) / sizeof(a[0]))
 #define SECRET_FILE "/secret.json"
 
+#define MY_HOST_NAME "scales"
+#define SOFT_AP_SSID "SCALES"
+#define SOFT_AP_PASSWORD "12345678"
+
 // DNS server
-const byte DNS_PORT = 53;
+#define DNS_PORT 53
 
 //typedef std::function<void(double)> HandlerFunction_t;
 typedef struct {
@@ -69,10 +73,10 @@ extern boolean connect;
 //extern const char* super_user_password;
 
 /* hostname for mDNS. Should work at least on windows. Try http://esp8266.local */
-extern const char *myHostname;
+//extern const char *myHostname;
 /* Set these to your desired softAP credentials. They are not configurable at runtime */
-extern const char *softAP_ssid;
-extern const char *softAP_password;
+//extern const char *softAP_ssid;
+//extern const char *softAP_password;
 
 //extern ESP8266HTTPUpdateServer httpUpdater;
 extern DNSServer dnsServer;

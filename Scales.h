@@ -31,6 +31,10 @@ using namespace ArduinoJson;
 #define PWR_SW  13							/* сигнал от кнопки питания */
 #define LED  2								/* индикатор работы */
 
+#define SCALE_JSON "scale"
+#define SERVER_JSON "server"
+#define DATE_JSON "date"
+
 extern TaskController taskController;		/*  */
 extern Task taskBlink;								/*  */
 extern Task taskBattery;							/*  */

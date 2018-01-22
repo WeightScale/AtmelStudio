@@ -11,8 +11,8 @@ void handleScaleProp(){
 		return browserServer.requestAuthentication();
 	String values = "";
 	values += "id_date|" + getDateTime() + "|div\n";	
-	values += "id_local_host|http://"+String(myHostname)+".local|div\n";
-	values += "id_ap_ssid|" + String(softAP_ssid) + "|div\n";
+	values += "id_local_host|http://"+String(MY_HOST_NAME)+".local|div\n";
+	values += "id_ap_ssid|" + String(SOFT_AP_SSID) + "|div\n";
 	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
 	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
 	browserServer.send(200, "text/plain", values);

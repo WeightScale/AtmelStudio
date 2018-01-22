@@ -208,6 +208,7 @@ bool ScalesClass::eventToServer(const String& date, const String& type, const St
 void ScalesClass::sendScaleSettingsSaveValue() {
 	//if (browserServer.args() > 0){  // Save Settings
 		bool flag = false;
+		String message = " ";
 		if (browserServer.hasHeader("x-SETNET")){
 			flag = true;
 			_settings.autoIp = false;
@@ -217,8 +218,9 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 			_settings.scaleGateway = browserServer.urldecode(browserServer.arg("gateway"));
 			_settings.scaleSubnet = browserServer.urldecode(browserServer.arg("subnet"));
 			_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg("ssid"));
-			_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg("key"));
-			connectWifi();				
+			_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg("key"));	
+			browserServer.send(200, "text/html", "OK");		
+			connectWifi();	
 			goto out;
 		}
 		
@@ -377,7 +379,7 @@ void ScalesClass::mathScale(){
 	_settings.adc_offset = calibrateZero;
 }
 
-bool ScalesClass::saveSettings() {
+const char *s = "scale";bool ScalesClass::saveSettings() {
 	File readFile = SPIFFS.open(SETTINGS_FILE, "r");
 	if (!readFile) {
 		readFile.close();
@@ -396,17 +398,17 @@ bool ScalesClass::saveSettings() {
 		return false;
 	}
 	
-	json["scale"]["id_name_admin"] = _settings.scaleName;
-	json["scale"]["id_pass_admin"] = _settings.scalePass;
-	json["scale"]["id_auto"] = _settings.autoIp;
-	json["scale"]["id_lan_ip"] = _settings.scaleLanIp;
-	json["scale"]["id_gateway"] = _settings.scaleGateway;
-	json["scale"]["id_subnet"] = _settings.scaleSubnet;
-	json["scale"]["id_ssid"] = _settings.scaleWlanSSID;
-	json["scale"]["id_key"] = _settings.scaleWlanKey;
+	json[SCALE_JSON]["id_name_admin"] = _settings.scaleName;
+	json[SCALE_JSON]["id_pass_admin"] = _settings.scalePass;
+	json[SCALE_JSON]["id_auto"] = _settings.autoIp;
+	json[SCALE_JSON]["id_lan_ip"] = _settings.scaleLanIp;
+	json[SCALE_JSON]["id_gateway"] = _settings.scaleGateway;
+	json[SCALE_JSON]["id_subnet"] = _settings.scaleSubnet;
+	json[SCALE_JSON]["id_ssid"] = _settings.scaleWlanSSID;
+	json[SCALE_JSON]["id_key"] = _settings.scaleWlanKey;
 	
-	json["server"]["id_host"] = _settings.hostUrl;
-	json["server"]["id_pin"] = _settings.hostPin;
+	json[SERVER_JSON]["id_host"] = _settings.hostUrl;
+	json[SERVER_JSON]["id_pin"] = _settings.hostPin;
 
 	//TODO add AP data to html
 	File serverFile = SPIFFS.open(SETTINGS_FILE, "w");
@@ -440,13 +442,13 @@ bool ScalesClass::saveDate() {
 		return false;
 	}
 	
-	json["date"]["filter_id"] = _settings.filter;
-	json["date"]["step_id"] = _settings.step;
-	json["date"]["accuracy_id"] = _settings.accuracy;
-	json["date"]["max_weight_id"] = _settings.max;
-	json["date"]["adc_offset"] = _settings.adc_offset;
-	json["date"]["scale"] = _settings.scale;
-	json["date"]["wfilter_id"] = ADCFilter.GetWeight();	
+	json[DATE_JSON]["filter_id"] = _settings.filter;
+	json[DATE_JSON]["step_id"] = _settings.step;
+	json[DATE_JSON]["accuracy_id"] = _settings.accuracy;
+	json[DATE_JSON]["max_weight_id"] = _settings.max;
+	json[DATE_JSON]["adc_offset"] = _settings.adc_offset;
+	json[DATE_JSON]["scale"] = _settings.scale;
+	json[DATE_JSON]["wfilter_id"] = ADCFilter.GetWeight();	
 
 	//TODO add AP data to html
 	File saveFile = SPIFFS.open(SETTINGS_FILE, "w");
@@ -504,23 +506,23 @@ bool ScalesClass::loadSettings() {
 		_settings.scalePass = "1234";		
 		return false;
 	}	
-	_settings.scaleName = json["scale"]["id_name_admin"].asString();
-	_settings.scalePass = json["scale"]["id_pass_admin"].asString();
-	_settings.autoIp = json["scale"]["id_auto"];
-	_settings.scaleLanIp = json["scale"]["id_lan_ip"].asString();
-	_settings.scaleGateway = json["scale"]["id_gateway"].asString();
-	_settings.scaleSubnet = json["scale"]["id_subnet"].asString();
-	_settings.scaleWlanSSID = json["scale"]["id_ssid"].asString();
-	_settings.scaleWlanKey = json["scale"]["id_key"].asString();
-	_settings.hostUrl = json["server"]["id_host"].asString();
-	_settings.hostPin = json["server"]["id_pin"].asString();
-	_settings.max = json["date"]["max_weight_id"];
-	_settings.adc_offset = json["date"]["adc_offset"];
-	_settings.filter = json["date"]["filter_id"];
-	_settings.step = json["date"]["step_id"];
-	_settings.accuracy = json["date"]["accuracy_id"];
-	_settings.scale = json["date"]["scale"];
-	ADCFilter.SetWeight(json["date"]["wfilter_id"]);
+	_settings.scaleName = json[SCALE_JSON]["id_name_admin"].asString();
+	_settings.scalePass = json[SCALE_JSON]["id_pass_admin"].asString();
+	_settings.autoIp = json[SCALE_JSON]["id_auto"];
+	_settings.scaleLanIp = json[SCALE_JSON]["id_lan_ip"].asString();
+	_settings.scaleGateway = json[SCALE_JSON]["id_gateway"].asString();
+	_settings.scaleSubnet = json[SCALE_JSON]["id_subnet"].asString();
+	_settings.scaleWlanSSID = json[SCALE_JSON]["id_ssid"].asString();
+	_settings.scaleWlanKey = json[SCALE_JSON]["id_key"].asString();
+	_settings.hostUrl = json[SERVER_JSON]["id_host"].asString();
+	_settings.hostPin = json[SERVER_JSON]["id_pin"].asString();
+	_settings.max = json[DATE_JSON]["max_weight_id"];
+	_settings.adc_offset = json[DATE_JSON]["adc_offset"];
+	_settings.filter = json[DATE_JSON]["filter_id"];
+	_settings.step = json[DATE_JSON]["step_id"];
+	_settings.accuracy = json[DATE_JSON]["accuracy_id"];
+	_settings.scale = json[DATE_JSON]["scale"];
+	ADCFilter.SetWeight(json[DATE_JSON]["wfilter_id"]);
 	return true;
 }
 

@@ -84,9 +84,9 @@ void setup() {
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
   
 	WiFi.persistent(false);
-	WiFi.hostname(myHostname);
+	WiFi.hostname(MY_HOST_NAME);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(softAP_ssid, softAP_password);
+	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
 	delay(500); 
 	#if defined SERIAL_DEDUG
 		Serial.print("AP IP address: ");
@@ -189,9 +189,9 @@ void loop() {
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
-	WiFi.softAP(softAP_ssid, softAP_password,evt.channel); //Устанавливаем канал как роутера
+	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD,evt.channel); //Устанавливаем канал как роутера
 	// Setup MDNS responder
-	if (MDNS.begin(myHostname, WiFi.localIP())) {
+	if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
 		// Add service to MDNS-SD
 		MDNS.addService("http", "tcp", 80);
 	}

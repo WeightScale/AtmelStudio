@@ -28,14 +28,14 @@ File fsUploadFile;
 /** Should I connect to WLAN asap? */
 boolean connect;
 /* Set these to your desired softAP credentials. They are not configurable at runtime */
-const char *softAP_ssid = "SCALES";
-const char *softAP_password = "12345678";
+
+
 
 //const char* super_user_login = "su";
 //const char* super_user_password = "1234";
 
 /* hostname for mDNS. Should work at least on windows. Try http://esp8266.local */
-const char *myHostname = "scales";
+
 
 BrowserServerClass::BrowserServerClass(uint16_t port) : ESP8266WebServer(port) {}
 

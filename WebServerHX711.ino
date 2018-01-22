@@ -87,7 +87,7 @@ void setup() {
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
   
-	WiFi.hostname(myHostname);
+	WiFi.hostname(MY_HOST_NAME);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(softAP_ssid, softAP_password);
 	delay(500); 
@@ -187,7 +187,7 @@ void loop() {
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
 	// Setup MDNS responder
-	if (MDNS.begin(myHostname)) {
+	if (MDNS.begin(MY_HOST_NAME)) {
 		// Add service to MDNS-SD
 		MDNS.addService("http", "tcp", 80);
 	}
