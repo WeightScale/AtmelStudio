@@ -1,43 +1,32 @@
-//#include <EEPROM.h>
 #include <ESP8266HTTPClient.h>
 #include <FS.h>
 #include <ArduinoJson.h>
-#include "Scales.h"
+#include "Core.h"
 #include "DateTime.h"
 #include "BrowserServer.h"
 
-ScalesClass SCALES(16,14);							/*  gpio16 gpio0  */
+CoreClass CORE;
 
-ScalesClass::ScalesClass(byte dout, byte pd_sck) : HX711(dout, pd_sck){
+CoreClass::CoreClass(){
 }
 
-ScalesClass::~ScalesClass(){}
+CoreClass::~CoreClass(){}
 
-void ScalesClass::begin(){
-	loadSettings();	
-	
-	//lanIp.fromString(_settings.scaleLanIp);
-	//gateway.fromString(_settings.scaleGateway);
-	
-	reset();	
-	set_filter(_settings.filter);
-	set_scale(_settings.scale);
-	set_offset(_settings.adc_offset);
-	ADCFilter.SetCurrent(_settings.adc_offset);
-	mathRound();
+void CoreClass::begin(){
+	SPIFFS.begin();
+	_downloadSettings();
+	Rtc.Begin();
 }
 
-void ScalesClass::setSSID(const String& ssid){
+void CoreClass::setSSID(const String& ssid){
 	_settings.scaleWlanSSID = ssid;
-	//ssid.toCharArray(_settings.ssid, sizeof(_settings.ssid));
 }
 
-void ScalesClass::setPASS(const String& pass){
+void CoreClass::setPASS(const String& pass){
 	_settings.scaleWlanKey = pass;
-	//pass.toCharArray(_settings.key, sizeof(_settings.key));
 }
 
-bool ScalesClass::saveEvent(const String& event, const String& value) {
+bool CoreClass::saveEvent(const String& event, const String& value) {
 	File readFile = SPIFFS.open("/events.json", "r");
     if (!readFile) {        
         readFile.close();
@@ -50,7 +39,7 @@ bool ScalesClass::saveEvent(const String& event, const String& value) {
 	String date = getDateTime();
     size_t size = readFile.size(); 
 	
-	bool flag = WiFi.status() == WL_CONNECTED?SCALES.eventToServer(date, event, value):false;
+	bool flag = WiFi.status() == WL_CONNECTED?CORE.eventToServer(date, event, value):false;
 	
     std::unique_ptr<char[]> buf(new char[size]);
     readFile.readBytes(buf.get(), size);	
@@ -59,10 +48,10 @@ bool ScalesClass::saveEvent(const String& event, const String& value) {
     DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(110));
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
-    if (!json.containsKey("events")) {	
+    if (!json.containsKey(EVENTS_JSON)) {	
 		json["cur_num"] = 0;
 		json["max_events"] = MAX_EVENTS;
-		JsonArray& events = json.createNestedArray("events");
+		JsonArray& events = json.createNestedArray(EVENTS_JSON);
 		for(int i = 0; i < MAX_EVENTS; i++){
 			JsonObject& ev = jsonBuffer.createObject();
 			ev["date"] = "";
@@ -76,9 +65,9 @@ bool ScalesClass::saveEvent(const String& event, const String& value) {
 	
 	long n = json["cur_num"];
 	
-	json["events"][n]["date"] = date;
-	json["events"][n]["value"] = value;	
-	json["events"][n]["server"] = flag;
+	json[EVENTS_JSON][n]["date"] = date;
+	json[EVENTS_JSON][n]["value"] = value;	
+	json[EVENTS_JSON][n]["server"] = flag;
 		
 	if ( ++n == MAX_EVENTS){
 		n = 0;
@@ -129,7 +118,7 @@ bool ScalesClass::pingServer(){
 }
 */
 
-String ScalesClass::getIp() {
+String CoreClass::getIp() {
 	WiFiClient client ;
 	String ip = "";
 	if (client.connect("api.ipify.org", 80)) {
@@ -182,18 +171,11 @@ String ScalesClass::getIp(){
 */
 
 /* */	
-bool ScalesClass::eventToServer(const String& date, const String& type, const String& value){
+bool CoreClass::eventToServer(const String& date, const String& type, const String& value){
 	HTTPClient http;
 	String message = "http://";
 	message += _settings.hostUrl.c_str();
-	String hash = getHash(_settings.hostPin.c_str(), date, type, value);
-	//Serial.println("Hash="+hash);
-/*
-	message += "?code=" + _settings.hostPin + "&";
-	message += "date=" + date + "&";
-	message += "type=" + type + "&";
-	message += "value=" + value;
-*/
+	String hash = getHash(_settings.hostPin.c_str(), date, type, value);	
 	message += "/scales.php?hash=" + hash;
 	http.begin(message);
 	http.setTimeout(1000);
@@ -205,7 +187,7 @@ bool ScalesClass::eventToServer(const String& date, const String& type, const St
 	return false;
 }
 
-void ScalesClass::sendScaleSettingsSaveValue() {
+void CoreClass::sendScaleSettingsSaveValue() {
 	//if (browserServer.args() > 0){  // Save Settings
 		bool flag = false;
 		String message = " ";
@@ -289,9 +271,9 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 				//continue;
 			}*/
 		}
-		out:;
+		out:
 		if(flag){
-			if (saveSettings()){
+			if (_saveSettings()){
 				//browserServer.send(200, "text/html", "OK");
 				handleFileRead(browserServer.uri());
 			}else{
@@ -301,51 +283,50 @@ void ScalesClass::sendScaleSettingsSaveValue() {
 	//}
 }
 
-void ScalesClass::scaleCalibrateSaveValue() {
+void CoreClass::scaleCalibrateSaveValue() {
 	//if (browserServer.args() > 0){  // Save Settings
 		bool flag = false;
 		for (uint8_t i = 0; i < browserServer.args(); i++) {			
-			if (browserServer.argName(i) == "weightMax") {				
-				_settings.max = browserServer.arg(i).toInt();
+			if (browserServer.argName(i) == "weightMax") {
+				Scale.setMax(browserServer.arg(i).toInt());	
 				flag = true;
 			}if (browserServer.argName(i) == "weightStep") {
-				_settings.step = browserServer.arg(i).toInt();
+				Scale.setStep(browserServer.arg(i).toInt());
 				flag = true;
-			}if (browserServer.argName(i) == "weightAccuracy") {
-				_settings.accuracy = browserServer.arg(i).toInt();
+			}if (browserServer.argName(i) == "weightAccuracy") {				
+				Scale.setAccuracy(browserServer.arg(i).toInt());
+				flag = true;
+			}if (browserServer.argName(i) == "weightAverage") {
+				Scale.setAverage(browserServer.arg(i).toInt());
 				flag = true;
 			}if (browserServer.argName(i) == "weightFilter") {
-				_settings.filter = browserServer.arg(i).toInt();
-				flag = true;
-			}if (browserServer.argName(i) == "weightFilter1") {
-				ADCFilter.SetWeight(browserServer.arg(i).toInt());
+				Scale.SetFilterWeight(browserServer.arg(i).toInt());
 				flag = true;
 			}else if (browserServer.argName(i) == "zero") {
-				calibrateZero = read_average(_settings.filter);				
+				Scale.setCalibrateZeroValue(Scale.readAverage());				
 				flag = true;
 			}else if (browserServer.argName(i) == "weightCal") {
-				accurateWeight = browserServer.arg(i).toFloat();
-				calibrateWeight = read_average(_settings.filter);
-				mathScale();							
-				set_scale(_settings.scale);
+				Scale.setReferenceWeight(browserServer.arg(i).toFloat());
+				Scale.setCalibrateWeightValue(Scale.readAverage());
+				Scale.mathScale();
 				flag = true;
 			}
 		}
 		if (browserServer.hasArg("update")){
-			if (SCALES.saveDate()){
-				SCALES.updateSettings();				
+			if (Scale.saveDate()){
+				//SCALES.updateSettings();				
 			}
 		}		
 		if(flag){
 			browserServer.send(200, "text/html", "");
-			mathRound();			
+			Scale.mathRound();			
 		}else{
 			browserServer.send(400, "text/html", "Ошибка ");
 		}
 	//}
 }
 
-String ScalesClass::getHash(const String& code, const String& date, const String& type, const String& value){
+String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){
 	
 	String event = String(code);
 	event += "\t" + date + "\t" + type + "\t" + value;
@@ -364,7 +345,7 @@ String ScalesClass::getHash(const String& code, const String& date, const String
 	return hash;
 }
 
-int ScalesClass::getBattery(int times){
+int CoreClass::getBattery(int times){
 	long sum = 0;
 	for (byte i = 0; i < times; i++) {
 		sum += analogRead(A0);
@@ -372,27 +353,18 @@ int ScalesClass::getBattery(int times){
 	return times == 0?sum :sum / times;	
 }
 
-void ScalesClass::mathScale(){	
-	//_settings.scale = calibrateWeight - calibrateZero;
-	//_settings.scale =  float(calibrateWeight - calibrateZero) / accurateWeight;
-	_settings.scale = accurateWeight / float(calibrateWeight - calibrateZero);	
-	_settings.adc_offset = calibrateZero;
-}
-
-const char *s = "scale";bool ScalesClass::saveSettings() {
-	File readFile = SPIFFS.open(SETTINGS_FILE, "r");
-	if (!readFile) {
-		readFile.close();
+bool CoreClass::_saveSettings() {
+	File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
+	if (!serverFile) {
+		serverFile.close();
 		return false;
 	}
-	size_t size = readFile.size();
+	size_t size = serverFile.size();
 	std::unique_ptr<char[]> buf(new char[size]);
-	readFile.readBytes(buf.get(), size);
-	readFile.close();
+	serverFile.readBytes(buf.get(), size);
+	//readFile.close();
 	DynamicJsonBuffer jsonBuffer(size);
-	//StaticJsonBuffer<256> jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
-	//JsonObject& json = openJsonFile(SERVER_FILE);
 
 	if (!json.success()) {
 		return false;
@@ -410,100 +382,32 @@ const char *s = "scale";bool ScalesClass::saveSettings() {
 	json[SERVER_JSON]["id_host"] = _settings.hostUrl;
 	json[SERVER_JSON]["id_pin"] = _settings.hostPin;
 
-	//TODO add AP data to html
-	File serverFile = SPIFFS.open(SETTINGS_FILE, "w");
-	if (!serverFile) {
-		serverFile.close();
-		return false;
-	}
-
 	json.printTo(serverFile);
 	serverFile.flush();
 	serverFile.close();
 	return true;
 }
 
-bool ScalesClass::saveDate() {
-	File readFile = SPIFFS.open(SETTINGS_FILE, "r");
-	if (!readFile) {
-		readFile.close();
-		return false;
-	}
-	size_t size = readFile.size();
-	std::unique_ptr<char[]> buf(new char[size]);
-	readFile.readBytes(buf.get(), size);
-	readFile.close();
-	DynamicJsonBuffer jsonBuffer(size);
-	//StaticJsonBuffer<256> jsonBuffer;
-	JsonObject& json = jsonBuffer.parseObject(buf.get());
-	//JsonObject& json = openJsonFile(SERVER_FILE);
-
-	if (!json.success()) {
-		return false;
-	}
-	
-	json[DATE_JSON]["filter_id"] = _settings.filter;
-	json[DATE_JSON]["step_id"] = _settings.step;
-	json[DATE_JSON]["accuracy_id"] = _settings.accuracy;
-	json[DATE_JSON]["max_weight_id"] = _settings.max;
-	json[DATE_JSON]["adc_offset"] = _settings.adc_offset;
-	json[DATE_JSON]["scale"] = _settings.scale;
-	json[DATE_JSON]["wfilter_id"] = ADCFilter.GetWeight();	
-
-	//TODO add AP data to html
-	File saveFile = SPIFFS.open(SETTINGS_FILE, "w");
-	if (!saveFile) {
-		saveFile.close();
-		return false;
-	}
-
-	json.printTo(saveFile);
-	saveFile.flush();
-	saveFile.close();
-	return true;
-}
-
-bool ScalesClass::loadSettings() {
-	File serverFile = SPIFFS.open(SETTINGS_FILE, "r");
-	if (!serverFile) {
-		_settings.scaleName = "admin";
-		_settings.scalePass = "1234";
-		_settings.autoIp = true;
-		_settings.scaleLanIp = "192.198.1.100";
-		_settings.scaleGateway = "192.168.1.1";
-		_settings.scaleSubnet = "255.255.255.0";
-		_settings.scaleWlanSSID = "";
-		_settings.scaleWlanKey = "";
-		_settings.hostUrl = "";
-		_settings.hostPin = "";
-		_settings.filter = 1;
-		_settings.step = 1;
-		_settings.accuracy = 0;
-		_settings.adc_offset = 0;
-		_settings.max = 1000;
-		_settings.scale = 1;
-		ADCFilter.SetWeight(20);
+bool CoreClass::_downloadSettings() {
+	_settings.scaleName = "admin";
+	_settings.scalePass = "1234";
+	_settings.autoIp = true;
+	File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
+	if (!serverFile) {			
 		serverFile.close();
 		return false;
 	}
-
 	size_t size = serverFile.size();
 
 	// Allocate a buffer to store contents of the file.
 	std::unique_ptr<char[]> buf(new char[size]);
-
-	// We don't use String here because ArduinoJson library requires the input
-	// buffer to be mutable. If you don't use ArduinoJson, you may as well
-	// use configFile.readString instead.
+	
 	serverFile.readBytes(buf.get(), size);
 	serverFile.close();
 	DynamicJsonBuffer jsonBuffer(size);
-	//StaticJsonBuffer<256> jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
 	if (!json.success()) {
-		_settings.scaleName = "admin";
-		_settings.scalePass = "1234";		
 		return false;
 	}	
 	_settings.scaleName = json[SCALE_JSON]["id_name_admin"].asString();
@@ -515,59 +419,37 @@ bool ScalesClass::loadSettings() {
 	_settings.scaleWlanSSID = json[SCALE_JSON]["id_ssid"].asString();
 	_settings.scaleWlanKey = json[SCALE_JSON]["id_key"].asString();
 	_settings.hostUrl = json[SERVER_JSON]["id_host"].asString();
-	_settings.hostPin = json[SERVER_JSON]["id_pin"].asString();
-	_settings.max = json[DATE_JSON]["max_weight_id"];
-	_settings.adc_offset = json[DATE_JSON]["adc_offset"];
-	_settings.filter = json[DATE_JSON]["filter_id"];
-	_settings.step = json[DATE_JSON]["step_id"];
-	_settings.accuracy = json[DATE_JSON]["accuracy_id"];
-	_settings.scale = json[DATE_JSON]["scale"];
-	ADCFilter.SetWeight(json[DATE_JSON]["wfilter_id"]);
+	_settings.hostPin = json[SERVER_JSON]["id_pin"].asString();	
 	return true;
 }
 
 /* */
-void ScalesClass::detectStable(){
-	if(abs(_weight) > _stable_step){
-		if (_weight_temp == _weight/*_weight_temp <= _weight && _weight_temp >= _weight && _weight != 0*/ ) {
-			if (_stable_num <= STABLE_NUM_MAX){
-				if (_stable_num == STABLE_NUM_MAX) {
+void CoreClass::detectStable(d_type w){
+	static d_type weight_temp = 0;
+	static unsigned char stable_num = 0;
+	static bool isStable = false;
+	if(abs(w) > Scale.getStableStep()){
+		if (weight_temp == w) {
+			if (stable_num <= STABLE_NUM_MAX){
+				if (stable_num == STABLE_NUM_MAX) {
 					if (!isStable){
-						saveEvent("weight", String(_weight)+"_kg");
+						saveEvent("weight", String(w)+"_kg");
 						isStable = true;
 					}
 					return;
 				}
-				_stable_num++;
+				stable_num++;
 			}
 		} else { 
-			_stable_num=0;
+			stable_num = 0;
 			isStable = false;
 		}
-		_weight_temp = _weight;
+		weight_temp = w;
 	}
 }
 
-void ScalesClass::updateSettings(){	
-	set_filter(_settings.filter);
-	set_scale(_settings.scale);
-	//set_offset(_settings.adc_offset);
-}
-
-/*! Функция для форматирования значения веса
-	value - Форматируемое значение
-	digits - Количество знаков после запятой
-	accuracy - Точновть шага значений (1, 2, 5, ...)
-	string - Выходная строка отфармотронова значение 
-*/
-void ScalesClass::formatValue(d_type value, /*int digits, int accuracy,*/ char* string){
-	//d_type r = pow(10.0, _settings.accuracy) / _settings.step; // РјРЅРѕР¶РёС‚РµР»СЊ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ
-	//dtostrf(round(value * _round) / _round, 6-_settings.accuracy, _settings.accuracy, string);
-	dtostrf(value, 6-_settings.accuracy, _settings.accuracy, string);
-}
-
 void powerOff(){
-	SCALES.power_down(); /// Выключаем ацп
+	Scale.power_down(); /// Выключаем ацп
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 	ESP.reset();
 }

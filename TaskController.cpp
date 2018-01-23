@@ -1,9 +1,4 @@
-/*
- * TaskController.cpp
- *
- * Created: 28.11.2017 8:44:16
- *  Author: Kostya
- */ 
+
 #include "Task.h"
 #include "TaskController.h"
 

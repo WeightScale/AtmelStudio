@@ -82,14 +82,14 @@
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WiFi/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/DNSServer/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/Wire</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
@@ -131,14 +131,14 @@
   <armgcccpp.compiler.directories.IncludePaths>
     <ListValues>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WiFi/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/DNSServer/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/Wire</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
@@ -578,14 +578,14 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WiFi/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/DNSServer/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/Wire</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
@@ -627,14 +627,14 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
   <armgcccpp.compiler.directories.IncludePaths>
     <ListValues>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WiFi/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/DNSServer/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266mDNS</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/Wire</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.3.0-rc2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
@@ -1082,10 +1082,16 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
     <Compile Include="HX711.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Scales.cpp">
+    <Compile Include="Scale.cpp">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Scales.h">
+    <Compile Include="Scale.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Core.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Core.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Task.cpp">

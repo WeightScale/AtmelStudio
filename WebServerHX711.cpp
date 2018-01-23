@@ -1,18 +1,7 @@
-//#define SERIAL_DEDUG
 #include <ESP8266WiFi.h>
-#include <IPAddress.h>
-#include <WiFiClient.h>
-#include <ESP8266HTTPClient.h>
-#include <ESP8266WebServer.h>
-#include <DNSServer.h>
 #include <ESP8266mDNS.h>
-#include <FS.h>
-#include <Arduino.h>
-#include <ArduinoJson.h>
-#include "DateTime.h"
-#include "tools.h"
 #include "BrowserServer.h" 
-#include "Scales.h"
+#include "Core.h"
 #include "Task.h"
 
 /*
@@ -44,13 +33,8 @@ WiFiEventHandler stationModeDisconnectedHandler;
 
 unsigned int COUNT_FLASH = 500;
 unsigned int COUNT_BLINK = 500;
-//
-void connectWifi();
-//
-long lastConnectTry = 0;
 
-/** Current WLAN status */
-int status = WL_IDLE_STATUS;
+void connectWifi();
 
 void setup() {
 	pinMode(EN_NCP, OUTPUT);
@@ -70,15 +54,11 @@ void setup() {
 	taskController.add(&taskConnectWiFi);
 	taskConnectWiFi.pause();
 	taskController.add(&taskPower);	
-
-	#if defined SERIAL_DEDUG
-	  Serial.begin(9600);
-	  Serial.println();
-	  Serial.print("Configuring access point...");
-	#endif
+	
 	delay(1000);
-	SPIFFS.begin();
-	SCALES.begin();
+	
+	CORE.begin();
+	Scale.init();
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
@@ -88,18 +68,13 @@ void setup() {
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
 	delay(500); 
-	#if defined SERIAL_DEDUG
-		Serial.print("AP IP address: ");
-		Serial.println(WiFi.softAPIP());	
-	#endif	
+	
 	//ESP.eraseConfig();
 	connectWifi();
-	browserServer.begin(); 
-  
-	connect = SCALES.getSSID().length() > 0; // Request WLAN connect if there is a SSID
-	Rtc.Begin();
-	SCALES.saveEvent("power", "ON");	
-	SCALES.tare();
+	browserServer.begin();   
+	
+	CORE.saveEvent("power", "ON");	
+	Scale.tare();
 }
 
 /*********************************/
@@ -108,16 +83,16 @@ void setup() {
 void takeBlink() {
 	bool led = !digitalRead(LED);
 	digitalWrite(LED, led);	
-	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH/SCALES.getFilter());	
+	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH/Scale.getAverage());	
 }
 
 /**/
 void takeBattery(){	
-	unsigned int charge = SCALES.getBattery(1);
+	unsigned int charge = CORE.getBattery(1);
 	charge = constrain(charge, MIN_CHG, MAX_CHG);	
 	charge = map(charge, MIN_CHG, MAX_CHG, 0, 100);				
-	SCALES.setCharge(charge);
-	if (SCALES.getCharge() < 16){												//< Если заряд батареи 15% тогда выключаем модуль
+	CORE.setCharge(charge);
+	if (charge < 10){												//< Если заряд батареи 10% тогда выключаем модуль
 		powerOff();
 	}		
 }
@@ -132,8 +107,7 @@ void powerSwitchInterrupt(){
 			if(t + 4000 < millis()){ // 
 				digitalWrite(LED, HIGH);
 				while(digitalRead(PWR_SW) == HIGH){delay(10);};// 
-				powerOff();
-				//ESP.reset();				
+				powerOff();			
 				break;
 			}
 			digitalWrite(LED, !digitalRead(LED));
@@ -141,10 +115,7 @@ void powerSwitchInterrupt(){
 	}
 }
 
-void connectWifi() {
-	#if defined SERIAL_DEDUG
-		Serial.println("Connecting as wifi client...");
-	#endif
+void connectWifi() {	
 	WiFi.disconnect(false);
 	/*!  */
 	int n = WiFi.scanNetworks();	
@@ -153,24 +124,20 @@ void connectWifi() {
 	}else{
 		for (int i = 0; i < n; ++i)	{
 			/*!  */
-			if(WiFi.SSID(i) == SCALES.getSSID().c_str()){
-				WiFi.begin ( SCALES.getSSID().c_str(), SCALES.getPASS().c_str());
-				if (!SCALES.isAuto()){
-					if (lanIp.fromString(SCALES.getLanIp()) && gateway.fromString(SCALES.getGateway())){
+			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
+				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());
+				if (!CORE.isAuto()){
+					if (lanIp.fromString(CORE.getLanIp()) && gateway.fromString(CORE.getGateway())){
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
 					}
 				}				
-				int connRes = WiFi.waitForConnectResult();
-				#if defined SERIAL_DEDUG
-					Serial.print ( "connRes: " );
-					Serial.println ( connRes );
-				#endif
+				int connRes = WiFi.waitForConnectResult();				
 				return;
 			}
 		}
 		goto disconnect;
 	}
-	disconnect:;
+	disconnect:
 	{
 		//WiFi.disconnect();
 		return;
@@ -189,7 +156,7 @@ void loop() {
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
-	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD,evt.channel); //Устанавливаем канал как роутера
+	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
 	// Setup MDNS responder
 	if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
 		// Add service to MDNS-SD
@@ -197,7 +164,7 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	}
 	COUNT_FLASH = 50;
 	COUNT_BLINK = 3000;
-	SCALES.saveEvent("ip", SCALES.getIp());
+	CORE.saveEvent("ip", CORE.getIp());
 }
 
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {	

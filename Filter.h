@@ -30,11 +30,11 @@ template<class T> class ExponentialFilter{
 		m_Current = (m_WeightNew * New + (100 - m_WeightNew) * m_Current) / 100;
 	}
 
-	void SetWeight(T NewWeight){
+	void SetFilterWeight(T NewWeight){
 		m_WeightNew = NewWeight;
 	}
 
-	T GetWeight() const { return m_WeightNew; }
+	T GetFilterWeight() const { return m_WeightNew; }
 
 	T Current() const { return m_Current; }
 
@@ -57,11 +57,11 @@ template<> class ExponentialFilter<float>{
 		m_fCurrent = m_fWeightNew * fNew + (1.0 - m_fWeightNew) * m_fCurrent;
 	}
 
-	void SetWeight(float NewWeight){
+	void SetFilterWeight(float NewWeight){
 		m_fWeightNew = NewWeight/100.0;
 	}
 
-	float GetWeight() const { return m_fWeightNew*100.0; }
+	float GetFilterWeight() const { return m_fWeightNew*100.0; }
 
 	float Current() const { return m_fCurrent; }
 

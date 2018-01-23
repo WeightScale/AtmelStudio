@@ -1,9 +1,4 @@
-#include <Arduino.h>
 #include "HX711.h"
-#include "Filter.h"
-
-//ExponentialFilter<d_type> ADCFilter;
-ExponentialFilter<long> ADCFilter;		
 
 HX711::HX711(byte dout, byte pd_sck, byte gain) {
 	PD_SCK 	= pd_sck;
@@ -11,7 +6,6 @@ HX711::HX711(byte dout, byte pd_sck, byte gain) {
 
 	GAIN = 1;
 	pinsConfigured = false;
-	ADCFilter.SetWeight(50);
 }
 
 HX711::~HX711(){
@@ -24,7 +18,6 @@ bool HX711::is_ready() {
 		pinMode(PD_SCK, OUTPUT);
 		pinMode(DOUT, INPUT);
 		pinsConfigured = true;
-		tare();
 	}
 	return digitalRead(DOUT) == LOW;
 }
@@ -114,42 +107,12 @@ long HX711::read() {
 	return ((uint32_t) data[2] << 16) | ((uint32_t) data[1] << 8) | (uint32_t) data[0];    
 }
 
-long HX711::read_average(byte times) {
-	long long sum = 0;
-	for (byte i = 0; i < times; i++) {
-		sum += read();
-	}	
-	return times == 0?sum / 1:sum / times;
-}
-
-long HX711::get_value() {
-	ADCFilter.Filter(read_average(FILTER));
-	//return read_average(FILTER) - OFFSET;
-	return ADCFilter.Current() - OFFSET;
-}
-
-d_type HX711::get_units() {
-	//ADCFilter.Filter(get_value() * SCALE);	
-	d_type v = get_value();
-	return (v * SCALE);
-	//return ADCFilter.Current();
-}
-
-void HX711::tare() {
-	long sum = read_average(FILTER);
-	set_offset(sum);
-}
-
 void HX711::power_down() {
 	digitalWrite(PD_SCK, HIGH);
 }
 
 void HX711::power_up() {
 	digitalWrite(PD_SCK, LOW);
-}
-
-void HX711::set_filter(unsigned char f){
-	FILTER = constrain(f, 1, 10);
 }
 
 void HX711::reset(){

@@ -1,8 +1,6 @@
-//#include <EEPROM.h>
 #include "handleHttp.h"
 #include "tools.h"
-#include "Scales.h"
-#include "Page.h"
+#include "Core.h"
 #include "DateTime.h"
 #include "BrowserServer.h"
 
@@ -20,11 +18,10 @@ void handleScaleProp(){
 
 /** Handle the WLAN save form and redirect to WLAN config page again */
 void handlePropSave() {
-	bool rec = false;
-	
+	bool rec = false;	
 		
 	if (browserServer.args() > 0){ // Save Settings			
-		SCALES.sendScaleSettingsSaveValue();		
+		CORE.sendScaleSettingsSaveValue();		
 	}else{
 		handleFileRead(browserServer.uri());
 	}	
@@ -32,7 +29,7 @@ void handlePropSave() {
 
 void handleCalibrSave(){
 	if (browserServer.args() > 0){ // Save Settings			
-		SCALES.scaleCalibrateSaveValue();		
+		CORE.scaleCalibrateSaveValue();		
 	}else{
 		handleFileRead(browserServer.uri());
 	}			
@@ -40,7 +37,7 @@ void handleCalibrSave(){
 
 //Check if header is present and correct
 bool isAuthentified(){
-	if (!browserServer.authenticate(SCALES.getNameAdmin().c_str(), SCALES.getPassAdmin().c_str())){
+	if (!browserServer.authenticate(CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str())){
 		if (!browserServer.checkAuth()){
 			return false;	
 		}

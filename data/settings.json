@@ -1,1 +1,17 @@
-{"scale":{"id_name_admin":"admin","id_pass_admin":"1234","id_ssid":"KONST","id_key":"3fal-rshc-nuo3"},"server":{"id_host":"sdb.net.ua","id_pin":"23339297"},"date":{"step_id":5,"filter_id":1,"max_weight_id":10000,"adc_offset":22735,"accuracy_id":1,"scale":6545.256,"wfilter_id":20}}
+{
+  "scale":{
+    "id_name_admin":"admin",
+    "id_pass_admin":"1234",
+    "id_ssid":"KONST",
+    "id_key":"3fal-rshc-nuo3",
+    "id_lan_ip":"192.168.1.107",
+    "id_gateway":"192.168.1.1",
+    "id_subnet":"255.255.255.0",
+    "id_auto":false
+  },
+  "server":{
+    "id_host":"sdb.net.ua",
+    "id_pin":"23339297",
+    "timeout":3000
+  }
+}

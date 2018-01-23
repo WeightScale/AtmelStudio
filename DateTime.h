@@ -1,5 +1,3 @@
-// DateTime.h
-
 #ifndef _DATETIME_h
 #define _DATETIME_h
 
@@ -8,14 +6,10 @@
 #else
 	#include "WProgram.h"
 #endif
-//#include <RtcUtility.h>
-//#include <RtcDS3231.h>
 #include <RtcDS1307.h>
-//#include <RtcDateTime.h>
 #include <Wire.h>
 
-//extern RtcDS3231<TwoWire> Rtc;
-extern RtcDS1307<TwoWire> Rtc;
+#define countof(a) (sizeof(a) / sizeof(a[0]))
 
 class RtcDateTime;
 
@@ -36,6 +30,8 @@ class DateTimeClass {
 };
 
 String getDateTime();
+
+extern RtcDS1307<TwoWire> Rtc;
 
 #endif
 

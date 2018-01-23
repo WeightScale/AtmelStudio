@@ -1,16 +1,8 @@
-// 
-// 
-// 
 #include "DateTime.h"
-//#include "RtcDateTime.h"
-#include "BrowserServer.h"
 
-//uRTCLib rtc;
-//RtcDS3231<TwoWire> Rtc(Wire);
 RtcDS1307<TwoWire> Rtc(Wire);
 
-DateTimeClass::DateTimeClass(const String& date){
-	
+DateTimeClass::DateTimeClass(const String& date){	
 	_dayOfMonth = date.substring(0, 2).toInt();
 	_month = date.substring(3, 5).toInt();
 	_year = date.substring(6, date.indexOf(',')).toInt();
@@ -20,20 +12,17 @@ DateTimeClass::DateTimeClass(const String& date){
 	
 }
 
-DateTimeClass::~DateTimeClass(){
-	//Serial.println("destruct");
-}
+DateTimeClass::~DateTimeClass(){}
 
 
 RtcDateTime DateTimeClass::toRtcDateTime(){
 	return RtcDateTime(_year, _month, _dayOfMonth, _hour, _minute, _second);
-	//return NULL;
 }
 
 String getDateTime(){
 	char datestring[20];		
 	RtcDateTime now = Rtc.GetDateTime();
-	snprintf_P(datestring,countof(datestring),PSTR("%04u.%02u.%02u-%02u:%02u:%02u"),
+	snprintf_P(datestring, countof(datestring), PSTR("%04u.%02u.%02u-%02u:%02u:%02u"),
 	now.Year(),
 	now.Month(),
 	now.Day(),	
@@ -42,13 +31,3 @@ String getDateTime(){
 	now.Second() );
 	return String(datestring);
 }
-
-
-//DateTimeClass DateTime;
-
-
-
-
-
-
-

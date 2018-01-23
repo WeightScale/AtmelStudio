@@ -1,5 +1,3 @@
-// handleHttp1.h
-
 #ifndef _HANDLEHTTP1_h
 #define _HANDLEHTTP1_h
 
@@ -16,11 +14,7 @@ void handlePropSave();
 
 void handleCalibrSave();
 
-//void sectionDateTime();
-
 void sectionSetCal();
-
-//String styleGeneral();
 
 void handleLogin();
 

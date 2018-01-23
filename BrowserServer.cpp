@@ -1,13 +1,11 @@
- 
 #include <ESP8266WebServer.h>
 #include <WiFiClient.h>
 #include <StreamString.h>
 #include <ESP8266httpUpdate.h>
-//#include <ArduinoOTA.h>
 #include <ArduinoJson.h>
 #include "BrowserServer.h"
 #include "handleHttp.h"
-#include "Scales.h"
+#include "Core.h"
 #include "Version.h"
 
 /* */
@@ -26,7 +24,7 @@ DNSServer dnsServer;
 File fsUploadFile;
 
 /** Should I connect to WLAN asap? */
-boolean connect;
+//boolean connect;
 /* Set these to your desired softAP credentials. They are not configurable at runtime */
 
 
@@ -48,30 +46,21 @@ void BrowserServerClass::begin() {
 	dnsServer.start(DNS_PORT, "*", apIP);
 		
 	ESP8266WebServer::begin(); // Web server start
-	loadHTTPAuth();	
+	_downloadHTTPAuth();	
 	init();
-}
-
-int getCountsOfDigits(long number) {
-	int count = 0;
-	while (number != 0) {
-		count++;
-		number /= 10;
-	}
-	return count;
 }
 
 void BrowserServerClass::init(){	
 	on("/weight", [this](){
-		char buffer[10];		
-		SCALES.setWeight(SCALES.get_units());
-		SCALES.formatValue(SCALES.getWeight(), buffer);							
-		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(SCALES.getCharge())+"}"));
-		SCALES.detectStable();
+		char buffer[10];
+		d_type w = Scale.getWeight();
+		Scale.formatValue(w, buffer	);
+		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
+		CORE.detectStable(w);
 		taskPower.updateCache();		
 	});
 	on("/tape", [this](){
-		SCALES.tare();
+		Scale.tare();
 		this->send(204, "text/html", "");
 	});
 	on("/",[this](){
@@ -92,8 +81,8 @@ void BrowserServerClass::init(){
 		taskPower.pause();
 	});
 	on("/seal", [this](){
-		if (SCALES.saveDate()){
-			SCALES.updateSettings();
+		if (Scale.saveDate()){
+			//SCALES.updateSettings();
 			this->send(200, "text/html", "");
 		}
 	});
@@ -181,10 +170,7 @@ void BrowserServerClass::init(){
 		HTTPUpload& upload = this->upload();
 		if(upload.status == UPLOAD_FILE_START){
 			Serial.setDebugOutput(true);
-			WiFiUDP::stopAll();
-			#if defined SERIAL_DEDUG
-				Serial.printf("Update: %s\n", upload.filename.c_str());
-			#endif			
+			WiFiUDP::stopAll();					
 			uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 			if(!Update.begin(maxSketchSpace)){//start with max available size
 				Update.printError(Serial);
@@ -194,11 +180,7 @@ void BrowserServerClass::init(){
 				Update.printError(Serial);
 			}
 		} else if(upload.status == UPLOAD_FILE_END){
-			if(Update.end(true)){ //true to set the size to the current progress
-				#if defined SERIAL_DEDUG
-					Serial.printf("Update Success: %u\nRebooting...\n", upload.totalSize);
-				#endif				
-			} else {
+			if(!Update.end(true)){ //true to set the size to the current progress			
 				Update.printError(Serial);
 			}
 			Serial.setDebugOutput(false);
@@ -236,10 +218,7 @@ void BrowserServerClass::init(){
 	const char * headerkeys[] = {"User-Agent","Cookie","x-SETNET"} ;
 	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
 	//ask server to track these headers
-	collectHeaders(headerkeys, headerkeyssize );
-	#if defined SERIAL_DEDUG
-		Serial.println("HTTP server started");
-	#endif	
+	collectHeaders(headerkeys, headerkeyssize );		
 }
 
 void BrowserServerClass::send_update_firmware_values_html() {
@@ -281,12 +260,12 @@ void BrowserServerClass::send_wwwauth_configuration_html() {
 			}
 		}
 
-		saveHTTPAuth();
+		_saveHTTPAuth();
 	}
 	handleFileRead("/admin.html");
 }
 
-bool BrowserServerClass::saveHTTPAuth() {
+bool BrowserServerClass::_saveHTTPAuth() {
 	
 	DynamicJsonBuffer jsonBuffer(256);
 	//StaticJsonBuffer<256> jsonBuffer;
@@ -308,16 +287,30 @@ bool BrowserServerClass::saveHTTPAuth() {
 	return true;
 }
 
-/*
-void BrowserServerClass::send_wwwauth_configuration_values_html() {
-	String values = "";
+bool BrowserServerClass::_downloadHTTPAuth() {
+	_httpAuth.auth = false;
+	File configFile = SPIFFS.open(SECRET_FILE, "r");
+	if (!configFile) {
+		configFile.close();
+		return false;
+	}
+	size_t size = configFile.size();
 
-	values += "wwwauth|" + (String)(_httpAuth.auth ? "checked" : "") + "|chk\n";
-	values += "wwwuser|" + (String)_httpAuth.wwwUsername + "|input\n";
-	values += "wwwpass|" + (String)_httpAuth.wwwPassword + "|input\n";
+	std::unique_ptr<char[]> buf(new char[size]);
+	
+	configFile.readBytes(buf.get(), size);
+	configFile.close();
+	DynamicJsonBuffer jsonBuffer(256);
+	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
-	send(200, "text/plain", values);
-}*/
+	if (!json.success()) {
+		return false;
+	}
+	_httpAuth.auth = json["auth"];
+	_httpAuth.wwwUsername = json["user"].as<char*>();
+	_httpAuth.wwwPassword = json["pass"].as<char*>();
+	return true;
+}
 
 bool BrowserServerClass::checkAuth() {
 	if (!_httpAuth.auth) {
@@ -325,7 +318,6 @@ bool BrowserServerClass::checkAuth() {
 	} else {
 		return authenticate(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
 	}
-
 }
 
 /*
@@ -369,40 +361,6 @@ String BrowserServerClass::urldecode(String input){ // (based on https://code.go
 		ret.concat(c);
 	}
 	return ret;
-}
-
-bool BrowserServerClass::loadHTTPAuth() {
-    File configFile = SPIFFS.open(SECRET_FILE, "r");
-    if (!configFile) {
-        _httpAuth.auth = false;
-        _httpAuth.wwwUsername = "";
-        _httpAuth.wwwPassword = "";
-        configFile.close();
-        return false;
-    }
-
-    size_t size = configFile.size();    
-
-    // Allocate a buffer to store contents of the file.
-    std::unique_ptr<char[]> buf(new char[size]);
-
-    // We don't use String here because ArduinoJson library requires the input
-    // buffer to be mutable. If you don't use ArduinoJson, you may as well
-    // use configFile.readString instead.
-    configFile.readBytes(buf.get(), size);
-    configFile.close();
-    DynamicJsonBuffer jsonBuffer(256);
-    //StaticJsonBuffer<256> jsonBuffer;
-    JsonObject& json = jsonBuffer.parseObject(buf.get());
-
-    if (!json.success()) {
-        _httpAuth.auth = false;
-        return false;
-    }
-    _httpAuth.auth = json["auth"];
-    _httpAuth.wwwUsername = json["user"].as<char*>();
-    _httpAuth.wwwPassword = json["pass"].as<char*>();    
-    return true;
 }
 
 void BrowserServerClass::setUpdateMD5() {
