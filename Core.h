@@ -74,8 +74,8 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 		bool saveEvent(const String&, const String&);
 		String getIp();
 		bool eventToServer(const String&, const String&, const String&);
-		void sendScaleSettingsSaveValue();
-		void scaleCalibrateSaveValue();
+		void saveValueSettingsHttp();
+		void saveValueCalibratedHttp();
 		String getHash(const String&, const String&, const String&, const String&);
 		int getBattery(int);
 		void detectStable(d_type);

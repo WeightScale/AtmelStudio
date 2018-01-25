@@ -50,7 +50,7 @@
         function sendDateTime(){
             var formData = new FormData();
             var date = new Date();
-            formData.append('date', date.toLocaleString());
+            formData.append('data', date.toLocaleString());
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
@@ -88,20 +88,25 @@
             http_request.overrideMimeType('application/json');
             http_request.onreadystatechange = function(){
                 if (http_request.readyState === 4  ){
-                    var json = JSON.parse(http_request.responseText);
-                    var scale = json.scale;
-                    for (entry in scale) {
-                        if(document.getElementById(entry).type === 'checkbox'){
-                            document.getElementById(entry).checked = scale[entry];
-                            enableAuthFields(document.getElementById(entry));
-                        }else
-                            document.getElementById(entry).value = scale[entry];
+                    try{
+                        var json = JSON.parse(http_request.responseText);
+                        var scale = json.scale;
+                        for (entry in scale) {
+                            if(document.getElementById(entry).type === 'checkbox'){
+                                document.getElementById(entry).checked = scale[entry];
+                                enableAuthFields(document.getElementById(entry));
+                            }else
+                                document.getElementById(entry).value = scale[entry];
+                        }
+                        var server = json.server;
+                        for (entry in server) {
+                            document.getElementById(entry).value=server[entry];
+                        }
+                    }catch(e){
+                        alert(e.toString());
+                    }finally {
+                        document.body.style.visibility = 'visible';
                     }
-                    var server = json.server;
-                    for (entry in server) {
-                        document.getElementById(entry).value=server[entry];
-                    }
-                    document.body.style.visibility = 'visible';
                 }
             };
             http_request.open("GET", "/settings.json", true);
@@ -143,23 +148,41 @@
                 document.getElementById("id_table_net").style.display = "";
             }
         }
-        function submitFrm() {
-            var form = document.getElementById("form_id");
+        function submitFormNet(f) {
+            var form = document.getElementById(f);
             var formData = new FormData(form);
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 ){
                     if (this.status === 200){
-                        document.open();
-                        document.write(request.innerHTML);
-                        document.close();
+                        var rec = confirm("Пересоеденится с новыми настройками");
+                        if(rec){
+                            request.open('GET','/rc',true)
+                        }
+                        alert(rec);
+                    }else if (this.status === 400){
+                        alert("Ошибка при сохранении настроек")
+                    }
+                }
+            };
+            request.open('POST','/settings.html',true);
+            //request.setRequestHeader('x-SETNET', 'set');
+            request.send(formData);
+        }
+        function submitFormServer() {
+            var form = document.getElementById("form_server_id");
+            var formData = new FormData(form);
+            var request = new XMLHttpRequest();
+            request.onreadystatechange = function(){
+                if (this.readyState === 4 ){
+                    if (this.status === 200){
+                        alert("OK")
                     }else if (this.status === 400){
                         alert("ERROR")
                     }
                 }
             };
             request.open('POST','/settings.html',true);
-            request.setRequestHeader('x-SETNET', 'set');
             request.send(formData);
         }
     </script>
@@ -185,28 +208,28 @@
     </table>
     <hr>
     <h5 align='left'><b>Точка доступа WiFi роутера</b></h5>
-    <form id="form_id" action='javascript:submitFrm()'>
+    <form id="form_id" action='javascript:submitFormNet("form_id")'>
         Получать IP:
         <input type="checkbox" id="id_auto" name="auto" onclick='enableAuthFields(this);'>
         <div id="id_ip"></div>
         <table id="id_table_net" >
             <tr>
                 <td>IP:</td>
-                <td><input id="id_lan_ip" type="text" name="lan_ip" onfocus="setOnBlur(this)"></td>
+                <td><input id="id_lan_ip" type="text" name="lan_ip"  onfocus="setOnBlur(this)"></td>
             </tr>
             <tr>
                 <td>ШЛЮЗ:</td>
-                <td><input id="id_gateway" type="text" name="gateway" onfocus="setOnBlur(this)"></td>
+                <td><input id="id_gateway" type="text" name="gateway"  onfocus="setOnBlur(this)"></td>
             </tr>
             <tr>
                 <td>МАСКА:</td>
-                <td><input id="id_subnet" type="text" name="subnet" onfocus="setOnBlur(this)"></td>
+                <td><input id="id_subnet" type="text" name="subnet"  onfocus="setOnBlur(this)"></td>
             </tr>
         </table>
         <table>
             <tr>
                 <td>СЕТЬ:</td>
-                <td><input id="id_ssid" name="ssid" placeholder='имя сети'></td>
+                <td><input id="id_ssid" name="ssid" required placeholder='имя сети'></td>
             </tr>
             <tr>
                 <td>КЛЮЧ:</td>
@@ -226,12 +249,12 @@
         <table>
             <tr>
                 <td><h5 id='id_date'>дата время</h5></td>
-                <td><input type='submit' value='УСТАНОВИТЬ НОВУЮ'/></td>
+                <td><input type='submit' name="data" value='УСТАНОВИТЬ НОВУЮ'/></td>
             </tr>
         </table>
     </form>
     <hr>
-    <form method='POST' >
+    <form id="form_server_id" action='javascript:submitFormServer()'>
         <h5>Настройки база данных интернет</h5>
         <table >
             <tr>

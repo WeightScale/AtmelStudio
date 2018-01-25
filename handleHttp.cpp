@@ -17,28 +17,24 @@ void handleScaleProp(){
 }
 
 /** Handle the WLAN save form and redirect to WLAN config page again */
-void handlePropSave() {
-	bool rec = false;	
-		
-	if (browserServer.args() > 0){ // Save Settings			
-		CORE.sendScaleSettingsSaveValue();		
-	}else{
-		handleFileRead(browserServer.uri());
-	}	
+void handleSettingsHtml() {	
+	if (!isAuthentified())
+		return browserServer.requestAuthentication();
+	if (browserServer.args() > 0) // Save Settings
+		return CORE.saveValueSettingsHttp();	
+	handleFileRead(browserServer.uri());
 }
 
-void handleCalibrSave(){
-	if (browserServer.args() > 0){ // Save Settings			
-		CORE.scaleCalibrateSaveValue();		
-	}else{
-		handleFileRead(browserServer.uri());
-	}			
+void handleCalibratedHtml(){
+	if (browserServer.args() > 0) // Save Settings			
+		return CORE.saveValueCalibratedHttp();		
+	handleFileRead(browserServer.uri());
 }
 
 //Check if header is present and correct
 bool isAuthentified(){
 	if (!browserServer.authenticate(CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str())){
-		if (!browserServer.checkAuth()){
+		if (!browserServer.checkAdminAuth()){
 			return false;	
 		}
 	}	

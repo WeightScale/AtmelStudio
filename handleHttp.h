@@ -10,9 +10,9 @@
 void handleScaleProp();
 
 /** Handle the WLAN save form and redirect to WLAN config page again */
-void handlePropSave();
+void handleSettingsHtml();
 
-void handleCalibrSave();
+void handleCalibratedHtml();
 
 void sectionSetCal();
 

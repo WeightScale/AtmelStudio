@@ -29,7 +29,12 @@ bool ScaleClass::_downloadValue(){
 	_scales_value.max = 1000;
 	_scales_value.scale = 1;
 	SetFilterWeight(80);
-	File dateFile = SPIFFS.open(CDATE_FILE, "w+");
+	File dateFile;
+	if (SPIFFS.exists(CDATE_FILE)){
+		dateFile = SPIFFS.open(CDATE_FILE, "r");
+	}else{
+		dateFile = SPIFFS.open(CDATE_FILE, "w+");
+	}
 	if (!dateFile) {
 		dateFile.close();
 		return false;
@@ -63,11 +68,13 @@ bool ScaleClass::saveDate() {
 		cdateFile.close();
 		return false;
 	}
-	size_t size = cdateFile.size();
-	std::unique_ptr<char[]> buf(new char[size]);
-	cdateFile.readBytes(buf.get(), size);
-	DynamicJsonBuffer jsonBuffer(size);
-	JsonObject& json = jsonBuffer.parseObject(buf.get());
+	//size_t size = cdateFile.size();
+	//std::unique_ptr<char[]> buf(new char[size]);
+	//cdateFile.readBytes(buf.get(), size);
+	//DynamicJsonBuffer jsonBuffer(size);
+	//JsonObject& json = jsonBuffer.parseObject(buf.get());
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject& json = jsonBuffer.createObject();
 
 	if (!json.success()) {
 		return false;

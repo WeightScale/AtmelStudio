@@ -187,12 +187,12 @@ bool CoreClass::eventToServer(const String& date, const String& type, const Stri
 	return false;
 }
 
-void CoreClass::sendScaleSettingsSaveValue() {
+void CoreClass::saveValueSettingsHttp() {
 	//if (browserServer.args() > 0){  // Save Settings
-		bool flag = false;
+		//bool flag = false;
 		String message = " ";
-		if (browserServer.hasHeader("x-SETNET")){
-			flag = true;
+		if (browserServer.hasArg("ssid")){
+			//flag = true;
 			_settings.autoIp = false;
 			if (browserServer.hasArg("auto"))
 				_settings.autoIp = true;				 			
@@ -201,89 +201,36 @@ void CoreClass::sendScaleSettingsSaveValue() {
 			_settings.scaleSubnet = browserServer.urldecode(browserServer.arg("subnet"));
 			_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg("ssid"));
 			_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg("key"));	
-			browserServer.send(200, "text/html", "OK");		
-			connectWifi();	
-			goto out;
+			//browserServer.send(200, "text/html", "");		
+			//connectWifi();	
+			goto save;
 		}
-		
-		for (uint8_t i = 0; i < browserServer.args(); i++) {
-			if (browserServer.argName(i)=="date"){
-				DateTimeClass DateTime(browserServer.arg("date"));
-				Rtc.SetDateTime(DateTime.toRtcDateTime());
-				String message = "<div>Дата время установлена<br/>";
-				message += getDateTime()+"</div>";
-				browserServer.send(200, "text/html", message);
-				return;
-			}
-			if (browserServer.argName(i) == "host") {
-				_settings.hostUrl = browserServer.urldecode(browserServer.arg(i));
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "pin") {
-				_settings.hostPin = browserServer.urldecode(browserServer.arg(i));
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "name_admin") {
-				_settings.scaleName = browserServer.urldecode(browserServer.arg(i));
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "pass_admin") {
-				_settings.scalePass = browserServer.urldecode(browserServer.arg(i));
-				flag = true;
-				//continue;
-			}/*else if (browserServer.argName(i) == "auto") {
-				_settings.autoIp = true;
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "lan_ip") {
-				_settings.scaleLanIp = browserServer.urldecode(browserServer.arg(i));
-				//if(_settings.scaleWlanSSID.length() > 0)
-					//connectWifi();
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "gateway") {
-				_settings.scaleGateway = browserServer.urldecode(browserServer.arg(i));
-				//connect = _settings.scaleWlanSSID.length() > 0;
-				//if(_settings.scaleWlanSSID.length() > 0)
-				//connectWifi();
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "subnet") {
-				_settings.scaleSubnet = browserServer.urldecode(browserServer.arg(i));
-				//connect = _settings.scaleWlanSSID.length() > 0;
-				//if(_settings.scaleWlanSSID.length() > 0)
-				//connectWifi();
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "ssid") {
-				_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg(i));
-				//connect = _settings.scaleWlanSSID.length() > 0;
-				if(_settings.scaleWlanSSID.length() > 0)
-					connectWifi();
-				flag = true;
-				//continue;
-			}else if (browserServer.argName(i) == "key") {
-				_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg(i));
-				//connect = _settings.scaleWlanKey.length() > 0;
-				if(_settings.scaleWlanSSID.length() > 0)
-					connectWifi();
-				flag = true;
-				//continue;
-			}*/
+		if(browserServer.hasArg("data")){
+			DateTimeClass DateTime(browserServer.arg("data"));
+			Rtc.SetDateTime(DateTime.toRtcDateTime());
+			String message = getDateTime();
+			browserServer.send(200, "text/html", message);
+			return;	
 		}
-		out:
-		if(flag){
-			if (_saveSettings()){
-				//browserServer.send(200, "text/html", "OK");
-				handleFileRead(browserServer.uri());
-			}else{
-				browserServer.send(400, "text/html", "Ошибка ");
-			}
+		if (browserServer.hasArg("host")){
+			_settings.hostUrl = browserServer.urldecode(browserServer.arg("host"));
+			_settings.hostPin = browserServer.urldecode(browserServer.arg("pin"));
+			goto save;	
 		}
-	//}
+		if (browserServer.hasArg("name_admin")){
+			_settings.scaleName = browserServer.urldecode(browserServer.arg("name_admin"));
+			_settings.scalePass = browserServer.urldecode(browserServer.arg("pass_admin"));
+			goto save;
+		}		
+		save:
+		if (_saveSettings()){
+			return browserServer.send(200, "text/html", "");
+			//handleFileRead(browserServer.uri());
+		}
+		browserServer.send(400, "text/html", "");
 }
 
-void CoreClass::scaleCalibrateSaveValue() {
+void CoreClass::saveValueCalibratedHttp() {
 	//if (browserServer.args() > 0){  // Save Settings
 		bool flag = false;
 		for (uint8_t i = 0; i < browserServer.args(); i++) {			
@@ -353,21 +300,24 @@ int CoreClass::getBattery(int times){
 	return times == 0?sum :sum / times;	
 }
 
-bool CoreClass::_saveSettings() {
+bool CoreClass::_saveSettings() {	
 	File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
 	if (!serverFile) {
 		serverFile.close();
 		return false;
 	}
-	size_t size = serverFile.size();
-	std::unique_ptr<char[]> buf(new char[size]);
-	serverFile.readBytes(buf.get(), size);
-	//readFile.close();
-	DynamicJsonBuffer jsonBuffer(size);
-	JsonObject& json = jsonBuffer.parseObject(buf.get());
+	//size_t size = serverFile.size();
+	//std::unique_ptr<char[]> buf(new char[size]);
+	//serverFile.readBytes(buf.get(), size);
+	//readFile.close();	
+	DynamicJsonBuffer jsonBuffer;
+	//StaticJsonBuffer<256> jsonBuffer;
+	JsonObject& json = jsonBuffer.createObject();
+	//JsonObject& json = jsonBuffer.parseObject(buf.get());
+	//JsonObject& scale = json.createNestedObject(SCALE_JSON);	
 
-	if (!json.success()) {
-		return false;
+	if (!json.containsKey(SCALE_JSON)) {
+		JsonObject& scale = json.createNestedObject(SCALE_JSON);
 	}
 	
 	json[SCALE_JSON]["id_name_admin"] = _settings.scaleName;
@@ -378,6 +328,11 @@ bool CoreClass::_saveSettings() {
 	json[SCALE_JSON]["id_subnet"] = _settings.scaleSubnet;
 	json[SCALE_JSON]["id_ssid"] = _settings.scaleWlanSSID;
 	json[SCALE_JSON]["id_key"] = _settings.scaleWlanKey;
+	
+	if (!json.containsKey(SERVER_JSON)) {
+		//JsonObject& json = jsonBuffer.createObject();
+		JsonObject& server = json.createNestedObject(SERVER_JSON);
+	}
 	
 	json[SERVER_JSON]["id_host"] = _settings.hostUrl;
 	json[SERVER_JSON]["id_pin"] = _settings.hostPin;
@@ -392,7 +347,13 @@ bool CoreClass::_downloadSettings() {
 	_settings.scaleName = "admin";
 	_settings.scalePass = "1234";
 	_settings.autoIp = true;
-	File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
+	File serverFile;
+	if (SPIFFS.exists(SETTINGS_FILE)){
+		serverFile = SPIFFS.open(SETTINGS_FILE, "r");	
+	}else{
+		serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
+	}
+	
 	if (!serverFile) {			
 		serverFile.close();
 		return false;

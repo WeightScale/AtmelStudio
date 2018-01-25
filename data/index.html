@@ -55,9 +55,9 @@
                 }
             };
             if((navigator.userAgent.indexOf("MSIE") !== -1 ) || (!!document.documentMode === true )){
-                requestWeight.open('GET','/weight?buster='+new Date().getTime(),true);
+                requestWeight.open('GET','/wt?buster='+new Date().getTime(),true);
             }else{
-                requestWeight.open('GET','/weight',true);
+                requestWeight.open('GET','/wt',true);
             }
             requestWeight.timeout = 5000;
             requestWeight.ontimeout = function(){go();};
@@ -75,7 +75,7 @@
                     document.getElementById('buttonZero').style.visibility = 'visible';
                     getWeight();
                 }};
-            request.open('GET','/tape',true);
+            request.open('GET','/tp',true);
             request.timeout = 5000;
             request.ontimeout = function(){go();};
             request.onerror = function(){go();};
@@ -100,10 +100,10 @@
 </table>
 <hr>
 <table>
-    <tr><td><a href='/events.html' class="btn btn&#45;&#45;m btn&#45;&#45;blue">события</a><br></td></tr>
+    <tr><td><a href='/events.html' class="btn btn--m btn--blue">события</a><br></td></tr>
     <tr><td><br/><a href='/settings.html'>настройки</a><br></td></tr>
 </table>
 <hr>
-<footer align="center">2017 © www.scale.in.ua</footer>
+<footer align="center">2018 © www.scale.in.ua</footer>
 </body>
 </html>

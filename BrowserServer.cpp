@@ -51,66 +51,64 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){	
-	on("/weight", [this](){
+	on("/wt", [this](){									/* Получить вес и заряд. */
 		char buffer[10];
 		d_type w = Scale.getWeight();
 		Scale.formatValue(w, buffer	);
-		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
 		CORE.detectStable(w);
-		taskPower.updateCache();		
+		taskPower.updateCache();
+		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
 	});
-	on("/tape", [this](){
+	on("/av", [this](){									/* Получить значение Ацп усредненное. */	
+		this->send(200, "text/html", String(Scale.readAverage()));
+	});
+	on("/tp", [this](){									/* Установить тару. */
 		Scale.tare();
 		this->send(204, "text/html", "");
 	});
-	on("/",[this](){
+	on("/",[this](){									/* Главная страница. */
 		if (!handleFileRead("/index.html"))	
 			this->send(404, "text/plain", "FileNotFound");
 		taskPower.resume();
 	});
-	on("/settings.html", [this]() {
+	on("/rc", connectWifi);							/* Пересоединиться по WiFi. */		
+	on("/settings.html", handleSettingsHtml);			/* Открыть страницу настроек или сохранить значения. */	
+	on("/sv", handleScaleProp);				/* Получить значения. */
+	on("/calibr.html", [this]() {			/* Открыть страницу калибровки.*/
 		if (!isAuthentified())
 			return this->requestAuthentication();
-		handlePropSave();
-	});
-	on("/scale/values", handleScaleProp);
-	on("/calibr.html", [this]() {
-		if (!isAuthentified())
-			return this->requestAuthentication();
-		handleCalibrSave();
+		handleCalibratedHtml();
 		taskPower.pause();
 	});
-	on("/seal", [this](){
+	on("/sl", [this](){						/* Опломбировать */
 		if (Scale.saveDate()){
 			//SCALES.updateSettings();
 			this->send(200, "text/html", "");
 		}
 	});
-	on("/events.html", [this](){
-		handleFileRead("/events.html");});
 	//list directory
 	on("/list", HTTP_GET, [this](){
-		if (!this->checkAuth())
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication(); 
 		handleFileList();});
 	//load editor
 	on("/editor.html", HTTP_GET, [this](){
-		if (!this->checkAuth())
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
 		if(!handleFileRead("/editor.html")) 
 			send(404, "text/plain", "FileNotFound");});
 	//create file
 	on("/edit", HTTP_PUT, [this](){
-		if (!this->checkAuth())
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
 		handleFileCreate();});
 	//delete file
 	on("/edit", HTTP_DELETE, [this](){
-		if (!this->checkAuth())
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
 		handleFileDelete();});
 	on("/edit", HTTP_POST, [this](){ 
-		if (!this->checkAuth())
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
 		this->send(200, "text/plain", ""); }, handleFileUpload);
 	
@@ -118,15 +116,13 @@ void BrowserServerClass::init(){
 		if(isValidType(uri())){
 			if(!handleFileRead(uri()))
 				return send(404, "text/plain", "FileNotFound");	
-		}else{
-			if (!this->checkAuth())
-				return this->requestAuthentication();
-			if(!handleFileRead(uri()))
+		}else{			
+			if(!handleFileReadAuth())
 				return send(404, "text/plain", "FileNotFound");		
 		}		
 	});
-	on("/httpupdate", HTTP_GET, [this]() {
-		if (!this->checkAuth())
+	on("/hu", HTTP_GET, [this]() {								/* Обновление чере интернет */
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
 		t_httpUpdate_return ret = ESPhttpUpdate.update("sdb.net.ua", 80, "/esp/update.php", "wshx711_v_" + String(SKETCH_VERSION));
 		switch(ret) {
@@ -140,55 +136,44 @@ void BrowserServerClass::init(){
 				this->send(200, "text/plain", "Обновление успешно!");
 			break;
 		}
-	});	
-	on("/update", HTTP_GET, [this]() {	
-		if (!this->checkAuth())
-			return this->requestAuthentication();	
-		if (!handleFileRead("/update.html"))
-			this->send(404, "text/plain", "FileNotFound");
 	});
-	on("/update/updatepossible", [this]() {
-		if (!this->checkAuth())
-			return this->requestAuthentication();
-		this->send_update_firmware_values_html();
-	});
-	on("/setmd5", [this]() {
-		if (!this->checkAuth())
-			return this->requestAuthentication();
-		this->setUpdateMD5();
-	});
+	on("/update.html", HTTP_GET, handleFileReadAuth);			/* Страница обновления прошивки. */	
+	on("/up", send_update_firmware_values_html);				/* Проверка возможности обновления. */	
+	on("/setmd5", setUpdateMD5);
 	on("/update", HTTP_POST, [this](){
-		if (!this->checkAuth())
-			return this->requestAuthentication();
-		this->sendHeader("Connection", "close");
-		this->sendHeader("Access-Control-Allow-Origin", "*");
-		String message = "<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>";
-		message += "<meta http-equiv='refresh' content='15;URL=/admin.html'/>Update correct. Restarting...";
-		this->send(200, "text/html", (Update.hasError())?"FAIL": message);
-		ESP.restart();
-		},[this](){
-		HTTPUpload& upload = this->upload();
-		if(upload.status == UPLOAD_FILE_START){
-			Serial.setDebugOutput(true);
-			WiFiUDP::stopAll();					
-			uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-			if(!Update.begin(maxSketchSpace)){//start with max available size
-				Update.printError(Serial);
+			if (!this->checkAdminAuth())
+				return this->requestAuthentication();
+			this->sendHeader("Connection", "close");
+			this->sendHeader("Access-Control-Allow-Origin", "*");
+			String message = "<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>";
+			message += "<meta http-equiv='refresh' content='15;URL=/admin.html'/>Update correct. Restarting...";
+			this->send(200, "text/html", (Update.hasError())?"FAIL": message);
+			ESP.restart();
+		},
+		[this](){
+			digitalWrite(LED, LOW);
+			HTTPUpload& upload = this->upload();
+			if(upload.status == UPLOAD_FILE_START){
+				Serial.setDebugOutput(true);
+				WiFiUDP::stopAll();					
+				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
+				if(!Update.begin(maxSketchSpace)){//start with max available size
+					Update.printError(Serial);
+				}
+			} else if(upload.status == UPLOAD_FILE_WRITE){
+				if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
+					Update.printError(Serial);
+				}
+			} else if(upload.status == UPLOAD_FILE_END){
+				if(!Update.end(true)){ //true to set the size to the current progress			
+					Update.printError(Serial);
+				}
+				Serial.setDebugOutput(false);
 			}
-		} else if(upload.status == UPLOAD_FILE_WRITE){
-			if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
-				Update.printError(Serial);
-			}
-		} else if(upload.status == UPLOAD_FILE_END){
-			if(!Update.end(true)){ //true to set the size to the current progress			
-				Update.printError(Serial);
-			}
-			Serial.setDebugOutput(false);
-		}
-		yield();
+			yield();
 	});	
 	on("/admin.html", [this]() {
-		if (!this->checkAuth())
+		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
 		this->send_wwwauth_configuration_html();
 		taskPower.pause();
@@ -196,32 +181,21 @@ void BrowserServerClass::init(){
 	/*on("/admin/restart", [this]() {	
 		if (!this->checkAuth())
 			return this->requestAuthentication();
-		this->restart_esp();});*/	
-	/*on("/admin/wwwauth", [this]() {
-		if (!this->checkAuth())
-			return this->requestAuthentication();
-		this->send_wwwauth_configuration_values_html();
-	});*/
-	on("/secret.json",[this]() {
-		if (!this->checkAuth())
-			return this->requestAuthentication();
-		handleFileRead("/secret.json");
-	});	
-	on("/settings.json",[this]() {
-		if (!isAuthentified())
-			return this->requestAuthentication();
-		handleFileRead("/settings.json");
-	});
+		this->restart_esp();});*/
+	on("/secret.json",handleFileReadAdmin);	
+	on("/settings.json", handleFileReadAuth);
 	//on("/generate_204", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
 	//on("/fwlink", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.	
 	
-	const char * headerkeys[] = {"User-Agent","Cookie","x-SETNET"} ;
+	const char * headerkeys[] = {"User-Agent","Cookie"/*,"x-SETNET"*/} ;
 	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
 	//ask server to track these headers
 	collectHeaders(headerkeys, headerkeyssize );		
 }
 
-void BrowserServerClass::send_update_firmware_values_html() {
+void send_update_firmware_values_html() {
+	if (!browserServer.checkAdminAuth())
+		return browserServer.requestAuthentication();
 	String values = "";
 	uint32_t maxSketchSpace = (ESP.getSketchSize() - 0x1000) & 0xFFFFF000;
 	//bool updateOK = Update.begin(maxSketchSpace);
@@ -237,7 +211,7 @@ void BrowserServerClass::send_update_firmware_values_html() {
 		values += "remupdResult||div\n";
 	}
 
-	send(200, "text/plain", values);
+	browserServer.send(200, "text/plain", values);
 }
 
 void BrowserServerClass::send_wwwauth_configuration_html() {
@@ -262,7 +236,7 @@ void BrowserServerClass::send_wwwauth_configuration_html() {
 
 		_saveHTTPAuth();
 	}
-	handleFileRead("/admin.html");
+	handleFileRead(uri());
 }
 
 bool BrowserServerClass::_saveHTTPAuth() {
@@ -312,7 +286,7 @@ bool BrowserServerClass::_downloadHTTPAuth() {
 	return true;
 }
 
-bool BrowserServerClass::checkAuth() {
+bool BrowserServerClass::checkAdminAuth() {
 	if (!_httpAuth.auth) {
 		return true;
 	} else {
@@ -363,22 +337,39 @@ String BrowserServerClass::urldecode(String input){ // (based on https://code.go
 	return ret;
 }
 
-void BrowserServerClass::setUpdateMD5() {
-	_browserMD5 = "";
-	if (args() > 0){  // Read hash
-		for (uint8_t i = 0; i < args(); i++) {			
-			if (argName(i) == "md5") {
-				_browserMD5 = urldecode(arg(i));
+void setUpdateMD5() {
+	if (!browserServer.checkAdminAuth())
+		return browserServer.requestAuthentication();
+	String _browserMD5 = "";
+	if (browserServer.args() > 0){  // Read hash
+		for (uint8_t i = 0; i < browserServer.args(); i++) {			
+			if (browserServer.argName(i) == "md5") {
+				_browserMD5 = browserServer.urldecode(browserServer.arg(i));
 				Update.setMD5(_browserMD5.c_str());
 				continue;
-			}if (argName(i) == "size") {
-				_updateSize = arg(i).toInt();				
+			}if (browserServer.argName(i) == "size") {
+				//_updateSize = browserServer.arg(i).toInt();				
 				continue;
 			}
 		}
-		send(200, "text/html", "OK --> MD5: " + _browserMD5);
+		browserServer.send(200, "text/html", "OK --> MD5: " + _browserMD5);
 	}
+}
 
+bool handleFileReadAdmin(){
+	if (!browserServer.checkAdminAuth()){
+		browserServer.requestAuthentication();
+		return false;
+	}
+	return handleFileRead(browserServer.uri());
+}
+
+bool handleFileReadAuth(){
+	if (!isAuthentified()){
+		browserServer.requestAuthentication();
+		return false;
+	}
+	return handleFileRead(browserServer.uri());
 }
 
 bool handleFileRead(String path){
@@ -447,7 +438,10 @@ void handleFileCreate(){
 }
 
 void handleFileList() {	
-	if(!browserServer.hasArg("dir")) {browserServer.send(500, "text/plain", "BAD ARGS"); return;}
+	if(!browserServer.hasArg("dir")) {
+		browserServer.send(500, "text/plain", "BAD ARGS"); 
+		return;
+	}
 	
 	String path = browserServer.arg("dir");
 	Dir dir = SPIFFS.openDir(path);

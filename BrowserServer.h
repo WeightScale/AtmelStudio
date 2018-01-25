@@ -33,13 +33,10 @@ class ESP8266WebServer;
 
 class BrowserServerClass : public ESP8266WebServer{
 	protected:
-		strHTTPAuth _httpAuth;
-		String _browserMD5 = "";
+		strHTTPAuth _httpAuth;		
 		uint32_t _updateSize = 0;
 		bool _saveHTTPAuth();		
-		bool _downloadHTTPAuth();
-		static String urldecode(String input); // (based on https://code.google.com/p/avr-netino/)
-		static unsigned char h2int(char c);
+		bool _downloadHTTPAuth();		
 
 	public:
 	
@@ -47,15 +44,16 @@ class BrowserServerClass : public ESP8266WebServer{
 		~BrowserServerClass();
 		void begin();
 		void init();
-		void send_update_firmware_values_html();
+		static String urldecode(String input); // (based on https://code.google.com/p/avr-netino/)
+		static unsigned char h2int(char c);
 		void send_wwwauth_configuration_html();
 		//void restart_esp();		
 		String getContentType(String filename);	
-		bool isValidType(String filename);	
-		void setUpdateMD5();
-		bool checkAuth();
+		bool isValidType(String filename);		
+		bool checkAdminAuth();
 		
-		friend CoreClass;
+		//friend CoreClass;
+		//friend BrowserServerClass;
 };
 
 //extern ESP8266HTTPUpdateServer httpUpdater;
@@ -66,6 +64,10 @@ extern IPAddress lanIp;			// Надо сделать настройки ip адреса
 extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 
+void send_update_firmware_values_html();
+void setUpdateMD5();
+bool handleFileReadAdmin();
+bool handleFileReadAuth();
 bool handleFileRead(String path);
 void handleFileCreate();
 void handleFileDelete();
