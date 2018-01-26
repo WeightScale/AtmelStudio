@@ -24,12 +24,14 @@
     </style>
     <script>
         function setMax(){
-            var formData = new FormData();
-            formData.append('weightStep', document.getElementById('step_id').value);
+            var form = document.getElementById("form_c_id");
+            var formData = new FormData(form);
+            /*formData.append('weightStep', document.getElementById('step_id').value);
             formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
             formData.append('weightFilter', document.getElementById('filter_id').value);
             formData.append('weightFilter1', document.getElementById('wfilter_id').value);
-            formData.append('weightMax', document.getElementById('max_weight_id').value);
+            formData.append('weightMax', document.getElementById('max_weight_id').value);*/
+            formData.append('update', true);
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
@@ -98,7 +100,7 @@
                     window.location.replace("/");
                 }
             };
-            request.open('GET','/seal',true);
+            request.open('GET','/sl',true);
             request.send(null);
         }
         function GetSettings() {
@@ -107,27 +109,28 @@
             http_request.onreadystatechange = function(){
                 if (http_request.readyState === 4  ){
                     var json = JSON.parse(http_request.responseText);
-                    var date = json.date;
-                    for (entry in date) {
+                    //var date = json.date;
+                    for (entry in json) {
                         if(document.getElementById(entry)!== null)
-                            document.getElementById(entry).value=date[entry];
+                            document.getElementById(entry).value=json[entry];
                     }
                     document.body.style.visibility = 'visible';
                 }
             };
-            http_request.open("GET", "/settings.json", true);
+            http_request.open("GET", "/cdate.json", true);
             http_request.send(null);
         }
         window.onload = function () {
             GetSettings();
         };
         function saveValue(){
-            var formData = new FormData();
-            formData.append('weightStep', document.getElementById('step_id').value);
+            var form = document.getElementById("form_c_id");
+            var formData = new FormData(form);
+            /*formData.append('weightStep', document.getElementById('step_id').value);
             formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
             formData.append('weightFilter', document.getElementById('filter_id').value);
             formData.append('weightFilter1', document.getElementById('wfilter_id').value);
-            formData.append('weightMax', document.getElementById('max_weight_id').value);
+            formData.append('weightMax', document.getElementById('max_weight_id').value);*/
             formData.append('update', true);
             var http_request = new XMLHttpRequest();
             http_request.onreadystatechange = function(){
@@ -148,12 +151,12 @@
 <hr>
 <fieldset id="form_max" style="visibility: visible">
     <legend>Общии настройки</legend>
-    <form action='javascript:setMax()'>
+    <form id="form_c_id" action='javascript:setMax()'>
         <table>
             <tr>
                 <td>Точность измерения</td>
                 <td>
-                    <select id="accuracy_id" title="Выбор точности с которым будет измерения" style="width: 100%">
+                    <select id="accuracy_id" name='weightAccuracy' title="Выбор точности с которым будет измерения" style="width: 100%">
                         <option name="0" value="0"> 0 </option>
                         <option name="0.0" value="1"> 0.0 </option>
                         <option name="0.00" value="2"> 0.00 </option>
@@ -164,7 +167,7 @@
             <tr>
                 <td>Шаг измерения</td>
                 <td>
-                    <select id="step_id" title="Выбор шага измерения" style="width: 100%">
+                    <select id="step_id" name='weightStep' title="Выбор шага измерения" style="width: 100%">
                         <option name="шаг 1" value="1"> 1 </option>
                         <option name="шаг 5" value="5"> 5 </option>
                         <option name="шаг 10" value="10"> 10 </option>
@@ -176,7 +179,7 @@
             <tr>
                 <td>Кол-во измерений</td>
                 <td>
-                    <select id="filter_id" title="Выбор количества измерений АЦП" style="width: 100%">
+                    <select id="average_id" name='weightAverage' title="Выбор количества измерений АЦП" style="width: 100%">
                         <option name="одно" value="1">ОДИН</option>
                         <option name="два" value="2">ДВА</option>
                         <option name="пять" value="5">ПЯТЬ</option>
@@ -186,7 +189,7 @@
             <tr>
                 <td>Филтер</td>
                 <td>
-                    <select id="wfilter_id" title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
+                    <select id="filter_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
                         <option name="5%" value="5">5 %</option>
                         <option name="10%" value="10">10 %</option>
                         <option name="20%" value="20">20 %</option>
@@ -203,7 +206,7 @@
             </tr>
             <tr>
                 <td>НВП</td>
-                <td><input title="Введите значение максимального веса" type='number' min='1' max='100000' id='max_weight_id' name='max_weight' placeholder='Найбольший предел'></td>
+                <td><input title="Введите значение максимального веса" type='number' min='1' max='100000' id='max_weight_id' name='weightMax' placeholder='Найбольший предел'></td>
             </tr>
             <tr>
                 <td><a href="javascript:saveValue();">сохранить и выйти</a></td>

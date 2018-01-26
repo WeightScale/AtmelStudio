@@ -5,20 +5,84 @@
 ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 
 ScaleClass::ScaleClass(byte dout, byte pd_sck) : HX711(dout, pd_sck) , ExponentialFilter<long>(){
-	
+	_server = NULL;
+	_username = NULL;
+	_password = NULL;
+	_authenticated = false;	
 }
 
 ScaleClass::~ScaleClass(){}
+	
+void ScaleClass::setup(BrowserServerClass *server, const char * username, const char * password){
+	init();
+	_server = server;
+	_username = (char *)username;
+	_password = (char *)password;
+	
+	_server->on(PAGE_FILE, [this]() {								/* Открыть страницу калибровки.*/
+		if (!_server->isAuthentified())
+			return _server->requestAuthentication();
+		saveValueCalibratedHttp();
+	});
+	_server->on("/av", [this](){									/* Получить значение АЦП усредненное. */
+		_server->send(200, "text/html", String(readAverage()));
+	});
+	_server->on("/tp", [this](){									/* Установить тару. */
+		tare();
+		_server->send(204, "text/html", "");
+	});
+	_server->on("/sl", [this](){									/* Опломбировать */		
+		if (saveDate()){
+			_server->send(200, "text/html", "");
+		}
+	});
+}
 
 void ScaleClass::init(){
 	reset();
 	_downloadValue();
 	mathRound();
+	SetCurrent(readAverage());
 }
 
 void ScaleClass::mathRound(){
 	_round = pow(10.0, _scales_value.accuracy) / _scales_value.step; // множитель для округления}
 	_stable_step = 1/_round;
+}
+
+void ScaleClass::saveValueCalibratedHttp() {
+	if (_server->args() > 0) {	
+		if (_server->hasArg("update")){
+			_scales_value.accuracy = _server->arg("weightAccuracy").toInt();
+			_scales_value.step = _server->arg("weightStep").toInt();
+			setAverage(_server->arg("weightAverage").toInt());
+			SetFilterWeight(_server->arg("weightFilter").toInt());
+			_scales_value.max = _server->arg("weightMax").toInt();
+			mathRound();
+			if (saveDate()){
+				goto ok;
+			}
+			goto err;	
+		}
+		
+		if (_server->hasArg("zero")){
+			_scales_value.offset = readAverage();
+		}
+		
+		if (_server->hasArg("weightCal")){
+			_referenceWeight = _server->arg("weightCal").toFloat();			
+			_calibrateWeightValue = readAverage();
+			mathScale();
+		}	
+		
+		ok:
+			return _server->send(200, "text/html", "");
+		err:
+			return _server->send(400, "text/html", "Ошибка ");	
+	}		
+	handleFileRead(_server->uri());
+	
+	//}
 }
 
 bool ScaleClass::_downloadValue(){
@@ -53,7 +117,7 @@ bool ScaleClass::_downloadValue(){
 	}
 	_scales_value.max = json["max_weight_id"];
 	_scales_value.offset = json["offset"];
-	_scales_value.average = json["filter_id"];
+	setAverage(json["average_id"]);
 	_scales_value.step = json["step_id"];
 	_scales_value.accuracy = json["accuracy_id"];
 	_scales_value.scale = json["scale"];
@@ -126,8 +190,7 @@ void ScaleClass::setAverage(unsigned char a){
 }
 
 void ScaleClass::mathScale(){
-	_scales_value.scale = referenceWeight / float(calibrateWeightValue - calibrateZeroValue);
-	_scales_value.offset = calibrateZeroValue;
+	_scales_value.scale = _referenceWeight / float(_calibrateWeightValue - _scales_value.offset);
 }
 
 /*! Функция для форматирования значения веса

@@ -23,15 +23,6 @@ DNSServer dnsServer;
 //holds the current upload
 File fsUploadFile;
 
-/** Should I connect to WLAN asap? */
-//boolean connect;
-/* Set these to your desired softAP credentials. They are not configurable at runtime */
-
-
-
-//const char* super_user_login = "su";
-//const char* super_user_password = "1234";
-
 /* hostname for mDNS. Should work at least on windows. Try http://esp8266.local */
 
 
@@ -51,41 +42,25 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){	
-	on("/wt", [this](){									/* Получить вес и заряд. */
+	on("/wt",HTTP_GET, [this](){									/* Получить вес и заряд. */
 		char buffer[10];
 		d_type w = Scale.getWeight();
 		Scale.formatValue(w, buffer	);
 		CORE.detectStable(w);
 		taskPower.updateCache();
 		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
-	});
-	on("/av", [this](){									/* Получить значение Ацп усредненное. */	
-		this->send(200, "text/html", String(Scale.readAverage()));
-	});
-	on("/tp", [this](){									/* Установить тару. */
-		Scale.tare();
-		this->send(204, "text/html", "");
-	});
+	});	
 	on("/",[this](){									/* Главная страница. */
-		if (!handleFileRead("/index.html"))	
-			this->send(404, "text/plain", "FileNotFound");
+		handleFileRead(this->uri());			
+		/*if (!handleFileRead("/index.html"))	
+			this->send(404, "text/plain", "FileNotFound");*/
 		taskPower.resume();
 	});
 	on("/rc", connectWifi);							/* Пересоединиться по WiFi. */		
 	on("/settings.html", handleSettingsHtml);			/* Открыть страницу настроек или сохранить значения. */	
+	on("/settings.json", handleFileReadAuth);
 	on("/sv", handleScaleProp);				/* Получить значения. */
-	on("/calibr.html", [this]() {			/* Открыть страницу калибровки.*/
-		if (!isAuthentified())
-			return this->requestAuthentication();
-		handleCalibratedHtml();
-		taskPower.pause();
-	});
-	on("/sl", [this](){						/* Опломбировать */
-		if (Scale.saveDate()){
-			//SCALES.updateSettings();
-			this->send(200, "text/html", "");
-		}
-	});
+	
 	//list directory
 	on("/list", HTTP_GET, [this](){
 		if (!this->checkAdminAuth())
@@ -145,30 +120,40 @@ void BrowserServerClass::init(){
 				return this->requestAuthentication();
 			this->sendHeader("Connection", "close");
 			this->sendHeader("Access-Control-Allow-Origin", "*");
-			String message = "<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>";
-			message += "<meta http-equiv='refresh' content='15;URL=/admin.html'/>Update correct. Restarting...";
-			this->send(200, "text/html", (Update.hasError())?"FAIL": message);
+			String message;
+			StreamString str;
+			if (Update.hasError()){
+				Update.printError(str);	
+				message = str.c_str();
+			}else{
+				message = "<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>";
+				message += "<meta http-equiv='refresh' content='15;URL=/admin.html'/>Update correct. Restarting...";	
+			}
+			this->send(200, "text/html", message);
 			ESP.restart();
 		},
 		[this](){
 			digitalWrite(LED, LOW);
 			HTTPUpload& upload = this->upload();
 			if(upload.status == UPLOAD_FILE_START){
-				Serial.setDebugOutput(true);
+				//Serial.setDebugOutput(true);
 				WiFiUDP::stopAll();					
 				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-				if(!Update.begin(maxSketchSpace)){//start with max available size
+				Update.begin(maxSketchSpace);
+				/*if(!Update.begin(maxSketchSpace)){//start with max available size
 					Update.printError(Serial);
-				}
+				}*/
 			} else if(upload.status == UPLOAD_FILE_WRITE){
-				if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
+				Update.write(upload.buf, upload.currentSize);
+				/*if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
 					Update.printError(Serial);
-				}
+				}*/
 			} else if(upload.status == UPLOAD_FILE_END){
-				if(!Update.end(true)){ //true to set the size to the current progress			
+				Update.end(true);
+				/*if(!Update.end(true)){ //true to set the size to the current progress			
 					Update.printError(Serial);
-				}
-				Serial.setDebugOutput(false);
+				}*/
+				//Serial.setDebugOutput(false);
 			}
 			yield();
 	});	
@@ -183,7 +168,7 @@ void BrowserServerClass::init(){
 			return this->requestAuthentication();
 		this->restart_esp();});*/
 	on("/secret.json",handleFileReadAdmin);	
-	on("/settings.json", handleFileReadAuth);
+	
 	//on("/generate_204", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
 	//on("/fwlink", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.	
 	
@@ -365,7 +350,7 @@ bool handleFileReadAdmin(){
 }
 
 bool handleFileReadAuth(){
-	if (!isAuthentified()){
+	if (!browserServer.isAuthentified()){
 		browserServer.requestAuthentication();
 		return false;
 	}
@@ -488,7 +473,17 @@ bool BrowserServerClass::isValidType(String filename){
 	else if(filename.endsWith(".png")) return true;
 	else if(filename.endsWith(".ico")) return true;
 	else if(filename.endsWith(".json")) return true;
+	else if(filename.endsWith(".html")) return true;
 	return false;	
+}
+
+bool BrowserServerClass::isAuthentified(){
+	if (!authenticate(CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str())){
+		if (!checkAdminAuth()){
+			return false;
+		}
+	}
+	return true;
 }
 
 

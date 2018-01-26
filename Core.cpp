@@ -230,48 +230,7 @@ void CoreClass::saveValueSettingsHttp() {
 		browserServer.send(400, "text/html", "");
 }
 
-void CoreClass::saveValueCalibratedHttp() {
-	//if (browserServer.args() > 0){  // Save Settings
-		bool flag = false;
-		for (uint8_t i = 0; i < browserServer.args(); i++) {			
-			if (browserServer.argName(i) == "weightMax") {
-				Scale.setMax(browserServer.arg(i).toInt());	
-				flag = true;
-			}if (browserServer.argName(i) == "weightStep") {
-				Scale.setStep(browserServer.arg(i).toInt());
-				flag = true;
-			}if (browserServer.argName(i) == "weightAccuracy") {				
-				Scale.setAccuracy(browserServer.arg(i).toInt());
-				flag = true;
-			}if (browserServer.argName(i) == "weightAverage") {
-				Scale.setAverage(browserServer.arg(i).toInt());
-				flag = true;
-			}if (browserServer.argName(i) == "weightFilter") {
-				Scale.SetFilterWeight(browserServer.arg(i).toInt());
-				flag = true;
-			}else if (browserServer.argName(i) == "zero") {
-				Scale.setCalibrateZeroValue(Scale.readAverage());				
-				flag = true;
-			}else if (browserServer.argName(i) == "weightCal") {
-				Scale.setReferenceWeight(browserServer.arg(i).toFloat());
-				Scale.setCalibrateWeightValue(Scale.readAverage());
-				Scale.mathScale();
-				flag = true;
-			}
-		}
-		if (browserServer.hasArg("update")){
-			if (Scale.saveDate()){
-				//SCALES.updateSettings();				
-			}
-		}		
-		if(flag){
-			browserServer.send(200, "text/html", "");
-			Scale.mathRound();			
-		}else{
-			browserServer.send(400, "text/html", "Ошибка ");
-		}
-	//}
-}
+
 
 String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){
 	
@@ -386,13 +345,13 @@ bool CoreClass::_downloadSettings() {
 
 /* */
 void CoreClass::detectStable(d_type w){
-	static d_type weight_temp = 0;
-	static unsigned char stable_num = 0;
-	static bool isStable = false;
+	static d_type weight_temp;
+	static unsigned char stable_num;
+	static bool isStable;
 	if(abs(w) > Scale.getStableStep()){
 		if (weight_temp == w) {
-			if (stable_num <= STABLE_NUM_MAX){
-				if (stable_num == STABLE_NUM_MAX) {
+			//if (stable_num <= STABLE_NUM_MAX){
+				if (stable_num > STABLE_NUM_MAX) {
 					if (!isStable){
 						saveEvent("weight", String(w)+"_kg");
 						isStable = true;
@@ -400,7 +359,7 @@ void CoreClass::detectStable(d_type w){
 					return;
 				}
 				stable_num++;
-			}
+			//}
 		} else { 
 			stable_num = 0;
 			isStable = false;

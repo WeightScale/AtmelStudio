@@ -58,7 +58,6 @@ void setup() {
 	delay(1000);
 	
 	CORE.begin();
-	Scale.init();
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
@@ -71,7 +70,9 @@ void setup() {
 	
 	//ESP.eraseConfig();
 	connectWifi();
-	browserServer.begin();   
+	browserServer.begin();
+	Scale.setup(&browserServer,CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str()); 
+	//Scale.init();  
 	
 	CORE.saveEvent("power", "ON");	
 	Scale.tare();

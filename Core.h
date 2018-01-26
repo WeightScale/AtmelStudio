@@ -16,7 +16,7 @@
 //using namespace ArduinoJson;
 
 #define SETTINGS_FILE "/settings.json"
-#define STABLE_NUM_MAX 10
+#define STABLE_NUM_MAX 20
 #define MAX_EVENTS 100
 #define MAX_CHG 1013//980 
 #define MIN_CHG 720
@@ -74,8 +74,7 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 		bool saveEvent(const String&, const String&);
 		String getIp();
 		bool eventToServer(const String&, const String&, const String&);
-		void saveValueSettingsHttp();
-		void saveValueCalibratedHttp();
+		void saveValueSettingsHttp();		
 		String getHash(const String&, const String&, const String&, const String&);
 		int getBattery(int);
 		void detectStable(d_type);

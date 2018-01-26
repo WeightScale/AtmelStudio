@@ -12,13 +12,13 @@ void handleScaleProp();
 /** Handle the WLAN save form and redirect to WLAN config page again */
 void handleSettingsHtml();
 
-void handleCalibratedHtml();
+//void handleCalibratedHtml();
 
 void sectionSetCal();
 
 void handleLogin();
 
-bool isAuthentified();
+//bool isAuthentified();
 
 void requestLogin(String session, String path, String msg="");
 

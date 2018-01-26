@@ -58,7 +58,6 @@ void setup() {
 	delay(1000);
 	
 	CORE.begin();
-	Scale.init();
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
@@ -71,7 +70,8 @@ void setup() {
 	
 	//ESP.eraseConfig();
 	connectWifi();
-	browserServer.begin();   
+	browserServer.begin();
+	Scale.setup(&browserServer,CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str());   
 	
 	CORE.saveEvent("power", "ON");	
 	Scale.tare();
@@ -119,11 +119,8 @@ void connectWifi() {
 	WiFi.disconnect(false);
 	/*!  */
 	int n = WiFi.scanNetworks();	
-	if (n == 0){		
-		goto disconnect;	
-	}else{
-		for (int i = 0; i < n; ++i)	{
-			/*!  */
+	if (n > 0){
+		for (int i = 0; i < n; ++i)	{			
 			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
 				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());
 				if (!CORE.isAuto()){
@@ -131,17 +128,11 @@ void connectWifi() {
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
 					}
 				}				
-				int connRes = WiFi.waitForConnectResult();				
+				WiFi.waitForConnectResult();				
 				return;
 			}
 		}
-		goto disconnect;
-	}
-	disconnect:
-	{
-		//WiFi.disconnect();
-		return;
-	}
+	}	
 }
 
 void loop() {

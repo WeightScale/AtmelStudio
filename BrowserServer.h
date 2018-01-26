@@ -51,6 +51,7 @@ class BrowserServerClass : public ESP8266WebServer{
 		String getContentType(String filename);	
 		bool isValidType(String filename);		
 		bool checkAdminAuth();
+		bool isAuthentified();
 		
 		//friend CoreClass;
 		//friend BrowserServerClass;

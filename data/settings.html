@@ -55,7 +55,7 @@
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
                     if (this.responseText !== null){
-                        document.getElementById('id_date').innerHTML = this.responseText;
+                        document.getElementById('id_date').innerHTML = "<div>Обновлено<br/>" + this.responseText + "</div>";
                     }
                 }
             };
@@ -115,7 +115,7 @@
         window.onload = function () {
             load("microajax.js", "js", function () {
                 GetSettings();
-                setValues("/scale/values");
+                setValues("/sv");
             });
         };
         function load(e, t, n) {
@@ -157,7 +157,8 @@
                     if (this.status === 200){
                         var rec = confirm("Пересоеденится с новыми настройками");
                         if(rec){
-                            request.open('GET','/rc',true)
+                            request.open('GET','/rc',true);
+                            request.send(null);
                         }
                         alert(rec);
                     }else if (this.status === 400){
