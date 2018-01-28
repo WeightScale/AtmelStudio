@@ -7,11 +7,17 @@
 #include "handleHttp.h"
 #include "Core.h"
 #include "Version.h"
+#include "HttpUpdater.h"
 
+static const char netIndex[]= /*PROGMEM =*/ R"(<html><body><form method='POST'>
+												<input type='checkbox' name='auto'><br/>												
+												<input name='ssid'><br/>
+												<input type='password' name='key'><br/>
+												<input type='submit' value='СОХРАНИТЬ'>
+												</form></body></html>)";
 /* */
 //ESP8266HTTPUpdateServer httpUpdater;
 /* Soft AP network parameters */
-//IPAddress apIP(192, 168, 4, 1);
 IPAddress apIP(192,168,4,1);
 IPAddress netMsk(255, 255, 255, 0);
 
@@ -42,21 +48,33 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){	
-	on("/wt",HTTP_GET, [this](){									/* Получить вес и заряд. */
+	on("/wt",HTTP_GET, [&](){									/* Получить вес и заряд. */
 		char buffer[10];
 		d_type w = Scale.getWeight();
 		Scale.formatValue(w, buffer	);
 		CORE.detectStable(w);
 		taskPower.updateCache();
 		this->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
-	});	
-	on("/",[this](){									/* Главная страница. */
+	});									/* Пересоединиться по WiFi. */		
+	on("/",[&](){									/* Главная страница. */
 		handleFileRead(this->uri());			
 		/*if (!handleFileRead("/index.html"))	
 			this->send(404, "text/plain", "FileNotFound");*/
 		taskPower.resume();
 	});
-	on("/rc", connectWifi);							/* Пересоединиться по WiFi. */		
+	on("/rc", reconnectWifi);							/* Пересоединиться по WiFi. */
+	on("/sn",HTTP_GET,[&](){
+		/*if(!authenticate("sa", "343434"))
+			return requestAuthentication();*/
+		//send_P(200, PSTR("text/html"), netIndex);	
+		send(200, "text/html", netIndex);
+	});
+	on("/sn",HTTP_POST,[&](){
+		CORE.saveValueSettingsHttp(successResponse);
+		delay(100);
+		client().stop();
+		ESP.restart();
+	});		
 	on("/settings.html", handleSettingsHtml);			/* Открыть страницу настроек или сохранить значения. */	
 	on("/settings.json", handleFileReadAuth);
 	on("/sv", handleScaleProp);				/* Получить значения. */
@@ -112,10 +130,10 @@ void BrowserServerClass::init(){
 			break;
 		}
 	});
-	on("/update.html", HTTP_GET, handleFileReadAuth);			/* Страница обновления прошивки. */	
-	on("/up", send_update_firmware_values_html);				/* Проверка возможности обновления. */	
-	on("/setmd5", setUpdateMD5);
-	on("/update", HTTP_POST, [this](){
+	//on("/update.html", HTTP_GET, handleFileReadAuth);			/* Страница обновления прошивки. */	
+	//on("/up", send_update_firmware_values_html);				/* Проверка возможности обновления. */	
+	//on("/setmd5", setUpdateMD5);
+	/*on("/update", HTTP_POST, [this](){
 			if (!this->checkAdminAuth())
 				return this->requestAuthentication();
 			this->sendHeader("Connection", "close");
@@ -140,23 +158,23 @@ void BrowserServerClass::init(){
 				WiFiUDP::stopAll();					
 				uint32_t maxSketchSpace = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 				Update.begin(maxSketchSpace);
-				/*if(!Update.begin(maxSketchSpace)){//start with max available size
+				/ *if(!Update.begin(maxSketchSpace)){//start with max available size
 					Update.printError(Serial);
-				}*/
+				}* /
 			} else if(upload.status == UPLOAD_FILE_WRITE){
 				Update.write(upload.buf, upload.currentSize);
-				/*if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
+				/ *if(Update.write(upload.buf, upload.currentSize) != upload.currentSize){
 					Update.printError(Serial);
-				}*/
+				}* /
 			} else if(upload.status == UPLOAD_FILE_END){
 				Update.end(true);
-				/*if(!Update.end(true)){ //true to set the size to the current progress			
+				/ *if(!Update.end(true)){ //true to set the size to the current progress			
 					Update.printError(Serial);
-				}*/
+				}* /
 				//Serial.setDebugOutput(false);
 			}
 			yield();
-	});	
+	});*/	
 	on("/admin.html", [this]() {
 		if (!this->checkAdminAuth())
 			return this->requestAuthentication();
@@ -178,6 +196,7 @@ void BrowserServerClass::init(){
 	collectHeaders(headerkeys, headerkeyssize );		
 }
 
+/*
 void send_update_firmware_values_html() {
 	if (!browserServer.checkAdminAuth())
 		return browserServer.requestAuthentication();
@@ -197,7 +216,7 @@ void send_update_firmware_values_html() {
 	}
 
 	browserServer.send(200, "text/plain", values);
-}
+}*/
 
 void BrowserServerClass::send_wwwauth_configuration_html() {
 	if (args() > 0){  // Save Settings
@@ -322,6 +341,7 @@ String BrowserServerClass::urldecode(String input){ // (based on https://code.go
 	return ret;
 }
 
+/*
 void setUpdateMD5() {
 	if (!browserServer.checkAdminAuth())
 		return browserServer.requestAuthentication();
@@ -339,7 +359,7 @@ void setUpdateMD5() {
 		}
 		browserServer.send(200, "text/html", "OK --> MD5: " + _browserMD5);
 	}
-}
+}*/
 
 bool handleFileReadAdmin(){
 	if (!browserServer.checkAdminAuth()){

@@ -65,8 +65,8 @@ extern IPAddress lanIp;			// Надо сделать настройки ip адреса
 extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 
-void send_update_firmware_values_html();
-void setUpdateMD5();
+//void send_update_firmware_values_html();
+//void setUpdateMD5();
 bool handleFileReadAdmin();
 bool handleFileReadAuth();
 bool handleFileRead(String path);

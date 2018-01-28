@@ -21,7 +21,7 @@ void handleSettingsHtml() {
 	if (!browserServer.isAuthentified())
 		return browserServer.requestAuthentication();
 	if (browserServer.args() > 0) // Save Settings
-		return CORE.saveValueSettingsHttp();	
+		return CORE.saveValueSettingsHttp("OK");	
 	handleFileRead(browserServer.uri());
 }
 

@@ -18,8 +18,8 @@
 #define SETTINGS_FILE "/settings.json"
 #define STABLE_NUM_MAX 20
 #define MAX_EVENTS 100
-#define MAX_CHG 1013//980 
-#define MIN_CHG 720
+#define MAX_CHG 1013//980	//делитель U2=U*(R2/(R1+R2)) 0.25
+#define MIN_CHG 768			//ADC = (Vin * 1024)/Vref  Vref = 1V
 
 #define EN_NCP  12							/* сигнал включения питания  */
 #define PWR_SW  13							/* сигнал от кнопки питания */
@@ -74,7 +74,7 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 		bool saveEvent(const String&, const String&);
 		String getIp();
 		bool eventToServer(const String&, const String&, const String&);
-		void saveValueSettingsHttp();		
+		void saveValueSettingsHttp(const char * text);		
 		String getHash(const String&, const String&, const String&, const String&);
 		int getBattery(int);
 		void detectStable(d_type);
@@ -85,6 +85,7 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 };
 
 void powerOff();
+void reconnectWifi();
 extern CoreClass CORE;
 
 #endif

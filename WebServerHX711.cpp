@@ -3,6 +3,7 @@
 #include "BrowserServer.h" 
 #include "Core.h"
 #include "Task.h"
+#include "HttpUpdater.h"
 
 /*
  * This example serves a "hello world" on a WLAN and a SoftAP at the same time.
@@ -40,8 +41,7 @@ void setup() {
 	pinMode(EN_NCP, OUTPUT);
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);
-	//digitalWrite(LED, HIGH);
-	pinMode(PWR_SW, INPUT);
+	pinMode(A0, OUTPUT);
 
 	while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
@@ -71,6 +71,7 @@ void setup() {
 	//ESP.eraseConfig();
 	connectWifi();
 	browserServer.begin();
+	httpUpdater.setup(&browserServer,"sa","343434");
 	Scale.setup(&browserServer,CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str()); 
 	//Scale.init();  
 	
@@ -93,7 +94,7 @@ void takeBattery(){
 	charge = constrain(charge, MIN_CHG, MAX_CHG);	
 	charge = map(charge, MIN_CHG, MAX_CHG, 0, 100);				
 	CORE.setCharge(charge);
-	if (charge < 10){												//< Если заряд батареи 10% тогда выключаем модуль
+	if (charge < 2){												//< Если заряд батареи 2% тогда выключаем модуль
 		powerOff();
 	}		
 }

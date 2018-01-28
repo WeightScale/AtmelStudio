@@ -187,7 +187,7 @@ bool CoreClass::eventToServer(const String& date, const String& type, const Stri
 	return false;
 }
 
-void CoreClass::saveValueSettingsHttp() {
+void CoreClass::saveValueSettingsHttp(const char * text) {
 	//if (browserServer.args() > 0){  // Save Settings
 		//bool flag = false;
 		String message = " ";
@@ -224,10 +224,10 @@ void CoreClass::saveValueSettingsHttp() {
 		}		
 		save:
 		if (_saveSettings()){
-			return browserServer.send(200, "text/html", "");
+			return browserServer.send(200, "text/html", text);
 			//handleFileRead(browserServer.uri());
 		}
-		browserServer.send(400, "text/html", "");
+		browserServer.send(400, "text/html", text);
 }
 
 
@@ -372,6 +372,12 @@ void powerOff(){
 	Scale.power_down(); /// Выключаем ацп
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 	ESP.reset();
+}
+
+
+void reconnectWifi(){
+	browserServer.client().stop();
+	connectWifi();	
 }
 
 

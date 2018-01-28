@@ -1,3 +1,5 @@
+#include "Updater.h"
+#include "Updater.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include "BrowserServer.h" 
@@ -40,8 +42,7 @@ void setup() {
 	pinMode(EN_NCP, OUTPUT);
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);
-	//digitalWrite(LED, HIGH);
-	pinMode(PWR_SW, INPUT);
+	pinMode(A0, OUTPUT);
 
 	while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
@@ -71,7 +72,8 @@ void setup() {
 	//ESP.eraseConfig();
 	connectWifi();
 	browserServer.begin();
-	Scale.setup(&browserServer,CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str());   
+	Scale.setup(&browserServer,CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str()); 
+	//Scale.init();  
 	
 	CORE.saveEvent("power", "ON");	
 	Scale.tare();
@@ -92,7 +94,7 @@ void takeBattery(){
 	charge = constrain(charge, MIN_CHG, MAX_CHG);	
 	charge = map(charge, MIN_CHG, MAX_CHG, 0, 100);				
 	CORE.setCharge(charge);
-	if (charge < 10){												//< Если заряд батареи 10% тогда выключаем модуль
+	if (charge < 2){												//< Если заряд батареи 2% тогда выключаем модуль
 		powerOff();
 	}		
 }
