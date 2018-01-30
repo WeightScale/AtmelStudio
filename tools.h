@@ -14,6 +14,7 @@
 boolean isIp(String str);
 /** IP to String? */
 String toStringIp(IPAddress ip);
+int StringSplit(String sInput, char cDelim, String sParams[], int iMaxParams);
 
 #endif
 

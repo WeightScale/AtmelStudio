@@ -55,14 +55,14 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 	unsigned int charge;
 	
 	bool saveAuth();
-	bool loadAuth();
-	bool _saveSettings();	
+	bool loadAuth();		
 	bool _downloadSettings();		
 
 	public:			
 		CoreClass();
 		~CoreClass();
 		void begin();
+		bool saveSettings();
 		String& getNameAdmin(){return _settings.scaleName;};
 		String& getPassAdmin(){return _settings.scalePass;};
 		String& getSSID(){return _settings.scaleWlanSSID;};

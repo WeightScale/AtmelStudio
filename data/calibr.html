@@ -26,11 +26,6 @@
         function setMax(){
             var form = document.getElementById("form_c_id");
             var formData = new FormData(form);
-            /*formData.append('weightStep', document.getElementById('step_id').value);
-            formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
-            formData.append('weightFilter', document.getElementById('filter_id').value);
-            formData.append('weightFilter1', document.getElementById('wfilter_id').value);
-            formData.append('weightMax', document.getElementById('max_weight_id').value);*/
             formData.append('update', true);
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
@@ -126,11 +121,6 @@
         function saveValue(){
             var form = document.getElementById("form_c_id");
             var formData = new FormData(form);
-            /*formData.append('weightStep', document.getElementById('step_id').value);
-            formData.append('weightAccuracy', document.getElementById('accuracy_id').value);
-            formData.append('weightFilter', document.getElementById('filter_id').value);
-            formData.append('weightFilter1', document.getElementById('wfilter_id').value);
-            formData.append('weightMax', document.getElementById('max_weight_id').value);*/
             formData.append('update', true);
             var http_request = new XMLHttpRequest();
             http_request.onreadystatechange = function(){

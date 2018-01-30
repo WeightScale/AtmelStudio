@@ -132,11 +132,6 @@ bool ScaleClass::saveDate() {
 		cdateFile.close();
 		return false;
 	}
-	//size_t size = cdateFile.size();
-	//std::unique_ptr<char[]> buf(new char[size]);
-	//cdateFile.readBytes(buf.get(), size);
-	//DynamicJsonBuffer jsonBuffer(size);
-	//JsonObject& json = jsonBuffer.parseObject(buf.get());
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
 

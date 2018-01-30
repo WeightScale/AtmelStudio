@@ -36,6 +36,7 @@ class HttpUpdaterClass{
 		char * _password;
 		bool _authenticated;
 		String _updaterError;
+		int _command;
 };
 
 extern HttpUpdaterClass httpUpdater;

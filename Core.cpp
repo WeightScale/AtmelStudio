@@ -223,7 +223,7 @@ void CoreClass::saveValueSettingsHttp(const char * text) {
 			goto save;
 		}		
 		save:
-		if (_saveSettings()){
+		if (saveSettings()){
 			return browserServer.send(200, "text/html", text);
 			//handleFileRead(browserServer.uri());
 		}
@@ -259,21 +259,15 @@ int CoreClass::getBattery(int times){
 	return times == 0?sum :sum / times;	
 }
 
-bool CoreClass::_saveSettings() {	
+bool CoreClass::saveSettings() {	
 	File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
 	if (!serverFile) {
 		serverFile.close();
 		return false;
 	}
-	//size_t size = serverFile.size();
-	//std::unique_ptr<char[]> buf(new char[size]);
-	//serverFile.readBytes(buf.get(), size);
-	//readFile.close();	
+	
 	DynamicJsonBuffer jsonBuffer;
-	//StaticJsonBuffer<256> jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
-	//JsonObject& json = jsonBuffer.parseObject(buf.get());
-	//JsonObject& scale = json.createNestedObject(SCALE_JSON);	
 
 	if (!json.containsKey(SCALE_JSON)) {
 		JsonObject& scale = json.createNestedObject(SCALE_JSON);
@@ -289,7 +283,6 @@ bool CoreClass::_saveSettings() {
 	json[SCALE_JSON]["id_key"] = _settings.scaleWlanKey;
 	
 	if (!json.containsKey(SERVER_JSON)) {
-		//JsonObject& json = jsonBuffer.createObject();
 		JsonObject& server = json.createNestedObject(SERVER_JSON);
 	}
 	
