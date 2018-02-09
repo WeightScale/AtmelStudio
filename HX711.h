@@ -1,5 +1,5 @@
-#ifndef HX711_h
-#define HX711_h
+#ifndef _HX711_h
+#define _HX711_h
 
 #if ARDUINO >= 100
 	#include "Arduino.h"
@@ -7,7 +7,7 @@
 	#include "WProgram.h"
 #endif
 
-typedef float d_type;
+//typedef float d_type;
 
 class HX711 {
 	private:

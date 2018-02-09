@@ -1,5 +1,8 @@
-#define SKETCH_VERSION "web_scales.001"
-#define SPIFFS_VERSION "web_scales.001"
+#ifndef _VERSION_h
+#define _VERSION_h
+
+#define SKETCH_VERSION "web_scales.002"
+#define SPIFFS_VERSION "web_scales.002"
 
 /*
 Формат файла
@@ -51,3 +54,5 @@
     http.collectHeaders(headerkeys, headerkeyssize);
 
 */
+
+#endif //_VERSION_h

@@ -1,11 +1,12 @@
 #ifndef _BROWSERSERVER_h
 #define _BROWSERSERVER_h
 
+/*
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
 #else
 	#include "WProgram.h"
-#endif
+#endif*/
 #include <IPAddress.h>
 #include <WiFiClient.h>
 #include <ESP8266WebServer.h>
@@ -52,7 +53,8 @@ class BrowserServerClass : public ESP8266WebServer{
 		bool isValidType(String filename);		
 		bool checkAdminAuth();
 		bool isAuthentified();
-		
+		String getName(){ return _httpAuth.wwwUsername;};
+		String getPass(){ return _httpAuth.wwwPassword;};
 		//friend CoreClass;
 		//friend BrowserServerClass;
 };
@@ -74,6 +76,9 @@ void handleFileCreate();
 void handleFileDelete();
 void handleFileUpload();
 void handleFileList();
+void handleAccessPoint();
+void handleSetAccessPoint();
+void handleAuthConfiguration();
 
 #endif
 

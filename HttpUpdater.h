@@ -1,7 +1,7 @@
 // Updater.h
 
-#ifndef _UPDATER_h
-#define _UPDATER_h
+#ifndef _HTTPUPDATER_h
+#define _HTTPUPDATER_h
 #include "BrowserServer.h"
 
 static const char successResponse[] PROGMEM = "<META http-equiv=\"refresh\" content=\"15;URL=/\">Обновление успешно! Перегрузка...\n";
@@ -41,5 +41,5 @@ class HttpUpdaterClass{
 
 extern HttpUpdaterClass httpUpdater;
 
-#endif
+#endif //_HTTPUPDATER_h
 

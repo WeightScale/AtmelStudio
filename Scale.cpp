@@ -18,7 +18,14 @@ void ScaleClass::setup(BrowserServerClass *server, const char * username, const 
 	_server = server;
 	_username = (char *)username;
 	_password = (char *)password;
-	
+	_server->on("/wt",HTTP_GET, [&](){									/* Получить вес и заряд. */
+		char buffer[10];
+		float w = getWeight();
+		formatValue(w, buffer	);
+		CORE.detectStable(w);
+		taskPower.updateCache();
+		_server->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
+	});
 	_server->on(PAGE_FILE, [this]() {								/* Открыть страницу калибровки.*/
 		if (!_server->isAuthentified())
 			return _server->requestAuthentication();
@@ -31,11 +38,7 @@ void ScaleClass::setup(BrowserServerClass *server, const char * username, const 
 		tare();
 		_server->send(204, "text/html", "");
 	});
-	_server->on("/sl", [this](){									/* Опломбировать */		
-		if (saveDate()){
-			_server->send(200, "text/html", "");
-		}
-	});
+	_server->on("/sl", handleSeal);									/* Опломбировать */	
 }
 
 void ScaleClass::init(){
@@ -59,10 +62,7 @@ void ScaleClass::saveValueCalibratedHttp() {
 			SetFilterWeight(_server->arg("weightFilter").toInt());
 			_scales_value.max = _server->arg("weightMax").toInt();
 			mathRound();
-			if (saveDate()){
-				goto ok;
-			}
-			goto err;	
+			goto ok;
 		}
 		
 		if (_server->hasArg("zero")){
@@ -122,6 +122,7 @@ bool ScaleClass::_downloadValue(){
 	_scales_value.accuracy = json["accuracy_id"];
 	_scales_value.scale = json["scale"];
 	SetFilterWeight(json["filter_id"]);
+	_scales_value.seal = json["seal_id"];
 	return true;
 	
 }
@@ -146,6 +147,7 @@ bool ScaleClass::saveDate() {
 	json["accuracy_id"] = _scales_value.accuracy;
 	json["scale"] = _scales_value.scale;
 	json["filter_id"] = GetFilterWeight();
+	json["seal_id"] = _scales_value.seal;
 
 	json.printTo(cdateFile);
 	cdateFile.flush();
@@ -166,12 +168,12 @@ long ScaleClass::getValue() {
 	return Current() - _scales_value.offset;
 }
 
-d_type ScaleClass::getUnits() {
-	d_type v = getValue();
+float ScaleClass::getUnits() {
+	float v = getValue();
 	return (v * _scales_value.scale);
 }
 
-d_type ScaleClass::getWeight(){
+float ScaleClass::getWeight(){
 	return round(getUnits() * _round) / _round; 
 }
 
@@ -194,8 +196,17 @@ void ScaleClass::mathScale(){
 	accuracy - Точновть шага значений (1, 2, 5, ...)
 	string - Выходная строка отфармотронова значение 
 */
-void ScaleClass::formatValue(d_type value, char* string){
+void ScaleClass::formatValue(float value, char* string){
 	dtostrf(value, 6-_scales_value.accuracy, _scales_value.accuracy, string);
+}
+
+void handleSeal(){
+	randomSeed(Scale.readAverage());
+	Scale.setSeal(random(1000));
+	
+	if (Scale.saveDate()){
+		Scale.getServer()->send(200, "text/html", String(Scale.getSeal()));
+	}
 }
 
 

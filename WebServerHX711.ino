@@ -41,8 +41,7 @@ void connectWifi();
 void setup() {
 	pinMode(EN_NCP, OUTPUT);
 	digitalWrite(EN_NCP, HIGH);
-	pinMode(LED, OUTPUT);
-	pinMode(A0, OUTPUT);
+	pinMode(LED, OUTPUT);	
 
 	while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
@@ -90,11 +89,11 @@ void takeBlink() {
 
 /**/
 void takeBattery(){	
-	unsigned int charge = CORE.getBattery(1);
+	/*unsigned int charge = CORE.getBattery(1);
 	charge = constrain(charge, MIN_CHG, MAX_CHG);	
 	charge = map(charge, MIN_CHG, MAX_CHG, 0, 100);				
-	CORE.setCharge(charge);
-	if (charge < 2){												//< Если заряд батареи 2% тогда выключаем модуль
+	CORE.setCharge(charge);*/
+	if (CORE.getBattery(1) < 2){												//< Если заряд батареи 2% тогда выключаем модуль
 		powerOff();
 	}		
 }

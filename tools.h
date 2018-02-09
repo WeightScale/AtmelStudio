@@ -1,7 +1,7 @@
 // tools1.h
 
-#ifndef _TOOLS1_h
-#define _TOOLS1_h
+#ifndef _TOOLS_h
+#define _TOOLS_h
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -16,7 +16,7 @@ boolean isIp(String str);
 String toStringIp(IPAddress ip);
 int StringSplit(String sInput, char cDelim, String sParams[], int iMaxParams);
 
-#endif
+#endif //_TOOLS_h
 
 
 

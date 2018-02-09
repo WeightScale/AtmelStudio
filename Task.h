@@ -2,12 +2,13 @@
 
 #ifndef _TASK_h
 #define _TASK_h
-
+#include <Arduino.h>
+/*
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
 #else
 	#include "WProgram.h"
-#endif
+#endif*/
 
 #include <inttypes.h>
 
@@ -30,7 +31,7 @@ protected:
 	/*! Запланированый пробег в милисекундах */	
 	unsigned long _cached_next_run;
 	
-	boolean Paused = false;
+	bool Paused = false;
 
 	/*!
 		IMPORTANT! Run after all calls to run()

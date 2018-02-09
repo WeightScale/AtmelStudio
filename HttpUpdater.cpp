@@ -39,13 +39,12 @@ void HttpUpdaterClass::setup(BrowserServerClass *server, const char * path, cons
 	_server->on(path, HTTP_GET, [&](){
 		if(_username != NULL && _password != NULL && !_server->authenticate(_username, _password))
 			return _server->requestAuthentication();
+		_authenticated = true;
 		_server->send_P(200, PSTR("text/html"), serverIndex);
 	});
 
 	// handler for the /update form POST (once file upload finishes)
-	_server->on(path, HTTP_POST, [&](){
-		if(!_authenticated)
-			return _server->requestAuthentication();
+	_server->on(path, HTTP_POST, [&](){		
 		if (_updaterError && _updaterError[0] != 0x00) {
 			_server->send(200, F("text/html"), String(F("Update error: ")) + _updaterError);
 		} else {	
@@ -70,9 +69,8 @@ void HttpUpdaterClass::setup(BrowserServerClass *server, const char * path, cons
 		
 		size_t size;
 		if(upload.status == UPLOAD_FILE_START){
-			_updaterError = String();			
-
-			_authenticated = (_username == NULL || _password == NULL || _server->authenticate(_username, _password));
+			_updaterError = String();	
+			
 			if(!_authenticated){				
 				return;
 			}	
@@ -105,27 +103,34 @@ void HttpUpdaterClass::setup(BrowserServerClass *server, const char * path, cons
 		delay(0);
 	});
 	
-	_server->on("/hu", HTTP_GET, [&]() {								/* Обновление чере интернет */
-		if (!_server->checkAdminAuth())
-		return _server->requestAuthentication();
-		ESPhttpUpdate.rebootOnUpdate(false);
-		digitalWrite(LED, LOW);
-		_server->send(404, "text/plain", "Проверяем");
-		t_httpUpdate_return ret = ESPhttpUpdate.updateSpiffs("http://sdb.net.ua/update.php", SPIFFS_VERSION);
-		if (ret == HTTP_UPDATE_OK){
-			ret = ESPhttpUpdate.update("http://sdb.net.ua/update.php", SKETCH_VERSION);
-		}
-		switch(ret) {
-			case HTTP_UPDATE_FAILED:
-			_server->send(404, "text/plain", ESPhttpUpdate.getLastErrorString());
-			break;
-			case HTTP_UPDATE_NO_UPDATES:
-			_server->send(304, "text/plain", "Обновление не требуется");
-			break;
-			case HTTP_UPDATE_OK:
-			_server->send(200, "text/plain", "Обновление успешно!");
-			break;
-		}
+	_server->on("/hu", HTTP_GET,[&]() {								/* Обновление чере интернет address/hu?host=sdb.net.ua/update.php */ 
+		if(_username != NULL && _password != NULL && !_server->authenticate(_username, _password))
+			return _server->requestAuthentication();
+		if(_server->hasArg("host")){
+			String host = _server->arg("host");
+			//_server->send(200, "text/plain", host);			
+			ESPhttpUpdate.rebootOnUpdate(false);
+			digitalWrite(LED, LOW);
+			String url = String("http://");
+			url += host;
+			t_httpUpdate_return ret = ESPhttpUpdate.updateSpiffs(url, SPIFFS_VERSION);
+			if (ret == HTTP_UPDATE_OK){
+				ret = ESPhttpUpdate.update(url, SKETCH_VERSION);
+			}				
+			switch(ret) {
+				case HTTP_UPDATE_FAILED:
+					_server->send(404, "text/plain", ESPhttpUpdate.getLastErrorString());
+				break;
+				case HTTP_UPDATE_NO_UPDATES:
+					_server->send(304, "text/plain", "Обновление не требуется");
+				break;
+				case HTTP_UPDATE_OK:
+					_server->client().stop();
+					ESP.restart();
+				break;
+			}
+			
+		}		
 		digitalWrite(LED, HIGH);
 	});
 }
@@ -135,4 +140,5 @@ void HttpUpdaterClass::_setUpdaterError(){
 	Update.printError(str);
 	_updaterError = str.c_str();
 }
+
 

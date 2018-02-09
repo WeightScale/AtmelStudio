@@ -13,6 +13,7 @@ void handleScaleProp(){
 	values += "id_ap_ssid|" + String(SOFT_AP_SSID) + "|div\n";
 	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
 	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
+	values += "seal_id|" + String(Scale.getSeal()) + "|div\n";
 	browserServer.send(200, "text/plain", values);
 }
 
@@ -25,23 +26,6 @@ void handleSettingsHtml() {
 	handleFileRead(browserServer.uri());
 }
 
-/*
-void handleCalibratedHtml(){
-	if (browserServer.args() > 0) // Save Settings			
-		return CORE.saveValueCalibratedHttp();		
-	handleFileRead(browserServer.uri());
-}*/
-
-//Check if header is present and correct
-/*
-bool isAuthentified(){
-	if (!browserServer.authenticate(CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str())){
-		if (!browserServer.checkAdminAuth()){
-			return false;	
-		}
-	}	
-	return true;
-}*/
 
 
 

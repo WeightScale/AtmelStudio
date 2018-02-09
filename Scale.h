@@ -2,11 +2,12 @@
 #ifndef _SCALE_h
 #define _SCALE_h
 
+/*
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
 #else
 	#include "WProgram.h"
-#endif
+#endif*/
 #include "HX711.h"
 #include "Filter.h"
 #include "BrowserServer.h"
@@ -21,7 +22,8 @@ typedef struct {
 	int accuracy;					/*  */
 	//unsigned char w_filter; /*! Значение для фильтра от 1-100 % */
 	unsigned int max;					/*  */
-	d_type scale;
+	float scale;
+	int seal;
 }t_scales_value;
 
 class BrowserServerClass;
@@ -33,9 +35,9 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		char * _password;
 		bool _authenticated;
 		t_scales_value _scales_value;
-		d_type _round;						/* множитиль для округления */
-		d_type _stable_step;				/* шаг для стабилизации */
-		d_type _referenceWeight;			/*  */
+		float _round;						/* множитиль для округления */
+		float _stable_step;					/* шаг для стабилизации */
+		float _referenceWeight;				/*  */
 		long _calibrateWeightValue;			/*  */		
 			
 		bool _downloadValue();
@@ -57,16 +59,20 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		long readAverage();
 		long getValue();
 		void setAverage(unsigned char);
-		unsigned char getAverage(){return _scales_value.average;};		
+		unsigned char getAverage(){return _scales_value.average;};	
+		void setSeal(int s){_scales_value.seal = s; };
+		int getSeal(){ return _scales_value.seal;};	
+		BrowserServerClass *getServer(){ return _server;};
 		
-		d_type getUnits();
-		d_type getWeight();
+		float getUnits();
+		float getWeight();
 		void tare();
 		
-		void formatValue(d_type value, char* string);
-		d_type getStableStep(){return _stable_step;};
+		void formatValue(float value, char* string);
+		float getStableStep(){return _stable_step;};
 		
-		d_type getRound(){return _round;};
+		float getRound(){return _round;};
+		
 		//void setMax(unsigned int m){_scales_value.max = m;};
 		//void setStep(unsigned char s){_scales_value.step = s;};
 		//void setAccuracy(int a){_scales_value.accuracy = a;};
@@ -76,6 +82,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 };
 
 extern ScaleClass Scale;
+void handleSeal();
 
 #endif
 

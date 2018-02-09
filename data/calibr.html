@@ -92,6 +92,7 @@
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
+                    alert(this.responseText);
                     window.location.replace("/");
                 }
             };
@@ -177,7 +178,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Филтер</td>
+                <td>Фильтр</td>
                 <td>
                     <select id="filter_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
                         <option name="5%" value="5">5 %</option>
