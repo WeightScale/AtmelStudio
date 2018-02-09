@@ -16,6 +16,7 @@
 #include "Core.h"
 
 #define SECRET_FILE "/secret.json"
+#define TEXT_HTML	"text/html"
 
 #define MY_HOST_NAME "scales"
 #define SOFT_AP_SSID "SCALES"

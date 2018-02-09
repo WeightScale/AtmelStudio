@@ -12,8 +12,18 @@
 #include "Filter.h"
 #include "BrowserServer.h"
 
-#define PAGE_FILE	"/calibr.html"
-#define CDATE_FILE	"/cdate.json"
+#define PAGE_FILE			"/calibr.html"
+#define CDATE_FILE			"/cdate.json"
+#define WEIGHT_MAX_JSON		"mw_id"
+#define OFFSET_JSON			"ofs"
+#define AVERAGE_JSON		"av_id"
+#define STEP_JSON			"st_id"
+#define ACCURACY_JSON		"ac_id"
+#define SCALE_JSON			"scale"
+#define FILTER_JSON			"fl_id"
+#define SEAL_JSON			"sl_id"
+#define USER_JSON			"us_id"
+#define PASS_JSON			"ps_id"
 
 typedef struct {
 	long offset;		/*  */
@@ -24,6 +34,8 @@ typedef struct {
 	unsigned int max;					/*  */
 	float scale;
 	int seal;
+	String user;
+	String password;
 }t_scales_value;
 
 class BrowserServerClass;
@@ -31,8 +43,8 @@ class BrowserServerClass;
 class ScaleClass : public HX711 , public ExponentialFilter<long>{
 	protected:
 		BrowserServerClass *_server;
-		char * _username;
-		char * _password;
+		//char * _username;
+		//char * _password;
 		bool _authenticated;
 		t_scales_value _scales_value;
 		float _round;						/* множитиль для округления */
@@ -45,7 +57,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 	public:
 		ScaleClass(byte, byte);
 		~ScaleClass();
-		void setup(BrowserServerClass *server, const char * username, const char * password);	
+		void setup(BrowserServerClass *server/*, const char * username, const char * password*/);	
 		bool saveDate();
 		void saveValueCalibratedHttp();
 		void mathScale();

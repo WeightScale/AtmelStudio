@@ -80,6 +80,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	return true;
 }
 
+/*
 String CoreClass::getIp() {
 	WiFiClient client ;
 	String ip = "";
@@ -94,22 +95,20 @@ String CoreClass::getIp() {
 	}
 	client.stop();	
 	return ip;
-}
+}*/
 
-/*
-String CoreClass::getIp(){
-	
+String CoreClass::getIp(){	
 	HTTPClient http;	
 	http.begin("http://sdb.net.ua/ip.php");
-	http.setTimeout(2000);	
+	http.setTimeout(_settings.timeout);	
 	int httpCode = http.GET();
-	String ip = "";	
+	String ip = http.getString();
+	http.end();	
 	if(httpCode == HTTP_CODE_OK){		
-		ip = http.getString();
-	}
-	http.end();
-	return ip;
-}*/
+		return ip;
+	}	
+	return String(httpCode);
+}
 
 /* */	
 bool CoreClass::eventToServer(const String& date, const String& type, const String& value){
@@ -147,7 +146,7 @@ void CoreClass::saveValueSettingsHttp(const char * text) {
 			DateTimeClass DateTime(browserServer.arg("data"));
 			Rtc.SetDateTime(DateTime.toRtcDateTime());
 			String message = getDateTime();
-			browserServer.send(200, "text/html", message);
+			browserServer.send(200, TEXT_HTML, message);
 			return;	
 		}
 		if (browserServer.hasArg("host")){
@@ -162,9 +161,9 @@ void CoreClass::saveValueSettingsHttp(const char * text) {
 		}		
 		save:
 		if (saveSettings()){
-			return browserServer.send(200, "text/html", text);
+			return browserServer.send(200, TEXT_HTML, text);
 		}
-		browserServer.send(400, "text/html", text);
+		browserServer.send(400, TEXT_HTML, text);
 }
 
 String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){

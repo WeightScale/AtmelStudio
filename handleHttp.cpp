@@ -13,7 +13,7 @@ void handleScaleProp(){
 	values += "id_ap_ssid|" + String(SOFT_AP_SSID) + "|div\n";
 	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
 	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
-	values += "seal_id|" + String(Scale.getSeal()) + "|div\n";
+	values += "sl_id|" + String(Scale.getSeal()) + "|div\n";
 	browserServer.send(200, "text/plain", values);
 }
 

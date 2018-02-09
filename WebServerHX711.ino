@@ -1,10 +1,9 @@
-#include "Updater.h"
-#include "Updater.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include "BrowserServer.h" 
 #include "Core.h"
 #include "Task.h"
+#include "HttpUpdater.h"
 
 /*
  * This example serves a "hello world" on a WLAN and a SoftAP at the same time.
@@ -47,6 +46,8 @@ void setup() {
 		delay(100);
 	};
 	
+	CORE.begin();
+	delay(1000);	
 	takeBattery();
   
 	taskController.add(&taskBlink);
@@ -54,10 +55,6 @@ void setup() {
 	taskController.add(&taskConnectWiFi);
 	taskConnectWiFi.pause();
 	taskController.add(&taskPower);	
-	
-	delay(1000);
-	
-	CORE.begin();
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
@@ -71,7 +68,8 @@ void setup() {
 	//ESP.eraseConfig();
 	connectWifi();
 	browserServer.begin();
-	Scale.setup(&browserServer,CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str()); 
+	httpUpdater.setup(&browserServer,"sa","343434");
+	Scale.setup(&browserServer,browserServer.getName().c_str(), browserServer.getPass().c_str()); 
 	//Scale.init();  
 	
 	CORE.saveEvent("power", "ON");	
@@ -88,14 +86,8 @@ void takeBlink() {
 }
 
 /**/
-void takeBattery(){	
-	/*unsigned int charge = CORE.getBattery(1);
-	charge = constrain(charge, MIN_CHG, MAX_CHG);	
-	charge = map(charge, MIN_CHG, MAX_CHG, 0, 100);				
-	CORE.setCharge(charge);*/
-	if (CORE.getBattery(1) < 2){												//< Если заряд батареи 2% тогда выключаем модуль
-		powerOff();
-	}		
+void takeBattery(){
+	CORE.getBattery(1);		
 }
 
 void powerSwitchInterrupt(){

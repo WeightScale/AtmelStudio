@@ -40,13 +40,13 @@ void HttpUpdaterClass::setup(BrowserServerClass *server, const char * path, cons
 		if(_username != NULL && _password != NULL && !_server->authenticate(_username, _password))
 			return _server->requestAuthentication();
 		_authenticated = true;
-		_server->send_P(200, PSTR("text/html"), serverIndex);
+		_server->send_P(200, PSTR(TEXT_HTML), serverIndex);
 	});
 
 	// handler for the /update form POST (once file upload finishes)
 	_server->on(path, HTTP_POST, [&](){		
 		if (_updaterError && _updaterError[0] != 0x00) {
-			_server->send(200, F("text/html"), String(F("Update error: ")) + _updaterError);
+			_server->send(200, F(TEXT_HTML), String(F("Update error: ")) + _updaterError);
 		} else {	
 			if (_command == U_SPIFFS){	
 				delay(2000);
@@ -56,7 +56,7 @@ void HttpUpdaterClass::setup(BrowserServerClass *server, const char * path, cons
 				return;
 			}		
 			_server->client().setNoDelay(true);			
-			_server->send_P(200, PSTR("text/html"), successResponse);
+			_server->send_P(200, PSTR(TEXT_HTML), successResponse);
 			delay(100);
 			_server->client().stop();
 			ESP.restart();

@@ -33,6 +33,7 @@ img{
 }
 footer{
     font-family: Arial, sans-serif;
+    font-size: small;
 }
 .btn, .btn:link, .btn:visited {
     display: inline-block;

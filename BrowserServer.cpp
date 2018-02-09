@@ -250,7 +250,7 @@ void setUpdateMD5() {
 				continue;
 			}
 		}
-		browserServer.send(200, "text/html", "OK --> MD5: " + _browserMD5);
+		browserServer.send(200, TEXT_HTML, "OK --> MD5: " + _browserMD5);
 	}
 }*/
 
@@ -258,8 +258,8 @@ void setUpdateMD5() {
 
 String BrowserServerClass::getContentType(String filename){
 	if(hasArg("download")) return "application/octet-stream";
-	else if(filename.endsWith(".htm")) return "text/html";
-	else if(filename.endsWith(".html")) return "text/html";
+	else if(filename.endsWith(".htm")) return TEXT_HTML;
+	else if(filename.endsWith(".html")) return TEXT_HTML;
 	else if(filename.endsWith(".css")) return "text/css";
 	else if(filename.endsWith(".js")) return "application/javascript";
 	else if (filename.endsWith(".json")) return "application/json";
@@ -410,7 +410,7 @@ void handleFileList() {
 void handleAccessPoint(){
 	if (!browserServer.checkAdminAuth())
 		return browserServer.requestAuthentication();
-	browserServer.send(200, "text/html", netIndex);	
+	browserServer.send(200, TEXT_HTML, netIndex);	
 }
 
 void handleSetAccessPoint(){

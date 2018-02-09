@@ -33,11 +33,11 @@
                     });
                     var groupedByDay = _.groupBy(array, "date");
                     groupedByDay = _.sortBy(groupedByDay, "date");
-                    var table = document.getElementById("events");
-                    table.innerHTML = "";
+                    var div = document.getElementById("events");
+                    div.innerHTML = "";
                     _.each (groupedByDay, function (day) {
                         var details = document.createElement("details");
-                        details.classList.add("th")
+                        details.classList.add("details")
                         details.innerHTML = "<summary>"+day[0].date+"</summary>";
                         var t = document.createElement("table");
                         t.classList.add('table');
@@ -47,7 +47,7 @@
                             t.appendChild(row);
                         }
                         details.appendChild(t);
-                        table.appendChild(details);
+                        div.appendChild(details);
                     });
                 }
             };
@@ -84,14 +84,16 @@
     </script>
 </head>
 <body >
-    <table width="100%">
-        <tr>
-            <td align="left"><a href="/"  class="btn btn--s btn--blue">&lt;</a>&nbsp;&nbsp;<strong>События</strong></td><td align="right"><a href="javascript:loadJSON();"  class="btn btn--s btn--blue">Обновить</a></td>
-        </tr>
-    </table>
-    <hr>
-    <table class="table">        
-        <tbody id="events"></tbody>
-    </table>
+<table width="100%">
+    <tr>
+        <td align="left"><a href="/"  class="btn btn--s btn--blue">&lt;</a>&nbsp;&nbsp;<strong>События</strong></td><td align="right"><a href="javascript:loadJSON();"  class="btn btn--s btn--blue">Обновить</a></td>
+    </tr>
+</table>
+<hr>
+<table class="table">
+    <tbody id="events"></tbody>
+</table>
+<hr>
+<footer align="center">2018 © Powered by www.scale.in.ua</footer>
 </body>
 </html>

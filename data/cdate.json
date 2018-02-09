@@ -1,10 +1,12 @@
 {
-  "step_id":1,
-  "average_id":1,
-  "max_weight_id":1000,
-  "offset":0,
-  "accuracy_id":1,
-  "scale":1,
-  "filter_id":100,
-  "seal_id":1111
+  "st_id":5,
+  "av_id":1,
+  "mw_id":1000,
+  "ofs":8408631,
+  "ac_id":2,
+  "scale":0.000155,
+  "fl_id":20,
+  "sl_id":357,
+  "us_id":"admin",
+  "ps_id":"1"
 }

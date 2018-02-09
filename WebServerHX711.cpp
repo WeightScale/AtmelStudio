@@ -69,7 +69,7 @@ void setup() {
 	connectWifi();
 	browserServer.begin();
 	httpUpdater.setup(&browserServer,"sa","343434");
-	Scale.setup(&browserServer,browserServer.getName().c_str(), browserServer.getPass().c_str()); 
+	Scale.setup(&browserServer); 
 	//Scale.init();  
 	
 	CORE.saveEvent("power", "ON");	
@@ -121,7 +121,8 @@ void connectWifi() {
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
 					}
 				}				
-				WiFi.waitForConnectResult();				
+				WiFi.waitForConnectResult();
+				CORE.saveEvent("ip", CORE.getIp());				
 				return;
 			}
 		}
@@ -147,8 +148,7 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 		MDNS.addService("http", "tcp", 80);
 	}
 	COUNT_FLASH = 50;
-	COUNT_BLINK = 3000;
-	CORE.saveEvent("ip", CORE.getIp());
+	COUNT_BLINK = 3000;	
 }
 
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {	

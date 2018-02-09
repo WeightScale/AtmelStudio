@@ -5,19 +5,15 @@
 ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 
 ScaleClass::ScaleClass(byte dout, byte pd_sck) : HX711(dout, pd_sck) , ExponentialFilter<long>(){
-	_server = NULL;
-	_username = NULL;
-	_password = NULL;
+	_server = NULL;	
 	_authenticated = false;	
 }
 
 ScaleClass::~ScaleClass(){}
 	
-void ScaleClass::setup(BrowserServerClass *server, const char * username, const char * password){
+void ScaleClass::setup(BrowserServerClass *server){
 	init();
 	_server = server;
-	_username = (char *)username;
-	_password = (char *)password;
 	_server->on("/wt",HTTP_GET, [&](){									/* Получить вес и заряд. */
 		char buffer[10];
 		float w = getWeight();
@@ -27,16 +23,17 @@ void ScaleClass::setup(BrowserServerClass *server, const char * username, const 
 		_server->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
 	});
 	_server->on(PAGE_FILE, [this]() {								/* Открыть страницу калибровки.*/
-		if (!_server->isAuthentified())
+		if(!_server->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
 			return _server->requestAuthentication();
+		_authenticated = true;
 		saveValueCalibratedHttp();
 	});
 	_server->on("/av", [this](){									/* Получить значение АЦП усредненное. */
-		_server->send(200, "text/html", String(readAverage()));
+		_server->send(200, TEXT_HTML, String(readAverage()));
 	});
 	_server->on("/tp", [this](){									/* Установить тару. */
 		tare();
-		_server->send(204, "text/html", "");
+		_server->send(204, TEXT_HTML, "");
 	});
 	_server->on("/sl", handleSeal);									/* Опломбировать */	
 }
@@ -62,7 +59,10 @@ void ScaleClass::saveValueCalibratedHttp() {
 			SetFilterWeight(_server->arg("weightFilter").toInt());
 			_scales_value.max = _server->arg("weightMax").toInt();
 			mathRound();
-			goto ok;
+			if (saveDate()){
+				goto ok;
+			}
+			goto err;
 		}
 		
 		if (_server->hasArg("zero")){
@@ -73,13 +73,23 @@ void ScaleClass::saveValueCalibratedHttp() {
 			_referenceWeight = _server->arg("weightCal").toFloat();			
 			_calibrateWeightValue = readAverage();
 			mathScale();
-		}	
+		}
+		
+		if (_server->hasArg("user")){
+			_scales_value.user = _server->arg("user");
+			_scales_value.password = _server->arg("pass");
+			if (saveDate()){
+				goto url;
+			}
+			goto err;
+		}
 		
 		ok:
-			return _server->send(200, "text/html", "");
+			return _server->send(200, TEXT_HTML, "");
 		err:
-			return _server->send(400, "text/html", "Ошибка ");	
-	}		
+			return _server->send(400, TEXT_HTML, "Ошибка ");	
+	}
+	url:		
 	handleFileRead(_server->uri());
 	
 	//}
@@ -93,6 +103,8 @@ bool ScaleClass::_downloadValue(){
 	_scales_value.max = 1000;
 	_scales_value.scale = 1;
 	SetFilterWeight(80);
+	_scales_value.user = "admin";
+	_scales_value.password = "1234";
 	File dateFile;
 	if (SPIFFS.exists(CDATE_FILE)){
 		dateFile = SPIFFS.open(CDATE_FILE, "r");
@@ -115,14 +127,22 @@ bool ScaleClass::_downloadValue(){
 	if (!json.success()) {
 		return false;
 	}
-	_scales_value.max = json["max_weight_id"];
-	_scales_value.offset = json["offset"];
-	setAverage(json["average_id"]);
-	_scales_value.step = json["step_id"];
-	_scales_value.accuracy = json["accuracy_id"];
-	_scales_value.scale = json["scale"];
-	SetFilterWeight(json["filter_id"]);
-	_scales_value.seal = json["seal_id"];
+	_scales_value.max = json[WEIGHT_MAX_JSON];
+	_scales_value.offset = json[OFFSET_JSON];
+	setAverage(json[AVERAGE_JSON]);
+	_scales_value.step = json[STEP_JSON];
+	_scales_value.accuracy = json[ACCURACY_JSON];
+	_scales_value.scale = json[SCALE_JSON];
+	SetFilterWeight(json[FILTER_JSON]);
+	_scales_value.seal = json[SEAL_JSON];
+	if (!json.containsKey(USER_JSON)){
+		_scales_value.user = "admin";
+		_scales_value.password = "1234";	
+	}else{
+		_scales_value.user = json[USER_JSON].as<String>();
+		_scales_value.password = json[PASS_JSON].as<String>();
+	}
+	
 	return true;
 	
 }
@@ -140,15 +160,17 @@ bool ScaleClass::saveDate() {
 		return false;
 	}
 	
-	json["step_id"] = _scales_value.step;
-	json["average_id"] = _scales_value.average;
-	json["max_weight_id"] = _scales_value.max;
-	json["offset"] = _scales_value.offset;
-	json["accuracy_id"] = _scales_value.accuracy;
-	json["scale"] = _scales_value.scale;
-	json["filter_id"] = GetFilterWeight();
-	json["seal_id"] = _scales_value.seal;
-
+	json[STEP_JSON] = _scales_value.step;
+	json[AVERAGE_JSON] = _scales_value.average;
+	json[WEIGHT_MAX_JSON] = _scales_value.max;
+	json[OFFSET_JSON] = _scales_value.offset;
+	json[ACCURACY_JSON] = _scales_value.accuracy;
+	json[SCALE_JSON] = _scales_value.scale;
+	json[FILTER_JSON] = GetFilterWeight();
+	json[SEAL_JSON] = _scales_value.seal;
+	json[USER_JSON] = _scales_value.user;
+	json[PASS_JSON] = _scales_value.password;
+	
 	json.printTo(cdateFile);
 	cdateFile.flush();
 	cdateFile.close();
@@ -205,7 +227,7 @@ void handleSeal(){
 	Scale.setSeal(random(1000));
 	
 	if (Scale.saveDate()){
-		Scale.getServer()->send(200, "text/html", String(Scale.getSeal()));
+		Scale.getServer()->send(200, TEXT_HTML, String(Scale.getSeal()));
 	}
 }
 

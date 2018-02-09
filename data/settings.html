@@ -198,21 +198,7 @@
 <hr>
 <fieldset>
     <details><summary>Конфигурация сети</summary>
-        <table>
-            <tr>
-                <td><h5>Имя хоста:</h5></td>
-                <td><h5 id="id_local_host"></h5></td>
-            </tr>
-        </table>
-        <hr>
-        <h5 align='left'><b>Точка доступа весов</b></h5>
-        <table>
-            <tr>
-                <td id="id_ap_ssid"></td>
-                <td id="id_ap_ip"></td>
-            </tr>
-        </table>
-        <hr>
+        <br>
         <h5 align='left'><b>Точка доступа WiFi роутера</b></h5>
         <form id="form_net_id" action='javascript:submitFormNet()'>
             <table>
@@ -259,6 +245,7 @@
 </fieldset><br/>
 <fieldset>
     <details><summary>Общии настройки</summary>
+        <br>
         <form action='javascript:sendDateTime()'>
             <h5 align='left'><b>Установка дата время</b></h5>
             <table>
@@ -306,7 +293,26 @@
         </form>
     </details>
 </fieldset><br/>
-<div id="seal_id"></div>
-<a href='/calibr.html'>КАЛИБРОВКА</a>
+
+<fieldset>
+    <details>
+        <summary>Информация</summary>
+        <br>
+        <table>
+            <tr><td><h5>Имя хоста:</h5></td><td><h5 id="id_local_host"></h5></td></tr>
+        </table>
+        <hr>
+        <h5 align='left'><b>Точка доступа весов</b></h5>
+        <table>
+            <tr><td id="id_ap_ssid"></td><td id="id_ap_ip"></td></tr>
+        </table>
+        <hr>
+        <table><tr><td>Пломба:</td><td><div id="sl_id"></div></td></tr></table>
+        <hr>
+        <a href='/calibr.html'>калибровка</a>
+    </details>
+</fieldset>
+<hr>
+<footer align="center">2018 © Powered by www.scale.in.ua</footer>
 </body>
 </html>

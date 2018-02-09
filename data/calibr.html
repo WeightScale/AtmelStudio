@@ -92,7 +92,7 @@
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
-                    alert(this.responseText);
+                    alert("Номер пломбы: " + this.responseText);
                     window.location.replace("/");
                 }
             };
@@ -147,7 +147,7 @@
             <tr>
                 <td>Точность измерения</td>
                 <td>
-                    <select id="accuracy_id" name='weightAccuracy' title="Выбор точности с которым будет измерения" style="width: 100%">
+                    <select id="ac_id" name='weightAccuracy' title="Выбор точности с которым будет измерения" style="width: 100%">
                         <option name="0" value="0"> 0 </option>
                         <option name="0.0" value="1"> 0.0 </option>
                         <option name="0.00" value="2"> 0.00 </option>
@@ -158,7 +158,7 @@
             <tr>
                 <td>Шаг измерения</td>
                 <td>
-                    <select id="step_id" name='weightStep' title="Выбор шага измерения" style="width: 100%">
+                    <select id="st_id" name='weightStep' title="Выбор шага измерения" style="width: 100%">
                         <option name="шаг 1" value="1"> 1 </option>
                         <option name="шаг 5" value="5"> 5 </option>
                         <option name="шаг 10" value="10"> 10 </option>
@@ -170,7 +170,7 @@
             <tr>
                 <td>Кол-во измерений</td>
                 <td>
-                    <select id="average_id" name='weightAverage' title="Выбор количества измерений АЦП" style="width: 100%">
+                    <select id="av_id" name='weightAverage' title="Выбор количества измерений АЦП" style="width: 100%">
                         <option name="одно" value="1">ОДИН</option>
                         <option name="два" value="2">ДВА</option>
                         <option name="пять" value="5">ПЯТЬ</option>
@@ -180,7 +180,7 @@
             <tr>
                 <td>Фильтр</td>
                 <td>
-                    <select id="filter_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
+                    <select id="fl_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
                         <option name="5%" value="5">5 %</option>
                         <option name="10%" value="10">10 %</option>
                         <option name="20%" value="20">20 %</option>
@@ -197,7 +197,7 @@
             </tr>
             <tr>
                 <td>НВП</td>
-                <td><input title="Введите значение максимального веса" type='number' min='1' max='100000' id='max_weight_id' name='weightMax' placeholder='Найбольший предел'></td>
+                <td><input title="Введите значение максимального веса" type='number' min='1' max='100000' id='mw_id' name='weightMax' placeholder='Найбольший предел'></td>
             </tr>
             <tr>
                 <td><a href="javascript:saveValue();">сохранить и выйти</a></td>
@@ -206,6 +206,18 @@
             </tr>
         </table>
     </form>
+</fieldset>
+<fieldset>
+    <details>
+        <summary>Авторизация для калибровки</summary>
+        <form method='POST'>
+            <table>
+                <tr><td>ИМЯ:</td><td><input id="us_id" name="user" placeholder='имя админ'></td></tr>
+                <tr><td>ПАРОЛЬ:</td><td><input type="password" id="ps_id" name="pass" placeholder='пароль админ'></td></tr>
+                <tr><td></td><td><input type='submit' value='СОХРАНИТЬ'/></td></tr>
+            </table>
+        </form>
+    </details>
 </fieldset>
 </body>
 </html>
