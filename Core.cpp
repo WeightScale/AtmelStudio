@@ -80,22 +80,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	return true;
 }
 
-/*
-String CoreClass::getIp() {
-	WiFiClient client ;
-	String ip = "";
-	if (client.connect("api.ipify.org", 80)) {
-		client.println("GET / HTTP/1.0");
-		client.println("Host: api.ipify.org");
-		client.println();
-		delay(50);
-		while(client.available()){
-			String ip = client.readStringUntil('\n');
-		}		
-	}
-	client.stop();	
-	return ip;
-}*/
+
 
 String CoreClass::getIp(){	
 	HTTPClient http;	
@@ -129,19 +114,25 @@ bool CoreClass::eventToServer(const String& date, const String& type, const Stri
 
 void CoreClass::saveValueSettingsHttp(const char * text) {	
 		String message = " ";
-		if (browserServer.hasArg("ssid")){
+		if (browserServer.hasArg("ssids")){
+			_settings.autoIp = true;
+			_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg("ssids"));
+			_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg("key"));	
+			goto save;
+		}else if (browserServer.hasArg("ssid")){
 			_settings.autoIp = false;
 			if (browserServer.hasArg("auto"))
 				_settings.autoIp = true;
 			else
-				_settings.autoIp = false;				 			
+				_settings.autoIp = false;
 			_settings.scaleLanIp = browserServer.urldecode(browserServer.arg("lan_ip"));			
 			_settings.scaleGateway = browserServer.urldecode(browserServer.arg("gateway"));
-			_settings.scaleSubnet = browserServer.urldecode(browserServer.arg("subnet"));
+			_settings.scaleSubnet = browserServer.urldecode(browserServer.arg("subnet"));		
 			_settings.scaleWlanSSID = browserServer.urldecode(browserServer.arg("ssid"));
 			_settings.scaleWlanKey = browserServer.urldecode(browserServer.arg("key"));	
 			goto save;
 		}
+		
 		if(browserServer.hasArg("data")){
 			DateTimeClass DateTime(browserServer.arg("data"));
 			Rtc.SetDateTime(DateTime.toRtcDateTime());

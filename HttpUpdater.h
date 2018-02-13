@@ -11,35 +11,38 @@ class BrowserServerClass;
 class HttpUpdaterClass{
 	public:
 		HttpUpdaterClass();
-
-		void setup(BrowserServerClass *server){
-			setup(server, NULL, NULL);
-		}
-
-		void setup(BrowserServerClass *server, const char * path){
-			setup(server, path, NULL, NULL);
-		}
-
+		
 		void setup(BrowserServerClass *server, const char * username, const char * password){
 			setup(server, "/update", username, password);
 		}
 
 		void setup(BrowserServerClass *server, const char * path, const char * username, const char * password);
+		
+		BrowserServerClass *getServer(){ return _server;};
+		char * getUserName(){return _username;};
+		char * getPassword(){return _password;};
+		void setAuthenticated(bool a){_authenticated = a;};
+		bool getAuthenticated(){return _authenticated;};
 
 	protected:
-		void _setUpdaterError();
+		
 
-	private:
-		//bool _serial_output;
+	private:		
 		BrowserServerClass *_server;
 		char * _username;
 		char * _password;
 		bool _authenticated;
-		String _updaterError;
-		int _command;
+		
+		
 };
 
 extern HttpUpdaterClass httpUpdater;
+
+void handleUpdatePage();
+void handleStartUpdate();
+void handleEndUpdate();
+void setUpdaterError();
+void handleHttpStartUpdate();
 
 #endif //_HTTPUPDATER_h
 

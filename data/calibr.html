@@ -104,11 +104,17 @@
             http_request.overrideMimeType('application/json');
             http_request.onreadystatechange = function(){
                 if (http_request.readyState === 4  ){
-                    var json = JSON.parse(http_request.responseText);
-                    //var date = json.date;
-                    for (entry in json) {
-                        if(document.getElementById(entry)!== null)
-                            document.getElementById(entry).value=json[entry];
+                    try {
+                        var json = JSON.parse(http_request.responseText);
+                        for (entry in json) {
+                            try {
+                                if(document.getElementById(entry)!== null)
+                                    document.getElementById(entry).value=json[entry];
+                            }catch(e) {}
+
+                        }
+                    }catch (e){
+                        alert(e.toString());
                     }
                     document.body.style.visibility = 'visible';
                 }
@@ -178,7 +184,7 @@
                 </td>
             </tr>
             <tr>
-                <td>Фильтр</td>
+                <td>Филтер</td>
                 <td>
                     <select id="fl_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
                         <option name="5%" value="5">5 %</option>

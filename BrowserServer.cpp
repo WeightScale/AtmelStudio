@@ -9,9 +9,8 @@
 #include "HttpUpdater.h"
 
 static const char netIndex[]= /*PROGMEM =*/ R"(	<html><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
-												<body><form method='POST'>
-												<input type='checkbox' name='auto'><br/>												
-												<input name='ssid'><br/>
+												<body><form method='POST'>																								
+												<input name='ssids'><br/>
 												<input type='password' name='key'><br/>
 												<input type='submit' value='ÑÎÕÐÀÍÈÒÜ'>
 												</form></body></html>)";
@@ -264,12 +263,12 @@ String BrowserServerClass::getContentType(String filename){
 	else if(filename.endsWith(".js")) return "application/javascript";
 	else if (filename.endsWith(".json")) return "application/json";
 	else if(filename.endsWith(".png")) return "image/png";
-	else if(filename.endsWith(".gif")) return "image/gif";
-	else if(filename.endsWith(".jpg")) return "image/jpeg";
+	//else if(filename.endsWith(".gif")) return "image/gif";
+	//else if(filename.endsWith(".jpg")) return "image/jpeg";
 	else if(filename.endsWith(".ico")) return "image/x-icon";
-	else if(filename.endsWith(".xml")) return "text/xml";
-	else if(filename.endsWith(".pdf")) return "application/x-pdf";
-	else if(filename.endsWith(".zip")) return "application/x-zip";
+	//else if(filename.endsWith(".xml")) return "text/xml";
+	//else if(filename.endsWith(".pdf")) return "application/x-pdf";
+	//else if(filename.endsWith(".zip")) return "application/x-zip";
 	else if(filename.endsWith(".gz")) return "application/x-gzip";
 	return "text/plain";
 }
@@ -408,7 +407,7 @@ void handleFileList() {
 }
 
 void handleAccessPoint(){
-	if (!browserServer.checkAdminAuth())
+	if (!browserServer.isAuthentified())
 		return browserServer.requestAuthentication();
 	browserServer.send(200, TEXT_HTML, netIndex);	
 }

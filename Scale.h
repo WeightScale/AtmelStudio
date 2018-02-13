@@ -14,6 +14,7 @@
 
 #define PAGE_FILE			"/calibr.html"
 #define CDATE_FILE			"/cdate.json"
+
 #define WEIGHT_MAX_JSON		"mw_id"
 #define OFFSET_JSON			"ofs"
 #define AVERAGE_JSON		"av_id"

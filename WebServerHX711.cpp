@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include "BrowserServer.h" 
+//#include <ESP8266mDNS.h>
+#include "BrowserServer.h"
+#include "ESP8266NetBIOS.h" 
 #include "Core.h"
 #include "Task.h"
 #include "HttpUpdater.h"
@@ -42,9 +43,9 @@ void setup() {
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);	
 
-	while (digitalRead(PWR_SW) == HIGH){
+	/*while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
-	};
+	};*/
 	
 	CORE.begin();
 	delay(1000);	
@@ -68,7 +69,8 @@ void setup() {
 	//ESP.eraseConfig();
 	connectWifi();
 	browserServer.begin();
-	httpUpdater.setup(&browserServer,"sa","343434");
+	NBNS.begin(MY_HOST_NAME);
+	httpUpdater.setup(&browserServer,"sa","654321");
 	Scale.setup(&browserServer); 
 	//Scale.init();  
 	
@@ -143,10 +145,10 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
 	// Setup MDNS responder
-	if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
+	/*if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
 		// Add service to MDNS-SD
 		MDNS.addService("http", "tcp", 80);
-	}
+	}*/
 	COUNT_FLASH = 50;
 	COUNT_BLINK = 3000;	
 }

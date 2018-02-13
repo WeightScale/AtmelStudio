@@ -1,3 +1,4 @@
+#include "ESP8266NetBIOS.h"
 #include <ESP8266WiFi.h>
 #include <ESP8266mDNS.h>
 #include "BrowserServer.h" 
