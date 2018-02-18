@@ -2,13 +2,13 @@
 
 RtcDS1307<TwoWire> Rtc(Wire);
 
-DateTimeClass::DateTimeClass(const String& date){	
+DateTimeClass::DateTimeClass(const String& date){
 	_dayOfMonth = date.substring(0, 2).toInt();
 	_month = date.substring(3, 5).toInt();
 	_year = date.substring(6, date.indexOf(',')).toInt();
 	_hour = date.substring(12, 14).toInt();
 	_minute = date.substring(15, 17).toInt();
-	_second = date.substring(18).toInt();	
+	_second = date.substring(18).toInt();
 	
 }
 
@@ -20,12 +20,12 @@ RtcDateTime DateTimeClass::toRtcDateTime(){
 }
 
 String getDateTime(){
-	char datestring[20];		
+	char datestring[20];
 	RtcDateTime now = Rtc.GetDateTime();
 	snprintf_P(datestring, countof(datestring), PSTR("%04u.%02u.%02u-%02u:%02u:%02u"),
 	now.Year(),
 	now.Month(),
-	now.Day(),	
+	now.Day(),
 	now.Hour(),
 	now.Minute(),
 	now.Second() );

@@ -8,17 +8,17 @@
     <title>Настройки</title>
     <link rel="stylesheet" type="text/css" href="global.css">
     <style>
-        .error {
-            background: red;
-        }
         input:focus {
             background: #FA6;
             outline: none;
         }
         table {width: 100%;}
         input{
-            width:auto;text-align: right;
+            width:100%;text-align: right;
             font-size:18px;
+        }
+        input[type=submit]{
+            width:auto;
         }
     </style>
     <script>
@@ -88,30 +88,28 @@
             http_request.overrideMimeType('application/json');
             http_request.onreadystatechange = function(){
                 if (http_request.readyState === 4  ){
-                    if (this.status === 200){
-                        try{
-                            var json = JSON.parse(http_request.responseText);
-                            var scale = json.scale;
-                            for (entry in scale) {
-                                try {
-                                    if(document.getElementById(entry).type === 'checkbox'){
-                                        document.getElementById(entry).checked = scale[entry];
-                                        enableAuthFields(document.getElementById(entry));
-                                    }else
-                                        document.getElementById(entry).value = scale[entry];
-                                }catch (e){}
-                            }
-                            var server = json.server;
-                            for (entry in server) {
-                                try {
-                                    document.getElementById(entry).value=server[entry];
-                                }catch (e){}
-                            }
-                        }catch(e){
-                            alert(e.toString());
-                        }finally {
-                            document.body.style.visibility = 'visible';
+                    try{
+                        var json = JSON.parse(http_request.responseText);
+                        var scale = json.scale;
+                        for (entry in scale) {
+                            try {
+                                if(document.getElementById(entry).type === 'checkbox'){
+                                    document.getElementById(entry).checked = scale[entry];
+                                    enableAuthFields(document.getElementById(entry));
+                                }else
+                                    document.getElementById(entry).value = scale[entry];
+                            }catch (e){}
                         }
+                        var server = json.server;
+                        for (entry in server) {
+                            try {
+                                document.getElementById(entry).value=server[entry];
+                            }catch (e){}
+                        }
+                    }catch(e){
+                        alert(e.toString());
+                    }finally {
+                        document.body.style.visibility = 'visible';
                     }
                 }
             };
@@ -154,8 +152,8 @@
                 document.getElementById("id_table_net").style.display = "";
             }
         }
-        function submitFormNet() {
-            var form = document.getElementById("form_net_id");
+        function submitFormNet(f) {
+            var form = document.getElementById(f);
             var formData = new FormData(form);
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
@@ -200,18 +198,10 @@
     <details><summary>Конфигурация сети</summary>
         <br>
         <h5 align='left'><b>Точка доступа WiFi роутера</b></h5>
-        <form id="form_net_id" action='javascript:submitFormNet()'>
-            <table>
-                <tr>
-                    <td>
-                        Получить IP:
-                        <input type="checkbox" id="id_auto" name="auto" onclick='enableAuthFields(this);'>
-                    </td>
-                    <td>
-                        <div id="id_ip"></div>
-                    </td>
-                </tr>
-            </table>
+        <form id="form_id" action='javascript:submitFormNet("form_id")'>
+            Получать IP:
+            <input type="checkbox" id="id_auto" name="auto" onclick='enableAuthFields(this);'>
+            <div id="id_ip"></div>
             <table id="id_table_net" >
                 <tr>
                     <td>IP:</td>
@@ -243,7 +233,7 @@
         </form>
     </details>
 </fieldset><br/>
-<fieldset>
+<fieldset style="width: auto">
     <details><summary>Общии настройки</summary>
         <br>
         <form action='javascript:sendDateTime()'>
@@ -293,21 +283,20 @@
         </form>
     </details>
 </fieldset><br/>
-
 <fieldset>
     <details>
         <summary>Информация</summary>
         <br>
         <table>
-            <tr><td><h5>Имя хоста:</h5></td><td><h5 id="id_local_host"></h5></td></tr>
+            <tr><td><h5>Имя хоста:</h5></td><td align="right"><h5 id="id_local_host"></h5></td></tr>
         </table>
         <hr>
         <h5 align='left'><b>Точка доступа весов</b></h5>
         <table>
-            <tr><td id="id_ap_ssid"></td><td id="id_ap_ip"></td></tr>
+            <tr><td id="id_ap_ssid"></td><td align="right" id="id_ap_ip"></td></tr>
         </table>
         <hr>
-        <table><tr><td>Пломба:</td><td><div id="sl_id"></div></td></tr></table>
+        <table><tr><td>Пломба:</td><td align="right"><div id="sl_id"></div></td></tr></table>
         <hr>
         <a href='/calibr.html'>калибровка</a>
     </details>

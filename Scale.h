@@ -47,6 +47,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		//char * _username;
 		//char * _password;
 		bool _authenticated;
+		bool stableWeight;
 		t_scales_value _scales_value;
 		float _round;						/* множитиль для округления */
 		float _stable_step;					/* шаг для стабилизации */
@@ -76,6 +77,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		void setSeal(int s){_scales_value.seal = s; };
 		int getSeal(){ return _scales_value.seal;};	
 		BrowserServerClass *getServer(){ return _server;};
+		void detectStable(float);
 		
 		float getUnits();
 		float getWeight();
@@ -85,6 +87,8 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		float getStableStep(){return _stable_step;};
 		
 		float getRound(){return _round;};
+		bool getStableWeight(){return stableWeight;};
+		void setStableWeight(bool s){stableWeight = s;};
 		
 		//void setMax(unsigned int m){_scales_value.max = m;};
 		//void setStep(unsigned char s){_scales_value.step = s;};
@@ -96,6 +100,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 
 extern ScaleClass Scale;
 void handleSeal();
+void handleWeight();
 
 #endif
 

@@ -50,6 +50,11 @@
                         var json = JSON.parse(requestWeight.responseText);
                         document.getElementById('weight').innerHTML = json.w;
                         document.getElementById('charge_id').innerHTML = json.c+'%';
+                        if(json.s){
+                            document.getElementById('weight_style').setAttribute("style", "background: #fff;");
+                        }else{
+                            document.getElementById('weight_style').setAttribute("style", "background: #C4C4C4;");
+                        }
                         getWeight();
                     }
                 }

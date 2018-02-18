@@ -9,7 +9,7 @@ void handleScaleProp(){
 		return browserServer.requestAuthentication();
 	String values = "";
 	values += "id_date|" + getDateTime() + "|div\n";	
-	values += "id_local_host|http://"+String(MY_HOST_NAME)+".local|div\n";
+	values += "id_local_host|"+String(MY_HOST_NAME)+"/|div\n";
 	values += "id_ap_ssid|" + String(SOFT_AP_SSID) + "|div\n";
 	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
 	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
@@ -22,16 +22,9 @@ void handleSettingsHtml() {
 	if (!browserServer.isAuthentified())
 		return browserServer.requestAuthentication();
 	if (browserServer.args() > 0) // Save Settings
-		return CORE.saveValueSettingsHttp("OK");	
+		return CORE.saveValueSettingsHttp("OK");
 	handleFileRead(browserServer.uri());
 }
-
-
-
-
-
-
-
 
 
 

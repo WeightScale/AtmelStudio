@@ -28,7 +28,7 @@ void connectWifi();
 TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
-Task taskPower(powerOff, 1200000);						/* 10 минут бездействия и выключаем */
+Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
 Task taskConnectWiFi(connectWifi, 60000);				/* Пытаемся соедениться с точкой доступа каждые 60 секунд */
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
@@ -68,8 +68,7 @@ void setup() {
 	
 	//ESP.eraseConfig();
 	connectWifi();
-	browserServer.begin();
-	NBNS.begin(MY_HOST_NAME);
+	browserServer.begin();	
 	httpUpdater.setup(&browserServer,"sa","654321");
 	Scale.setup(&browserServer); 
 	//Scale.init();  
@@ -124,11 +123,12 @@ void connectWifi() {
 					}
 				}				
 				WiFi.waitForConnectResult();
+				NBNS.begin(MY_HOST_NAME);								
 				CORE.saveEvent("ip", CORE.getIp());				
 				return;
 			}
 		}
-	}	
+	}
 }
 
 void loop() {
@@ -148,7 +148,7 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	/*if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
 		// Add service to MDNS-SD
 		MDNS.addService("http", "tcp", 80);
-	}*/
+	}*/	
 	COUNT_FLASH = 50;
 	COUNT_BLINK = 3000;	
 }

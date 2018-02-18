@@ -14,14 +14,7 @@ ScaleClass::~ScaleClass(){}
 void ScaleClass::setup(BrowserServerClass *server){
 	init();
 	_server = server;
-	_server->on("/wt",HTTP_GET, [&](){									/* Получить вес и заряд. */
-		char buffer[10];
-		float w = getWeight();
-		formatValue(w, buffer	);
-		CORE.detectStable(w);
-		taskPower.updateCache();
-		_server->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+"}"));
-	});
+	_server->on("/wt",HTTP_GET, handleWeight);						/* Получить вес и заряд. */
 	_server->on(PAGE_FILE, [this]() {								/* Открыть страницу калибровки.*/
 		if(!_server->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
 			return _server->requestAuthentication();
@@ -222,6 +215,30 @@ void ScaleClass::formatValue(float value, char* string){
 	dtostrf(value, 6-_scales_value.accuracy, _scales_value.accuracy, string);
 }
 
+/* */
+void ScaleClass::detectStable(float w){
+	static float weight_temp;
+	static unsigned char stable_num;
+		if (weight_temp == w) {
+			//if (stable_num <= STABLE_NUM_MAX){
+			if (stable_num > STABLE_NUM_MAX) {
+				if (!stableWeight){
+					if(abs(w) > _stable_step){
+						CORE.saveEvent("weight", String(w)+"_kg");	
+					}
+					stableWeight = true;
+				}
+				return;
+			}
+			stable_num++;
+			//}
+			} else {
+			stable_num = 0;
+			stableWeight = false;
+		}
+		weight_temp = w;
+}
+
 void handleSeal(){
 	randomSeed(Scale.readAverage());
 	Scale.setSeal(random(1000));
@@ -229,6 +246,16 @@ void handleSeal(){
 	if (Scale.saveDate()){
 		Scale.getServer()->send(200, TEXT_HTML, String(Scale.getSeal()));
 	}
+}
+
+void handleWeight(){
+	char buffer[10];
+	float w = Scale.getWeight();
+	Scale.formatValue(w, buffer	);
+	Scale.detectStable(w);
+	
+	taskPower.updateCache();
+	Scale.getServer()->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
 }
 
 

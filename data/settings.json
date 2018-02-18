@@ -13,7 +13,6 @@
     "id_host":"sdb.net.ua",
     "id_pin":"",
     "timeout":3000,
-    "bat_max": 1016,
-    "bat_min": 768
+    "bat_max": 1016
   }
 }

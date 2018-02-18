@@ -10,22 +10,14 @@
     </style>
     <script>
         function submitFrm(frm) {
-            if (document.getElementById("auth").checked) {
-                if ((document.getElementById("user").value !== "") && (document.getElementById("pass").value !== "")) {
-                    console.log("User: " + document.getElementById("user").value);
-                    console.log("Pass: " + document.getElementById("pass").value);
-                    console.log("Enable: " + document.getElementById("auth").checked);
-                    frm.submit();
-                } else {
-                    document.getElementById("submitResult").innerHTML = "Имя или пароль неверный";
-                }
-            } else {
-                document.getElementById("pass").value = "";
+            if ((document.getElementById("user").value !== "") && (document.getElementById("pass").value !== "")) {
                 console.log("User: " + document.getElementById("user").value);
                 console.log("Pass: " + document.getElementById("pass").value);
-                console.log("Enable: " + document.getElementById("auth").checked);
                 frm.submit();
+            } else {
+                document.getElementById("submitResult").innerHTML = "Имя или пароль неверный";
             }
+
         }
         function restartESP() {
             setValues("/admin/restart");
@@ -38,10 +30,7 @@
                     var json = JSON.parse(http_request.responseText);
                     for (var entry in json) {
                         if(document.getElementById(entry)!== null){
-                            if(document.getElementById(entry).type === 'checkbox')
-                                document.getElementById(entry).checked=json[entry];
-                            else
-                                document.getElementById(entry).value=json[entry];
+                            document.getElementById(entry).value=json[entry];
                         }
                     }
                     document.body.style.visibility = 'visible';
@@ -95,10 +84,6 @@
 </form>
 <form id="wwwAuthForm" action="">
     <table border="0" cellspacing="0" cellpadding="3">
-        <tr>
-            <td>Use auth:</td>
-            <td><input type="checkbox" id="auth" name="wwwauth" onclick='enableAuthFields(this);'></td>
-        </tr>
         <tr>
             <td>ИМЯ:</td>
             <td><input id="user" name="wwwuser" value=""></td>

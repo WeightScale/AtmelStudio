@@ -18,7 +18,7 @@
 #define SETTINGS_FILE "/settings.json"
 #define HOST_URL "sdb.net.ua"
 #define TIMEOUT_HTTP 3000
-#define STABLE_NUM_MAX 20
+#define STABLE_NUM_MAX 10
 #define MAX_EVENTS 100
 //#define MAX_CHG 1013//980	//делитель U2=U*(R2/(R1+R2)) 0.25
 #define MIN_CHG 768			//ADC = (Vin * 1024)/Vref  Vref = 1V
@@ -81,8 +81,7 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 		bool eventToServer(const String&, const String&, const String&);
 		void saveValueSettingsHttp(const char * text);		
 		String getHash(const String&, const String&, const String&, const String&);
-		int getBattery(int);
-		void detectStable(float);
+		int getBattery(int);		
 		void setCharge(unsigned int ch){_charge = ch;};
 		unsigned int getCharge(){return _charge;};
 		bool isAuto(){return _settings.autoIp;};

@@ -11,12 +11,12 @@
     <style>
         table {width: 100%;}
         input{
-            width:auto;text-align: right;
+            width:100%; text-align: right;
             font-size:18px;
             height:auto;
         }
         select{
-            width:auto;
+            width:100%; text-align-last:right;
             font-size:18px;
             height:auto;
             border:1px solid #ccc;
@@ -153,7 +153,7 @@
             <tr>
                 <td>Точность измерения</td>
                 <td>
-                    <select id="ac_id" name='weightAccuracy' title="Выбор точности с которым будет измерения" style="width: 100%">
+                    <select id="ac_id" name='weightAccuracy' title="Выбор точности с которым будет измерения">
                         <option name="0" value="0"> 0 </option>
                         <option name="0.0" value="1"> 0.0 </option>
                         <option name="0.00" value="2"> 0.00 </option>
@@ -164,7 +164,7 @@
             <tr>
                 <td>Шаг измерения</td>
                 <td>
-                    <select id="st_id" name='weightStep' title="Выбор шага измерения" style="width: 100%">
+                    <select id="st_id" name='weightStep' title="Выбор шага измерения">
                         <option name="шаг 1" value="1"> 1 </option>
                         <option name="шаг 5" value="5"> 5 </option>
                         <option name="шаг 10" value="10"> 10 </option>
@@ -176,7 +176,7 @@
             <tr>
                 <td>Кол-во измерений</td>
                 <td>
-                    <select id="av_id" name='weightAverage' title="Выбор количества измерений АЦП" style="width: 100%">
+                    <select id="av_id" name='weightAverage' title="Выбор количества измерений АЦП">
                         <option name="одно" value="1">ОДИН</option>
                         <option name="два" value="2">ДВА</option>
                         <option name="пять" value="5">ПЯТЬ</option>
@@ -184,9 +184,9 @@
                 </td>
             </tr>
             <tr>
-                <td>Филтер</td>
+                <td>Фильтр</td>
                 <td>
-                    <select id="fl_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение" style="width: 100%">
+                    <select id="fl_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение">
                         <option name="5%" value="5">5 %</option>
                         <option name="10%" value="10">10 %</option>
                         <option name="20%" value="20">20 %</option>
@@ -207,7 +207,7 @@
             </tr>
             <tr>
                 <td><a href="javascript:saveValue();">сохранить и выйти</a></td>
-                <td><input type='submit' value='ДАЛЬШЕ >>' style="width: 100%"/></td>
+                <td><input type='submit' value='ДАЛЬШЕ >>'/></td>
 
             </tr>
         </table>

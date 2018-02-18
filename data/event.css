@@ -12,6 +12,6 @@
     background: #a0a0a0;
 }
 .details {
-    padding: 3px; /* Поля вокруг содержимого таблицы */
-    border: 1px solid white; /* Параметры рамки */
+    padding: 3px;
+    border: 1px solid white;
 }
