@@ -5,10 +5,10 @@ RtcDS1307<TwoWire> Rtc(Wire);
 DateTimeClass::DateTimeClass(const String& date){
 	_dayOfMonth = date.substring(0, 2).toInt();
 	_month = date.substring(3, 5).toInt();
-	_year = date.substring(6, date.indexOf(',')).toInt();
-	_hour = date.substring(12, 14).toInt();
-	_minute = date.substring(15, 17).toInt();
-	_second = date.substring(18).toInt();
+	_year = date.substring(6, date.indexOf("-")).toInt();
+	_hour = date.substring(11, 13).toInt();
+	_minute = date.substring(14, 16).toInt();
+	_second = date.substring(17).toInt();
 	
 }
 

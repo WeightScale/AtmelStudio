@@ -17,7 +17,9 @@ void ScaleClass::setup(BrowserServerClass *server){
 	_server->on("/wt",HTTP_GET, handleWeight);						/* Получить вес и заряд. */
 	_server->on(PAGE_FILE, [this]() {								/* Открыть страницу калибровки.*/
 		if(!_server->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
-			return _server->requestAuthentication();
+			if (!_server->checkAdminAuth()){
+				return _server->requestAuthentication();
+			}
 		_authenticated = true;
 		saveValueCalibratedHttp();
 	});

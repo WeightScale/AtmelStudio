@@ -50,7 +50,9 @@
         function sendDateTime(){
             var formData = new FormData();
             var date = new Date();
-            formData.append('data', date.toLocaleString());
+            var d = date.toLocaleDateString();
+            d+="-"+date.toLocaleTimeString();
+            formData.append('data', d.replace(/[^\x20-\x7E]+/g, ''));
             var request = new XMLHttpRequest();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
@@ -59,7 +61,7 @@
                     }
                 }
             };
-            request.open('POST','settings.html',true);
+            request.open("POST","settings.html?"+new Date().getTime(),true);
             request.send(formData);
         }
         function saveServerValue(){

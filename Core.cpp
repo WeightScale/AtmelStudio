@@ -136,8 +136,7 @@ void CoreClass::saveValueSettingsHttp(const char * text) {
 		if(browserServer.hasArg("data")){
 			DateTimeClass DateTime(browserServer.arg("data"));
 			Rtc.SetDateTime(DateTime.toRtcDateTime());
-			String message = getDateTime();
-			browserServer.send(200, TEXT_HTML, message);
+			browserServer.send(200, TEXT_HTML, getDateTime());
 			return;	
 		}
 		if (browserServer.hasArg("host")){

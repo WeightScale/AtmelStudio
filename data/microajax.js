@@ -26,12 +26,12 @@ function microAjax(B,A){
         var C = this.request;
         C.onreadystatechange = this.bindFunction(this.stateChange, this);
         if (this.postBody !== "") {
-            C.open("POST", B, true);
+            C.open("POST", B+"?"+new Date().getTime(), true);
             C.setRequestHeader("X-Requested-With", "XMLHttpRequest");
             C.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             C.setRequestHeader("Connection", "close");
         } else {
-            C.open("GET", B, true);
+            C.open("GET", B+"?"+new Date().getTime(), true);
         }
         C.send(this.postBody);
     }
