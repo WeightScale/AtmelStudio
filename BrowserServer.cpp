@@ -189,6 +189,7 @@ void BrowserServerClass::restart_esp() {
 }*/
 
 // convert a single hex digit character to its integer value (from https://code.google.com/p/avr-netino/)
+/*
 unsigned char BrowserServerClass::h2int(char c) {
 	if (c >= '0' && c <= '9') {
 		return((unsigned char)c - '0');
@@ -200,8 +201,9 @@ unsigned char BrowserServerClass::h2int(char c) {
 		return((unsigned char)c - 'A' + 10);
 	}
 	return(0);
-}
+}*/
 
+/*
 String BrowserServerClass::urldecode(String input){ // (based on https://code.google.com/p/avr-netino/)
 	char c;
 	String ret = "";
@@ -219,7 +221,7 @@ String BrowserServerClass::urldecode(String input){ // (based on https://code.go
 		ret.concat(c);
 	}
 	return ret;
-}
+}*/
 
 /*
 void setUpdateMD5() {

@@ -1,7 +1,7 @@
-#include "ESP8266NetBIOS.h"
 #include <ESP8266WiFi.h>
-#include <ESP8266mDNS.h>
-#include "BrowserServer.h" 
+//#include <ESP8266mDNS.h>
+#include "BrowserServer.h"
+#include "ESP8266NetBIOS.h" 
 #include "Core.h"
 #include "Task.h"
 #include "HttpUpdater.h"
@@ -28,7 +28,7 @@ void connectWifi();
 TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
-Task taskPower(powerOff, 1200000);						/* 10 минут бездействия и выключаем */
+Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
 Task taskConnectWiFi(connectWifi, 60000);				/* Пытаемся соедениться с точкой доступа каждые 60 секунд */
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
@@ -43,9 +43,9 @@ void setup() {
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);	
 
-	while (digitalRead(PWR_SW) == HIGH){
+	/*while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
-	};
+	};*/
 	
 	CORE.begin();
 	delay(1000);	
@@ -68,9 +68,9 @@ void setup() {
 	
 	//ESP.eraseConfig();
 	connectWifi();
-	browserServer.begin();
-	httpUpdater.setup(&browserServer,"sa","343434");
-	Scale.setup(&browserServer,browserServer.getName().c_str(), browserServer.getPass().c_str()); 
+	browserServer.begin();	
+	httpUpdater.setup(&browserServer,"sa","654321");
+	Scale.setup(&browserServer); 
 	//Scale.init();  
 	
 	CORE.saveEvent("power", "ON");	
@@ -122,11 +122,13 @@ void connectWifi() {
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
 					}
 				}				
-				WiFi.waitForConnectResult();				
+				WiFi.waitForConnectResult();
+				NBNS.begin(MY_HOST_NAME);								
+				CORE.saveEvent("ip", CORE.getIp());				
 				return;
 			}
 		}
-	}	
+	}
 }
 
 void loop() {
@@ -143,13 +145,12 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
 	// Setup MDNS responder
-	if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
+	/*if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
 		// Add service to MDNS-SD
 		MDNS.addService("http", "tcp", 80);
-	}
+	}*/	
 	COUNT_FLASH = 50;
-	COUNT_BLINK = 3000;
-	CORE.saveEvent("ip", CORE.getIp());
+	COUNT_BLINK = 3000;	
 }
 
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {	

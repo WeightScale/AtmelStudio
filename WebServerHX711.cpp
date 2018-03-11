@@ -61,6 +61,7 @@ void setup() {
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
   
 	WiFi.persistent(false);
+	WiFi.mode(WIFI_AP_STA);
 	WiFi.hostname(MY_HOST_NAME);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
@@ -112,7 +113,7 @@ void powerSwitchInterrupt(){
 void connectWifi() {	
 	WiFi.disconnect(false);
 	/*!  */
-	int n = WiFi.scanNetworks();	
+	int n = WiFi.scanNetworks(true);	
 	if (n > 0){
 		for (int i = 0; i < n; ++i)	{			
 			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
@@ -124,7 +125,7 @@ void connectWifi() {
 				}				
 				WiFi.waitForConnectResult();
 				NBNS.begin(MY_HOST_NAME);								
-				CORE.saveEvent("ip", CORE.getIp());				
+				CORE.saveEvent("ip", CORE.getIp());
 				return;
 			}
 		}
