@@ -42,31 +42,39 @@ typedef struct {
 class BrowserServerClass;
 
 class ScaleClass : public HX711 , public ExponentialFilter<long>{
+	private:
+		float _weight;
+		char _buffer[10];
 	protected:
 		BrowserServerClass *_server;
-		//char * _username;
-		//char * _password;
+		//char _buffer[10];
 		bool _authenticated;
 		bool stableWeight;
 		t_scales_value _scales_value;
 		float _round;						/* множитиль для округления */
 		float _stable_step;					/* шаг для стабилизации */
 		float _referenceWeight;				/*  */
-		long _calibrateWeightValue;			/*  */		
+		long _calibrateWeightValue;			/*  */
+				
 			
 		bool _downloadValue();
 
 	public:
+		
 		ScaleClass(byte, byte);
 		~ScaleClass();
 		void setup(BrowserServerClass *server/*, const char * username, const char * password*/);	
 		bool saveDate();
-		void saveValueCalibratedHttp();
+		void saveValueCalibratedHttp(AsyncWebServerRequest *);
+		void handleWeight(AsyncWebServerRequest*);
+		void fetchWeight();
 		void mathScale();
 		void mathRound();
 		//void setScale(d_type scale = 1.f){_scales_value.scale = scale;};
 		//d_type getScale(){return _scales_value.scale;};
-			
+		char * getBuffer(){return _buffer;};
+		float getTest(){return _weight;};
+		void setTest(float f){_weight = f;};	
 		void setOffset(long offset = 0){_scales_value.offset = offset;};
 		long getOffset(){return _scales_value.offset;};
 		void init();	
@@ -90,17 +98,12 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		bool getStableWeight(){return stableWeight;};
 		void setStableWeight(bool s){stableWeight = s;};
 		
-		//void setMax(unsigned int m){_scales_value.max = m;};
-		//void setStep(unsigned char s){_scales_value.step = s;};
-		//void setAccuracy(int a){_scales_value.accuracy = a;};
-		//void setCalibrateZeroValue(long z){_calibrateZeroValue = z;};
-		//void setCalibrateWeightValue(long w){_calibrateWeightValue = w;};	
-		//void setReferenceWeight(d_type r){_referenceWeight = r;};			
+		float forTest(uint32_t h);		
 };
 
 extern ScaleClass Scale;
-void handleSeal();
-void handleWeight();
+void handleSeal(AsyncWebServerRequest*);
+void handleSlave(AsyncWebServerRequest*);
 
 #endif
 

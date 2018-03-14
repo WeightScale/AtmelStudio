@@ -4,6 +4,7 @@
 #include "Core.h"
 #include "DateTime.h"
 #include "BrowserServer.h"
+#include "HttpUpdater.h"
 
 CoreClass CORE;
 
@@ -111,48 +112,72 @@ bool CoreClass::eventToServer(const String& date, const String& type, const Stri
 	return false;
 }
 
-void CoreClass::saveValueSettingsHttp(const char * text) {	
+void CoreClass::handleSetAccessPoint(AsyncWebServerRequest * request){	
+	if (request->hasArg("ssids")){
+		_settings.autoIp = true;
+		_settings.scaleWlanSSID = request->arg("ssids");
+		_settings.scaleWlanKey = request->arg("key");
+	}
+	AsyncWebServerResponse *response;	
+	if (saveSettings()){
+		response = request->beginResponse(200, TEXT_HTML, successResponse);
+		response->addHeader("Connection", "close");
+		request->onDisconnect([](){ESP.reset();});
+	}else{
+		response = request->beginResponse(400);
+	}
+	request->send(response);	
+}
+
+void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {	
+	if (!browserServer.isAuthentified(request))
+		return request->requestAuthentication();
+	if (request->args() > 0){	// Save Settings
 		String message = " ";
-		if (browserServer.hasArg("ssids")){
+		if (request->hasArg("ssids")){
 			_settings.autoIp = true;
-			_settings.scaleWlanSSID = browserServer.arg("ssids");
-			_settings.scaleWlanKey = browserServer.arg("key");	
+			_settings.scaleWlanSSID = request->arg("ssids");
+			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
-		}else if (browserServer.hasArg("ssid")){
+		}else if (request->hasArg("ssid")){
 			_settings.autoIp = false;
-			if (browserServer.hasArg("auto"))
+			if (request->hasArg("auto"))
 				_settings.autoIp = true;
 			else
 				_settings.autoIp = false;
-			_settings.scaleLanIp = browserServer.arg("lan_ip");			
-			_settings.scaleGateway = browserServer.arg("gateway");
-			_settings.scaleSubnet = browserServer.arg("subnet");		
-			_settings.scaleWlanSSID = browserServer.arg("ssid");
-			_settings.scaleWlanKey = browserServer.arg("key");	
+			_settings.scaleLanIp = request->arg("lan_ip");			
+			_settings.scaleGateway = request->arg("gateway");
+			_settings.scaleSubnet = request->arg("subnet");		
+			_settings.scaleWlanSSID = request->arg("ssid");
+			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
 		}
 		
-		if(browserServer.hasArg("data")){
-			DateTimeClass DateTime(browserServer.arg("data"));
+		if(request->hasArg("data")){
+			DateTimeClass DateTime(request->arg("data"));
 			Rtc.SetDateTime(DateTime.toRtcDateTime());
-			browserServer.send(200, TEXT_HTML, getDateTime());
+			request->send(200, TEXT_HTML, getDateTime());
 			return;	
 		}
-		if (browserServer.hasArg("host")){
-			_settings.hostUrl = browserServer.arg("host");
-			_settings.hostPin = browserServer.arg("pin");
+		if (request->hasArg("host")){
+			_settings.hostUrl = request->arg("host");
+			_settings.hostPin = request->arg("pin");
 			goto save;	
 		}
-		if (browserServer.hasArg("name_admin")){
-			_settings.scaleName = browserServer.arg("name_admin");
-			_settings.scalePass = browserServer.arg("pass_admin");
+		if (request->hasArg("name_admin")){
+			_settings.scaleName = request->arg("name_admin");
+			_settings.scalePass = request->arg("pass_admin");
 			goto save;
 		}		
 		save:
 		if (saveSettings()){
-			return browserServer.send(200, TEXT_HTML, text);
+			return request->send(200, TEXT_HTML, "OK");
 		}
-		browserServer.send(400, TEXT_HTML, text);
+		return request->send(400);	
+	} 
+	
+	request->send(SPIFFS, request->url());
+		
 }
 
 String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){
@@ -282,8 +307,12 @@ void powerOff(){
 	ESP.reset();
 }
 
-void reconnectWifi(){
-	browserServer.client().stop();
+void reconnectWifi(AsyncWebServerRequest * request){
+	//AsyncWebServerResponse *response = request->beginResponse_P(200, PSTR(TEXT_HTML), "RECONNECT...");
+	//response->addHeader("Connection", "close");
+	//request->send(response);
+	request->client()->close(true);
+	//request->onDisconnect([](){connectWifi();});
 	connectWifi();	
 }
 

@@ -22,7 +22,7 @@ RtcDateTime DateTimeClass::toRtcDateTime(){
 String getDateTime(){
 	char datestring[20];
 	RtcDateTime now = Rtc.GetDateTime();
-	snprintf_P(datestring, countof(datestring), PSTR("%04u.%02u.%02u-%02u:%02u:%02u"),
+	snprintf_P(datestring, countof(datestring),PSTR("%04u.%02u.%02u-%02u:%02u:%02u"),
 	now.Year(),
 	now.Month(),
 	now.Day(),

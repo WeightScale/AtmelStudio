@@ -22,6 +22,7 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);
 void takeBlink();
 void takeBattery();
+void takeWeight();
 void powerSwitchInterrupt();
 void connectWifi();
 //
@@ -30,11 +31,13 @@ Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
 Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
 Task taskConnectWiFi(connectWifi, 60000);				/* Пытаемся соедениться с точкой доступа каждые 60 секунд */
+Task taskWeight(takeWeight,5000);
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
 
 unsigned int COUNT_FLASH = 500;
 unsigned int COUNT_BLINK = 500;
+#define USE_SERIAL Serial
 
 void connectWifi();
 
@@ -53,6 +56,7 @@ void setup() {
   
 	taskController.add(&taskBlink);
 	taskController.add(&taskBattery);
+	taskController.add(&taskWeight);
 	taskController.add(&taskConnectWiFi);
 	taskConnectWiFi.pause();
 	taskController.add(&taskPower);	
@@ -60,7 +64,9 @@ void setup() {
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
   
+	//ESP.eraseConfig();
 	WiFi.persistent(false);
+	WiFi.mode(WIFI_AP_STA);
 	WiFi.hostname(MY_HOST_NAME);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
@@ -68,13 +74,9 @@ void setup() {
 	
 	//ESP.eraseConfig();
 	connectWifi();
-	browserServer.begin();	
-	httpUpdater.setup(&browserServer,"sa","654321");
+	browserServer.begin();
 	Scale.setup(&browserServer); 
-	//Scale.init();  
-	
-	CORE.saveEvent("power", "ON");	
-	Scale.tare();
+	CORE.saveEvent("power", "ON");
 }
 
 /*********************************/
@@ -83,12 +85,17 @@ void setup() {
 void takeBlink() {
 	bool led = !digitalRead(LED);
 	digitalWrite(LED, led);	
-	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH/Scale.getAverage());	
+	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH/Scale.getAverage());
+	//Scale.fetchWeight();	
 }
 
 /**/
 void takeBattery(){
 	CORE.getBattery(1);		
+}
+
+void takeWeight(){
+	Scale.fetchWeight();
 }
 
 void powerSwitchInterrupt(){
@@ -109,23 +116,24 @@ void powerSwitchInterrupt(){
 	}
 }
 
-void connectWifi() {	
-	WiFi.disconnect(false);
-	/*!  */
-	int n = WiFi.scanNetworks();	
-	if (n > 0){
-		for (int i = 0; i < n; ++i)	{			
-			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
-				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());
-				if (!CORE.isAuto()){
-					if (lanIp.fromString(CORE.getLanIp()) && gateway.fromString(CORE.getGateway())){
-						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
+void connectWifi() {
+	if (WiFi.disconnect(false)){
+		/*!  */
+		int n = WiFi.scanNetworks(false);
+		if (n > 0){
+			for (int i = 0; i < n; ++i)	{			
+				if(WiFi.SSID(i) == CORE.getSSID().c_str()){
+					if (!CORE.isAuto()){
+						if (lanIp.fromString(CORE.getLanIp()) && gateway.fromString(CORE.getGateway())){
+							WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
+						}
 					}
-				}				
-				WiFi.waitForConnectResult();
-				NBNS.begin(MY_HOST_NAME);								
-				CORE.saveEvent("ip", CORE.getIp());				
-				return;
+					WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());			
+					WiFi.waitForConnectResult();
+					NBNS.begin(MY_HOST_NAME);
+					CORE.saveEvent("ip", CORE.getIp());	
+					return;
+				}
 			}
 		}
 	}
@@ -134,21 +142,15 @@ void connectWifi() {
 void loop() {
 	taskController.run();	
 	//DNS
-	dnsServer.processNextRequest();
+	//dnsServer.processNextRequest();
 	//HTTP
-	browserServer.handleClient();	
-	
-	powerSwitchInterrupt();	
+	//Scale.fetchWeight();
+	powerSwitchInterrupt();
 }
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
-	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
-	// Setup MDNS responder
-	/*if (MDNS.begin(MY_HOST_NAME, WiFi.localIP())) {
-		// Add service to MDNS-SD
-		MDNS.addService("http", "tcp", 80);
-	}*/	
+	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера	
 	COUNT_FLASH = 50;
 	COUNT_BLINK = 3000;	
 }

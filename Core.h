@@ -79,7 +79,8 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 		bool saveEvent(const String&, const String&);
 		String getIp();
 		bool eventToServer(const String&, const String&, const String&);
-		void saveValueSettingsHttp(const char * text);		
+		void saveValueSettingsHttp(AsyncWebServerRequest*);	
+		void handleSetAccessPoint(AsyncWebServerRequest*);	
 		String getHash(const String&, const String&, const String&, const String&);
 		int getBattery(int);		
 		void setCharge(unsigned int ch){_charge = ch;};
@@ -91,7 +92,7 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 };
 
 void powerOff();
-void reconnectWifi();
+void reconnectWifi(AsyncWebServerRequest*);
 extern CoreClass CORE;
 
 #endif //_CORE_h

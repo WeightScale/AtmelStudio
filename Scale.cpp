@@ -14,21 +14,25 @@ ScaleClass::~ScaleClass(){}
 void ScaleClass::setup(BrowserServerClass *server){
 	init();
 	_server = server;
-	_server->on("/wt",HTTP_GET, handleWeight);						/* Получить вес и заряд. */
-	_server->on(PAGE_FILE, [this]() {								/* Открыть страницу калибровки.*/
-		if(!_server->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
-			if (!_server->checkAdminAuth()){
-				return _server->requestAuthentication();
+	//_server->on("/wt",HTTP_GET, std::bind(&ScaleClass::handleWeight, Scale, std::placeholders::_1));						/* Получить вес и заряд. */
+	/*_server->on("/cb",HTTP_GET,[this](AsyncWebServerRequest * request){
+		Serial.println("saveValueCalibratedHttp GET");
+		saveValueCalibratedHttp(request);	
+	});*/
+	_server->on(PAGE_FILE, HTTP_POST, [this](AsyncWebServerRequest * request) {								/* Открыть страницу калибровки.*/
+		if(!request->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
+			if (!_server->checkAdminAuth(request)){
+				return request->requestAuthentication();
 			}
 		_authenticated = true;
-		saveValueCalibratedHttp();
+		saveValueCalibratedHttp(request);
 	});
-	_server->on("/av", [this](){									/* Получить значение АЦП усредненное. */
-		_server->send(200, TEXT_HTML, String(readAverage()));
+	_server->on("/av", [this](AsyncWebServerRequest * request){									/* Получить значение АЦП усредненное. */
+		request->send(200, TEXT_HTML, String(readAverage()));
 	});
-	_server->on("/tp", [this](){									/* Установить тару. */
+	_server->on("/tp", [this](AsyncWebServerRequest * request){									/* Установить тару. */
 		tare();
-		_server->send(204, TEXT_HTML, "");
+		request->send(204, TEXT_HTML, "");
 	});
 	_server->on("/sl", handleSeal);									/* Опломбировать */	
 }
@@ -38,6 +42,7 @@ void ScaleClass::init(){
 	_downloadValue();
 	mathRound();
 	SetCurrent(readAverage());
+	tare();
 }
 
 void ScaleClass::mathRound(){
@@ -45,14 +50,14 @@ void ScaleClass::mathRound(){
 	_stable_step = 1/_round;
 }
 
-void ScaleClass::saveValueCalibratedHttp() {
-	if (_server->args() > 0) {	
-		if (_server->hasArg("update")){
-			_scales_value.accuracy = _server->arg("weightAccuracy").toInt();
-			_scales_value.step = _server->arg("weightStep").toInt();
-			setAverage(_server->arg("weightAverage").toInt());
-			SetFilterWeight(_server->arg("weightFilter").toInt());
-			_scales_value.max = _server->arg("weightMax").toInt();
+void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
+	if (request->args() > 0) {
+		if (request->hasArg("update")){
+			_scales_value.accuracy = request->arg("weightAccuracy").toInt();
+			_scales_value.step = request->arg("weightStep").toInt();
+			setAverage(request->arg("weightAverage").toInt());
+			SetFilterWeight(request->arg("weightFilter").toInt());
+			_scales_value.max = request->arg("weightMax").toInt();
 			mathRound();
 			if (saveDate()){
 				goto ok;
@@ -60,19 +65,19 @@ void ScaleClass::saveValueCalibratedHttp() {
 			goto err;
 		}
 		
-		if (_server->hasArg("zero")){
+		if (request->hasArg("zero")){
 			_scales_value.offset = readAverage();
 		}
 		
-		if (_server->hasArg("weightCal")){
-			_referenceWeight = _server->arg("weightCal").toFloat();			
+		if (request->hasArg("weightCal")){
+			_referenceWeight = request->arg("weightCal").toFloat();			
 			_calibrateWeightValue = readAverage();
 			mathScale();
 		}
 		
-		if (_server->hasArg("user")){
-			_scales_value.user = _server->arg("user");
-			_scales_value.password = _server->arg("pass");
+		if (request->hasArg("user")){
+			_scales_value.user = request->arg("user");
+			_scales_value.password = request->arg("pass");
 			if (saveDate()){
 				goto url;
 			}
@@ -80,14 +85,38 @@ void ScaleClass::saveValueCalibratedHttp() {
 		}
 		
 		ok:
-			return _server->send(200, TEXT_HTML, "");
+			return request->send(200, TEXT_HTML, "");
 		err:
-			return _server->send(400, TEXT_HTML, "Ошибка ");	
+			return request->send(400, TEXT_HTML, "Ошибка ");	
 	}
 	url:		
-	handleFileRead(_server->uri());
+	request->send(SPIFFS, request->url());
 	
 	//}
+}
+
+void ScaleClass::fetchWeight(){
+	//char buffer[10];
+	//float w = Scale.forTest(ESP.getFreeHeap());
+	float w = getWeight();
+	formatValue(w,_buffer);
+	detectStable(w);
+	//_weight = w;
+	//ws.textAll(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
+	//_weight = String(buffer).toFloat();
+	//taskPower.updateCache();
+	/*char buffer[10];
+	float w = getWeight();
+	formatValue(w,buffer);
+	detectStable(w);
+	
+	_weight = String(buffer);*/
+	//_weight = String(ESP.getFreeHeap());
+	//_weight = s.toFloat();
+	//setTest(random(100,millis()));
+	//setTest(s);
+	//_weight = float(11.23);
+	//taskPower.updateCache();	
 }
 
 bool ScaleClass::_downloadValue(){
@@ -194,6 +223,14 @@ float ScaleClass::getWeight(){
 	return round(getUnits() * _round) / _round; 
 }
 
+float ScaleClass::forTest(uint32_t h){
+	Filter(h);
+	float v = Current();
+	v*= _scales_value.scale;
+	v = round(v * _round) / _round;
+	return v;
+}
+
 void ScaleClass::tare() {
 	long sum = readAverage();
 	setOffset(sum);
@@ -241,24 +278,26 @@ void ScaleClass::detectStable(float w){
 		weight_temp = w;
 }
 
-void handleSeal(){
-	randomSeed(Scale.readAverage());
-	Scale.setSeal(random(1000));
-	
-	if (Scale.saveDate()){
-		Scale.getServer()->send(200, TEXT_HTML, String(Scale.getSeal()));
-	}
-}
-
-void handleWeight(){
-	char buffer[10];
+void ScaleClass::handleWeight(AsyncWebServerRequest * request){
+	/*char buffer[10];
 	float w = Scale.getWeight();
 	Scale.formatValue(w, buffer	);
 	Scale.detectStable(w);
 	
-	taskPower.updateCache();
-	Scale.getServer()->send(200, "text/plain", String("{\"w\":\""+String(buffer)+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
+	taskPower.updateCache();*/
+	request->send(200, "text/plain", String("{\"w\":\""+String(Scale.getTest())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
 }
+
+void handleSeal(AsyncWebServerRequest * request){
+	randomSeed(Scale.readAverage());
+	Scale.setSeal(random(1000));
+	
+	if (Scale.saveDate()){
+		request->send(200, TEXT_HTML, String(Scale.getSeal()));
+	}
+}
+
+
 
 
 

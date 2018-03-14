@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="global.css">
     <link rel="shortcut icon" href="favicon.png" type="image/png">
     <style>
-        #weight_style{
+        #w_style{
             background: #fff;
             font-size: 80px;
             font-family: Arial,sans-serif;
@@ -21,58 +21,70 @@
         input{font-size:20px; text-align:center;}
     </style>
     <script>
+        var timerWeight;
+        var timerSocket;
+
+        function startWeightTimeout() {
+            clearTimeout(timerWeight);
+            timerWeight = setTimeout(function () {
+                go();
+            },5000);
+        }
+        function starSocketTimeout() {
+            clearTimeout(timerSocket);
+            timerSocket = setTimeout(function () {
+                startSocket();
+            },5000);
+        }
+        function startSocket(){
+            try{
+                ws = new WebSocket('ws://'+document.location.host+'/ws',['arduino']);
+                ws.binaryType = "arraybuffer";
+                ws.onopen = function(e){
+                    console.log("Connected");
+                    //getWeight();
+                };
+                ws.onclose = function(e){
+                    console.log("Disconnected");
+                    clearTimeout(timerWeight);
+                    starSocketTimeout();
+                };
+                ws.onerror = function(e){
+                    console.log("ws error", e);
+                    go();
+                };
+                ws.onmessage = function(e){
+                    try{
+                        var json = JSON.parse(e.data);
+                        document.getElementById('weight').innerHTML = json.w;
+                        document.getElementById('charge_id').innerHTML = json.c+'%';
+                        if(json.s){
+                            document.getElementById('w_style').setAttribute('style', 'background: #fff;');
+                        }else{
+                            document.getElementById('w_style').setAttribute('style', 'background: #C4C4C4;');
+                        }
+                    }catch(e){
+                        go();
+                    }
+                };
+            }catch (e){
+                starSocketTimeout();
+            }
+        }
+        function getWeight() {
+            ws.send("/wt");
+            startWeightTimeout();
+        }
         function go() {
             document.getElementById('weight').innerHTML = '---';
             document.getElementById('charge_id').innerHTML = '--%';
             document.getElementById('buttonZero').style.visibility = 'visible';
-            getWeight();
-        }
-        var requestWeight = null;
-        function getWeight(){
-            try{
-                requestWeight = new XMLHttpRequest();
-            }catch (e){
-                try{
-                    requestWeight = new ActiveXObject("Msxml2.XMLHTTP");
-                }catch (e) {
-                    try{
-                        requestWeight = new ActiveXObject("Microsoft.XMLHTTP");
-                    }catch (e){
-                        alert("Your browser broke!");
-                        return false;
-                    }
-                }
-            }
-            requestWeight.onreadystatechange = function () {
-                if (this.readyState === 4 && this.status === 200){
-                    if (this.responseText !== null){
-                        var json = JSON.parse(requestWeight.responseText);
-                        document.getElementById('weight').innerHTML = json.w;
-                        document.getElementById('charge_id').innerHTML = json.c+'%';
-                        if(json.s){
-                            document.getElementById('weight_style').setAttribute("style", "background: #fff;");
-                        }else{
-                            document.getElementById('weight_style').setAttribute("style", "background: #C4C4C4;");
-                        }
-                        getWeight();
-                    }
-                }
-            };
-            if((navigator.userAgent.indexOf("MSIE") !== -1 ) || (!!document.documentMode === true )){
-                requestWeight.open('GET','/wt?buster='+new Date().getTime(),true);
-            }else{
-                requestWeight.open('GET','/wt',true);
-            }
-            requestWeight.timeout = 5000;
-            requestWeight.ontimeout = function(){go();};
-            requestWeight.onerror = function(){go();};
-            requestWeight.send(null);
+            //getWeight();
         }
         function setZero(){
             document.getElementById('buttonZero').style.visibility = 'hidden';
             var request = new XMLHttpRequest();
             document.getElementById('weight').innerHTML = "...";
-            requestWeight.abort();
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 204){
                     document.getElementById('buttonZero').style.visibility = 'visible';
@@ -84,9 +96,15 @@
             request.onerror = function(){go();};
             request.send(null);
         }
+        window.onload = function () {
+            onBodyLoad();
+        };
+        function onBodyLoad(){
+            startSocket();
+        }
     </script>
 </head>
-<body onload="getWeight()">
+<body <!--onload="onBodyLoad()"-->>
 <div align="center">
     <table>
         <tr><td ><img src="scales.png" style="height: 42px;" /></td><td align="right"><h3 id="brand_name">scale.in.ua</h3></td></tr>
@@ -94,7 +112,7 @@
     <p hidden="hidden" id='dnt'></p>
 </div>
 <hr>
-<div align='right' id='weight_style'>
+<div align='right' id='w_style'>
     <b id='weight'>---</b>
 </div>
 <hr>

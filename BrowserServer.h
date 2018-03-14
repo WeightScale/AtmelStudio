@@ -7,9 +7,11 @@
 #else
 	#include "WProgram.h"
 #endif*/
+#include <ESPAsyncTCP.h>
+#include <ESPAsyncWebServer.h>
 #include <IPAddress.h>
 #include <WiFiClient.h>
-#include <ESP8266WebServer.h>
+//#include <ESP8266WebServer.h>
 #include <DNSServer.h>
 #include <FS.h>
 #include <ArduinoJson.h>
@@ -30,9 +32,16 @@ typedef struct {
 	String wwwPassword;
 } strHTTPAuth;
 
-class ESP8266WebServer;
+const char netIndex[]= /*PROGMEM =*/ R"(	<html><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
+												<body><form method='POST'>
+												<input name='ssids'><br/>
+												<input type='password' name='key'><br/>
+												<input type='submit' value='СОХРАНИТЬ'>
+												</form></body></html>)";
 
-class BrowserServerClass : public ESP8266WebServer{
+class AsyncWebServer;
+
+class BrowserServerClass : public AsyncWebServer{
 	protected:
 		strHTTPAuth _httpAuth;		
 		uint32_t _updateSize = 0;
@@ -47,12 +56,12 @@ class BrowserServerClass : public ESP8266WebServer{
 		void init();
 		//static String urldecode(String input); // (based on https://code.google.com/p/avr-netino/)
 		//static unsigned char h2int(char c);
-		void send_wwwauth_configuration_html();
+		void send_wwwauth_configuration_html(AsyncWebServerRequest *request);
 		//void restart_esp();		
 		String getContentType(String filename);	
-		bool isValidType(String filename);		
-		bool checkAdminAuth();
-		bool isAuthentified();
+		//bool isValidType(String filename);		
+		bool checkAdminAuth(AsyncWebServerRequest * request);
+		bool isAuthentified(AsyncWebServerRequest * request);
 		String getName(){ return _httpAuth.wwwUsername;};
 		String getPass(){ return _httpAuth.wwwPassword;};
 		//friend CoreClass;
@@ -60,25 +69,21 @@ class BrowserServerClass : public ESP8266WebServer{
 };
 
 //extern ESP8266HTTPUpdateServer httpUpdater;
-extern DNSServer dnsServer;
+//extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
 extern IPAddress lanIp;			// Надо сделать настройки ip адреса
 extern IPAddress gateway;
 extern BrowserServerClass browserServer;
+extern AsyncWebSocket ws;
 
 //void send_update_firmware_values_html();
 //void setUpdateMD5();
-bool handleFileReadAdmin();
-bool handleFileReadAuth();
-bool handleFileRead(String path);
-void handleFileCreate();
-void handleFileDelete();
-void handleFileUpload();
-void handleFileList();
-void handleAccessPoint();
-void handleSetAccessPoint();
-void handleAuthConfiguration();
+//void handleFileReadAdmin(AsyncWebServerRequest*);
+void handleFileReadAuth(AsyncWebServerRequest*);
+void handleAccessPoint(AsyncWebServerRequest*);
+void handleScaleProp(AsyncWebServerRequest*);
+void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 
 #endif
 
