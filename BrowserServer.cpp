@@ -4,6 +4,7 @@
 #include <SPIFFSEditor.h>
 #include <ArduinoJson.h>
 #include <Hash.h>
+#include <AsyncJson.h>
 #include <functional>
 #include "BrowserServer.h"
 #include "tools.h"
@@ -40,8 +41,8 @@ void BrowserServerClass::begin() {
 	//dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	//dnsServer.start(DNS_PORT, "*", apIP);	
 	_downloadHTTPAuth();
-	ws.onEvent(onWsEvent);
-	addHandler(&ws);
+	//ws.onEvent(onWsEvent);
+	//addHandler(&ws);
 	addHandler(new SPIFFSEditor(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str()));	
 	addHandler(new HttpUpdaterClass("sa", "654321"));
 	init();
@@ -79,9 +80,10 @@ void BrowserServerClass::init(){
 	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
 	//ask server to track these headers
 	collectHeaders(headerkeys, headerkeyssize );*/
-	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-	//rewrite("/", "index.html");
-	//rewrite("/index.html", "index-ap.html").setFilter(ON_AP_FILTER);
+	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html").setFilter(ON_STA_FILTER);
+	serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
+	//rewrite("/", "index.html").setFilter(ON_STA_FILTER);
+	//rewrite("/", "index-ap.html").setFilter(ON_AP_FILTER);
 	onNotFound([](AsyncWebServerRequest *request){
 		request->send(404);
 	});
@@ -178,15 +180,26 @@ void handleFileReadAuth(AsyncWebServerRequest * request){
 
 void handleScaleProp(AsyncWebServerRequest * request){
 	if (!browserServer.isAuthentified(request))
-	return request->requestAuthentication();
-	String values = "";
+		return request->requestAuthentication();
+	AsyncJsonResponse * response = new AsyncJsonResponse();
+	JsonObject& root = response->getRoot();
+	root["id_date"] = getDateTime();
+	root["id_local_host"] = String(MY_HOST_NAME);
+	root["id_ap_ssid"] = String(SOFT_AP_SSID);
+	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
+	root["id_ip"] = toStringIp(WiFi.localIP());
+	root["sl_id"] = String(Scale.getSeal());
+	response->setLength();
+	request->send(response);
+	/*String values = "";
 	values += "id_date|" + getDateTime() + "|div\n";
 	values += "id_local_host|"+String(MY_HOST_NAME)+"/|div\n";
 	values += "id_ap_ssid|" + String(SOFT_AP_SSID) + "|div\n";
 	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
 	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
 	values += "sl_id|" + String(Scale.getSeal()) + "|div\n";
-	request->send(200, "text/plain", values);
+	
+	request->send(200, "text/plain", values);*/
 }
 
 void handleAccessPoint(AsyncWebServerRequest * request){

@@ -7,19 +7,7 @@
     <meta http-equiv="Pragma" content="no-cache"/>
     <title>Настройки</title>
     <link rel="stylesheet" type="text/css" href="global.css">
-    <style>
-        input:focus {
-            background: #FA6;
-            outline: none;
-        }
-        table {width: 100%;}
-        input{
-            width:100%;text-align: right;
-            font-size:18px;
-        }
-        input[type=submit]{
-            width:auto;
-        }
+    <style>input:focus{background: #FA6;outline: none;}table{width:100%;}input{width:100%;text-align:right;font-size:18px;}input[type=submit]{width:auto;}
     </style>
     <script>
         function setOnBlur( input){
@@ -90,39 +78,52 @@
             http_request.overrideMimeType('application/json');
             http_request.onreadystatechange = function(){
                 if (http_request.readyState === 4  ){
-                    try{
+                    if(http_request.responseURL.indexOf("/settings.json")!==-1){
+                        try{
+                            var json = JSON.parse(http_request.responseText);
+                            var scale = json.scale;
+                            for (entry in scale) {
+                                try {
+                                    if(document.getElementById(entry).type === 'checkbox'){
+                                        document.getElementById(entry).checked = scale[entry];
+                                        enableAuthFields(document.getElementById(entry));
+                                    }else
+                                        document.getElementById(entry).value = scale[entry];
+                                }catch (e){}
+                            }
+                            var server = json.server;
+                            for (entry in server) {
+                                try {
+                                    document.getElementById(entry).value=server[entry];
+                                }catch (e){}
+                            }
+                        }catch(e){
+                            alert(e.toString());
+                        }finally {
+                            document.body.style.visibility = 'visible';
+                            http_request.open("GET", "/sv", true);
+                            http_request.send(null);
+                        }
+                    } else if(http_request.responseURL.indexOf("/sv")!==-1){
                         var json = JSON.parse(http_request.responseText);
-                        var scale = json.scale;
-                        for (entry in scale) {
+                        for (entry in json) {
                             try {
-                                if(document.getElementById(entry).type === 'checkbox'){
-                                    document.getElementById(entry).checked = scale[entry];
-                                    enableAuthFields(document.getElementById(entry));
-                                }else
-                                    document.getElementById(entry).value = scale[entry];
+                                document.getElementById(entry).innerHTML = json[entry];
                             }catch (e){}
                         }
-                        var server = json.server;
-                        for (entry in server) {
-                            try {
-                                document.getElementById(entry).value=server[entry];
-                            }catch (e){}
-                        }
-                    }catch(e){
-                        alert(e.toString());
-                    }finally {
-                        document.body.style.visibility = 'visible';
                     }
+
                 }
             };
             http_request.open("GET", "/settings.json", true);
             http_request.send(null);
         }
         window.onload = function () {
-            load("microajax.js", "js", function () {
-                GetSettings();
-                setValues("/sv");
-            });
+            GetSettings();
+            /*load("microajax.js", "js", function () {
+
+                //setValues("/sv");
+            });*/
         };
         function load(e, t, n) {
             if ("js" === t) {

@@ -20,6 +20,7 @@
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);
+void onSoftAPModeStationDisconnected(const WiFiEventSoftAPModeStationDisconnected& evt);
 void takeBlink();
 void takeBattery();
 void takeWeight();
@@ -30,10 +31,11 @@ TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
 Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
-Task taskConnectWiFi(connectWifi, 60000);				/* Пытаемся соедениться с точкой доступа каждые 60 секунд */
-Task taskWeight(takeWeight,5000);
+Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедениться с точкой доступа каждые 60 секунд */
+Task taskWeight(takeWeight,200);
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
+WiFiEventHandler apModeDisconnectHandler;
 
 unsigned int COUNT_FLASH = 500;
 unsigned int COUNT_BLINK = 500;
@@ -45,12 +47,16 @@ void setup() {
 	pinMode(EN_NCP, OUTPUT);
 	digitalWrite(EN_NCP, HIGH);
 	pinMode(LED, OUTPUT);	
-
+	//Serial.begin(115200);
 	/*while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
 	};*/
 	
+	USE_SERIAL.begin(115200);
+	USE_SERIAL.println("Start");
+	
 	CORE.begin();
+	//SPIFFS.begin();
 	delay(1000);	
 	takeBattery();
   
@@ -58,14 +64,15 @@ void setup() {
 	taskController.add(&taskBattery);
 	taskController.add(&taskWeight);
 	taskController.add(&taskConnectWiFi);
-	taskConnectWiFi.pause();
 	taskController.add(&taskPower);	
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
+	apModeDisconnectHandler = WiFi.onSoftAPModeStationDisconnected(&onApModeDisconnect);
   
 	//ESP.eraseConfig();
 	WiFi.persistent(false);
+	//WiFi.smartConfigDone();
 	WiFi.mode(WIFI_AP_STA);
 	WiFi.hostname(MY_HOST_NAME);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
@@ -74,6 +81,10 @@ void setup() {
 	
 	//ESP.eraseConfig();
 	connectWifi();
+	//WiFi.begin ( "KONST", "3fal-rshc-nuo3");
+	//WiFi.waitForConnectResult();
+	//NBNS.begin(MY_HOST_NAME);
+	
 	browserServer.begin();
 	Scale.setup(&browserServer); 
 	CORE.saveEvent("power", "ON");
@@ -85,23 +96,22 @@ void setup() {
 void takeBlink() {
 	bool led = !digitalRead(LED);
 	digitalWrite(LED, led);	
-	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH/Scale.getAverage());
-	//Scale.fetchWeight();	
+	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH);
 }
 
 /**/
 void takeBattery(){
-	CORE.getBattery(1);		
+	CORE.getBattery(1);
 }
 
 void takeWeight(){
+	taskPower.updateCache();
 	Scale.fetchWeight();
 }
 
 void powerSwitchInterrupt(){
-	unsigned long t = millis();
-	//delay(100);
-	if(digitalRead(PWR_SW)==HIGH){ //
+	if(digitalRead(PWR_SW)==HIGH){
+		unsigned long t = millis();
 		digitalWrite(LED, HIGH);
 		while(digitalRead(PWR_SW)==HIGH){ // 
 			delay(100);	
@@ -117,26 +127,54 @@ void powerSwitchInterrupt(){
 }
 
 void connectWifi() {
-	if (WiFi.disconnect(false)){
-		/*!  */
-		int n = WiFi.scanNetworks(false);
+	USE_SERIAL.println("Connecting...");
+	WiFi.disconnect(false);
+	/*!  */
+	int n = WiFi.scanComplete();
+	if(n == -2){
+		n = WiFi.scanNetworks();
 		if (n > 0){
-			for (int i = 0; i < n; ++i)	{			
-				if(WiFi.SSID(i) == CORE.getSSID().c_str()){
-					if (!CORE.isAuto()){
-						if (lanIp.fromString(CORE.getLanIp()) && gateway.fromString(CORE.getGateway())){
-							WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса		
-						}
+			goto connect;
+		}
+	}else if (n > 0){
+		goto connect;
+	}else{
+		goto scan;
+	}
+	connect:
+		for (int i = 0; i < n; ++i)	{
+			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
+				USE_SERIAL.println(CORE.getSSID());
+				String ssid_scan;
+				int32_t rssi_scan;
+				uint8_t sec_scan;
+				uint8_t* BSSID_scan;
+				int32_t chan_scan;
+				bool hidden_scan;
+
+				WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, BSSID_scan, chan_scan, hidden_scan);
+				if (!CORE.isAuto()){
+					if (lanIp.fromString(CORE.getLanIp()) && gateway.fromString(CORE.getGateway())){
+						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 					}
-					WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());			
-					WiFi.waitForConnectResult();
-					NBNS.begin(MY_HOST_NAME);
-					CORE.saveEvent("ip", CORE.getIp());	
-					return;
 				}
+				//WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
+				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str(),chan_scan,BSSID_scan);
+				USE_SERIAL.println("waitForConnectResult");
+				int status = WiFi.waitForConnectResult();
+				USE_SERIAL.println("ConnectResult ");
+				if(status == WL_CONNECTED ){
+					NBNS.begin(MY_HOST_NAME);
+					CORE.saveEvent("ip", CORE.getIp());
+				}
+				USE_SERIAL.println(String(status));
+				return;
 			}
 		}
-	}
+	scan:
+		WiFi.scanDelete();
+		WiFi.scanNetworks(true);	
+		
 }
 
 void loop() {
@@ -145,18 +183,25 @@ void loop() {
 	//dnsServer.processNextRequest();
 	//HTTP
 	//Scale.fetchWeight();
-	powerSwitchInterrupt();
+	//powerSwitchInterrupt();
 }
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
-	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера	
+	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
 	COUNT_FLASH = 50;
-	COUNT_BLINK = 3000;	
+	COUNT_BLINK = 3000;
 }
 
-void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {	
+void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {
+	Serial.println("Disconnect");
+	WiFi.scanDelete();
+	WiFi.scanNetworks(true);
 	taskConnectWiFi.resume();
 	COUNT_FLASH = 500;
 	COUNT_BLINK = 500;
+}
+
+void onApModeDisconnect(const WiFiEventSoftAPModeStationDisconnected& evt){
+	Serial.println("ApDisconnect");
 }

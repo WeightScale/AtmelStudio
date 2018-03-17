@@ -134,12 +134,12 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 		return request->requestAuthentication();
 	if (request->args() > 0){	// Save Settings
 		String message = " ";
-		if (request->hasArg("ssids")){
-			_settings.autoIp = true;
-			_settings.scaleWlanSSID = request->arg("ssids");
+		/*if (request->hasArg("ssids")){
+			_settings.autoIp = true;			
+			_settings.scaleWlanSSID = request->arg("ssids");			
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
-		}else if (request->hasArg("ssid")){
+		}else */if (request->hasArg("ssid")){
 			_settings.autoIp = false;
 			if (request->hasArg("auto"))
 				_settings.autoIp = true;
@@ -147,8 +147,11 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 				_settings.autoIp = false;
 			_settings.scaleLanIp = request->arg("lan_ip");			
 			_settings.scaleGateway = request->arg("gateway");
-			_settings.scaleSubnet = request->arg("subnet");		
-			_settings.scaleWlanSSID = request->arg("ssid");
+			_settings.scaleSubnet = request->arg("subnet");
+			Serial.println("Save ssid");
+			CORE.setSSID(request->arg("ssid"));		
+			//_settings.scaleWlanSSID = request->arg("ssid");
+			Serial.println(CORE.getSSID());
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
 		}
@@ -308,12 +311,17 @@ void powerOff(){
 }
 
 void reconnectWifi(AsyncWebServerRequest * request){
-	//AsyncWebServerResponse *response = request->beginResponse_P(200, PSTR(TEXT_HTML), "RECONNECT...");
-	//response->addHeader("Connection", "close");
-	//request->send(response);
-	request->client()->close(true);
+	AsyncWebServerResponse *response = request->beginResponse_P(200, PSTR(TEXT_HTML), "RECONNECT...");
+	response->addHeader("Connection", "close");
+	request->onDisconnect([](){
+		//WiFi.setAutoConnect(false);
+		//WiFi.setAutoReconnect(false);
+		connectWifi();});
+	request->send(response);
+	
+	//request->client()->close(true);
 	//request->onDisconnect([](){connectWifi();});
-	connectWifi();	
+	//connectWifi();	
 }
 
 int CoreClass::getADC(byte times){

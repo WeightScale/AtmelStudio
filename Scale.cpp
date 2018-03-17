@@ -38,11 +38,11 @@ void ScaleClass::setup(BrowserServerClass *server){
 }
 
 void ScaleClass::init(){
-	reset();
+	//reset();
 	_downloadValue();
 	mathRound();
-	SetCurrent(readAverage());
-	tare();
+	//tare();
+	//SetCurrent(readAverage());
 }
 
 void ScaleClass::mathRound(){
@@ -70,9 +70,9 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 		}
 		
 		if (request->hasArg("weightCal")){
-			_referenceWeight = request->arg("weightCal").toFloat();			
-			_calibrateWeightValue = readAverage();
-			mathScale();
+			float rw = request->arg("weightCal").toFloat();			
+			long cw = readAverage();
+			mathScale(rw,cw);
 		}
 		
 		if (request->hasArg("user")){
@@ -97,12 +97,12 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 
 void ScaleClass::fetchWeight(){
 	//char buffer[10];
-	//float w = Scale.forTest(ESP.getFreeHeap());
-	float w = getWeight();
+	float w = Scale.forTest(ESP.getFreeHeap());
+	//float w = getWeight();
 	formatValue(w,_buffer);
 	detectStable(w);
 	//_weight = w;
-	//ws.textAll(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
+	//ws.textAll(String("{\"w\":\""+String(ESP.getFreeHeap())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
 	//_weight = String(buffer).toFloat();
 	//taskPower.updateCache();
 	/*char buffer[10];
@@ -240,8 +240,8 @@ void ScaleClass::setAverage(unsigned char a){
 	_scales_value.average = constrain(a, 1, 5);
 }
 
-void ScaleClass::mathScale(){
-	_scales_value.scale = _referenceWeight / float(_calibrateWeightValue - _scales_value.offset);
+void ScaleClass::mathScale(float referenceW, long calibrateW){
+	_scales_value.scale = referenceW / float(calibrateW - _scales_value.offset);
 }
 
 /*! Функция для форматирования значения веса

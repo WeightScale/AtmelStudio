@@ -43,8 +43,7 @@ class AsyncWebServer;
 
 class BrowserServerClass : public AsyncWebServer{
 	protected:
-		strHTTPAuth _httpAuth;		
-		uint32_t _updateSize = 0;
+		strHTTPAuth _httpAuth;
 		bool _saveHTTPAuth();		
 		bool _downloadHTTPAuth();		
 

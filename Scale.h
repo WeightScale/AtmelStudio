@@ -53,8 +53,8 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		t_scales_value _scales_value;
 		float _round;						/* множитиль для округления */
 		float _stable_step;					/* шаг для стабилизации */
-		float _referenceWeight;				/*  */
-		long _calibrateWeightValue;			/*  */
+		//float _referenceWeight;				/*  */
+		//long _calibrateWeightValue;			/*  */
 				
 			
 		bool _downloadValue();
@@ -68,7 +68,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		void saveValueCalibratedHttp(AsyncWebServerRequest *);
 		void handleWeight(AsyncWebServerRequest*);
 		void fetchWeight();
-		void mathScale();
+		void mathScale(float referenceW, long calibrateW);
 		void mathRound();
 		//void setScale(d_type scale = 1.f){_scales_value.scale = scale;};
 		//d_type getScale(){return _scales_value.scale;};
