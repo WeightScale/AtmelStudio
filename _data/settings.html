@@ -73,12 +73,30 @@
             request.open('POST','/settings.html',true);
             request.send(formData);
         }
+        function GetValue() {
+            var http_request = new XMLHttpRequest();
+            http_request.overrideMimeType('application/json');
+            http_request.onreadystatechange = function(){
+                if (this.readyState === 4  ){
+                    if(this.status === 200){
+                        var json = JSON.parse(this.responseText);
+                        for (entry in json) {
+                            try {
+                                document.getElementById(entry).innerHTML = json[entry];
+                            }catch (e){}
+                        }
+                    }
+                }
+            };
+            http_request.open("GET", "/sv", true);
+            http_request.send(null);
+        }
         function GetSettings() {
             var http_request = new XMLHttpRequest();
             http_request.overrideMimeType('application/json');
             http_request.onreadystatechange = function(){
-                if (http_request.readyState === 4  ){
-                    if(http_request.responseURL.indexOf("/settings.json")!==-1){
+                if (this.readyState === 4){
+                    if(this.status === 200){
                         try{
                             var json = JSON.parse(http_request.responseText);
                             var scale = json.scale;
@@ -101,48 +119,15 @@
                             alert(e.toString());
                         }finally {
                             document.body.style.visibility = 'visible';
-                            http_request.open("GET", "/sv", true);
-                            http_request.send(null);
-                        }
-                    } else if(http_request.responseURL.indexOf("/sv")!==-1){
-                        var json = JSON.parse(http_request.responseText);
-                        for (entry in json) {
-                            try {
-                                document.getElementById(entry).innerHTML = json[entry];
-                            }catch (e){}
+                            GetValue();
                         }
                     }
-
                 }
             };
             http_request.open("GET", "/settings.json", true);
             http_request.send(null);
         }
-        window.onload = function () {
-            GetSettings();
-            /*load("microajax.js", "js", function () {
-
-                //setValues("/sv");
-            });*/
-        };
-        function load(e, t, n) {
-            if ("js" === t) {
-                var a = document.createElement("script");
-                a.src = e,
-                    a.type = "text/javascript",
-                    a.async = !1,
-                    a.onload = function () { n() },
-                    document.getElementsByTagName("head")[0].appendChild(a)
-            } else if ("css" === t) {
-                var a = document.createElement("link");
-                a.href = e,
-                    a.rel = "stylesheet",
-                    a.type = "text/css",
-                    a.async = !1,
-                    a.onload = function () { n() },
-                    document.getElementsByTagName("head")[0].appendChild(a)
-            }
-        }
+        window.onload=function(){GetSettings();};
         function openSDB() {
             var url = "https://"+document.getElementById("id_host").value+"/scale.php?code=" + document.getElementById("id_pin").value;
             var win = window.open(url, '_blank');

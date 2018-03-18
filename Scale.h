@@ -60,7 +60,6 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		bool _downloadValue();
 
 	public:
-		
 		ScaleClass(byte, byte);
 		~ScaleClass();
 		void setup(BrowserServerClass *server/*, const char * username, const char * password*/);	

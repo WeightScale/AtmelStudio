@@ -52,12 +52,11 @@ void setup() {
 		delay(100);
 	};*/
 	
-	USE_SERIAL.begin(115200);
-	USE_SERIAL.println("Start");
+	//USE_SERIAL.begin(115200);
+	//USE_SERIAL.println("Start");
 	
 	CORE.begin();
-	//SPIFFS.begin();
-	delay(1000);	
+	//delay(1000);	
 	takeBattery();
   
 	taskController.add(&taskBlink);
@@ -127,7 +126,7 @@ void powerSwitchInterrupt(){
 }
 
 void connectWifi() {
-	USE_SERIAL.println("Connecting...");
+	//USE_SERIAL.println("Connecting...");
 	WiFi.disconnect(false);
 	/*!  */
 	int n = WiFi.scanComplete();
@@ -144,7 +143,7 @@ void connectWifi() {
 	connect:
 		for (int i = 0; i < n; ++i)	{
 			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
-				USE_SERIAL.println(CORE.getSSID());
+				//USE_SERIAL.println(CORE.getSSID());
 				String ssid_scan;
 				int32_t rssi_scan;
 				uint8_t sec_scan;
@@ -160,14 +159,14 @@ void connectWifi() {
 				}
 				//WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
 				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str(),chan_scan,BSSID_scan);
-				USE_SERIAL.println("waitForConnectResult");
+				//USE_SERIAL.println("waitForConnectResult");
 				int status = WiFi.waitForConnectResult();
-				USE_SERIAL.println("ConnectResult ");
+				//USE_SERIAL.println("ConnectResult ");
 				if(status == WL_CONNECTED ){
 					NBNS.begin(MY_HOST_NAME);
 					CORE.saveEvent("ip", CORE.getIp());
 				}
-				USE_SERIAL.println(String(status));
+				//USE_SERIAL.println(String(status));
 				return;
 			}
 		}
@@ -194,7 +193,7 @@ void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 }
 
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {
-	Serial.println("Disconnect");
+	//Serial.println("Disconnect");
 	WiFi.scanDelete();
 	WiFi.scanNetworks(true);
 	taskConnectWiFi.resume();
@@ -203,5 +202,5 @@ void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {
 }
 
 void onApModeDisconnect(const WiFiEventSoftAPModeStationDisconnected& evt){
-	Serial.println("ApDisconnect");
+	//Serial.println("ApDisconnect");
 }

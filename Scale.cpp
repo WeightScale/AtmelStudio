@@ -38,11 +38,11 @@ void ScaleClass::setup(BrowserServerClass *server){
 }
 
 void ScaleClass::init(){
-	//reset();
+	reset();
 	_downloadValue();
 	mathRound();
-	//tare();
-	//SetCurrent(readAverage());
+	tare();
+	SetCurrent(readAverage());
 }
 
 void ScaleClass::mathRound(){
@@ -97,12 +97,12 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 
 void ScaleClass::fetchWeight(){
 	//char buffer[10];
-	float w = Scale.forTest(ESP.getFreeHeap());
-	//float w = getWeight();
+	//float w = Scale.forTest(ESP.getFreeHeap());
+	float w = getWeight();
 	formatValue(w,_buffer);
 	detectStable(w);
 	//_weight = w;
-	//ws.textAll(String("{\"w\":\""+String(ESP.getFreeHeap())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
+	//ws.textAll(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
 	//_weight = String(buffer).toFloat();
 	//taskPower.updateCache();
 	/*char buffer[10];
@@ -262,7 +262,7 @@ void ScaleClass::detectStable(float w){
 			//if (stable_num <= STABLE_NUM_MAX){
 			if (stable_num > STABLE_NUM_MAX) {
 				if (!stableWeight){
-					if(abs(w) > _stable_step){
+					if(fabs(w) > _stable_step){
 						CORE.saveEvent("weight", String(w)+"_kg");	
 					}
 					stableWeight = true;

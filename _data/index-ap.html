@@ -23,26 +23,66 @@
     <script>
         var timerWeight;
         var timerSocket;
+        var w;
+        function ScalesSocket(h, p, fm, fe)  {
+            var host = h;
+            var protocol = p;
+            var timerWeight;
+            var ws;
+            var startWeightTimeout = function()  {
+                clearTimeout(timerWeight);
+                timerWeight = setTimeout(function () {
+                    fe();
+                },5000);
+            };
+            this.getWeight = function () {
+                ws.send("/wt");
+                startWeightTimeout();
+            };
 
-        function startWeightTimeout() {
+            this.openSocket = function () {
+                ws = new WebSocket(host, protocol);
+                ws.onopen = this.getWeight;
+                ws.onclose = function(e){
+                    clearTimeout(timerWeight);
+                    starSocketTimeout();
+                    fe();
+                };
+                ws.onerror = function(e){
+                    fe();
+                };
+                ws.onmessage = function (e) {
+                    fm(JSON.parse(e.data));
+                }
+            };
+
+            var starSocketTimeout = function () {
+                clearTimeout(timerSocket);
+                timerSocket = setTimeout(function () {
+                    this.prototype.openSocket();
+                },5000);
+            }
+        }
+
+        /*function startWeightTimeout() {
             clearTimeout(timerWeight);
             timerWeight = setTimeout(function () {
                 go();
             },5000);
-        }
-        function starSocketTimeout() {
+        }*/
+        /*function starSocketTimeout() {
             clearTimeout(timerSocket);
             timerSocket = setTimeout(function () {
                 startSocket();
             },5000);
-        }
-        function startSocket(){
+        }*/
+        /*function startSocket(){
             try{
                 ws = new WebSocket('ws://'+document.location.host+'/ws',['arduino']);
                 ws.binaryType = "arraybuffer";
                 ws.onopen = function(e){
                     console.log("Connected");
-                    //getWeight();
+                    getWeight();
                 };
                 ws.onclose = function(e){
                     console.log("Disconnected");
@@ -65,16 +105,18 @@
                         }
                     }catch(e){
                         go();
+                    }finally{
+                        getWeight();
                     }
                 };
             }catch (e){
                 starSocketTimeout();
             }
-        }
-        function getWeight() {
+        }*/
+        /*function getWeight() {
             ws.send("/wt");
             startWeightTimeout();
-        }
+        }*/
         function go() {
             document.getElementById('weight').innerHTML = '---';
             document.getElementById('charge_id').innerHTML = '--%';
@@ -88,7 +130,7 @@
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 204){
                     document.getElementById('buttonZero').style.visibility = 'visible';
-                    getWeight();
+                    w.getWeight();
                 }};
             request.open('GET','/tp',true);
             request.timeout = 5000;
@@ -100,11 +142,30 @@
             onBodyLoad();
         };
         function onBodyLoad(){
-            startSocket();
+            //startSocket();
+            w = new ScalesSocket('ws://'+document.location.host+'/ws',['arduino'],function(e){
+                try{
+                    document.getElementById('weight').innerHTML = e.w;
+                    document.getElementById('charge_id').innerHTML = e.c+'%';
+                    if(e.s){
+                        document.getElementById('w_style').setAttribute('style', 'background: #fff;');
+                    }else{
+                        document.getElementById('w_style').setAttribute('style', 'background: #C4C4C4;');
+                    }
+                }catch(e){
+                    go();
+                }finally{
+                    w.getWeight();
+                }
+            },function(){
+                go();
+                w.openSocket();
+            });
+            w.openSocket();
         }
     </script>
 </head>
-<body <!--onload="onBodyLoad()"-->>
+<body>
 <div align="center">
     <table>
         <tr><td ><img src="scales.png" style="height: 42px;" /></td><td align="right"><h3 id="brand_name">scale.in.ua</h3></td></tr>

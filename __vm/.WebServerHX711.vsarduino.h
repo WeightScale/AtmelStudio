@@ -12,15 +12,14 @@
 #define __ESP8266_ESP8266__
 #define ARDUINO 10803
 #define ARDUINO_MAIN
-#define F_CPU 80000000L
 #define printf iprintf
 #define __ESP8266__
 #define __ets__
 #define ICACHE_FLASH
-#define F_CPU 80000000L
+#define F_CPU {build.f_cpu}
 #define LWIP_OPEN_SRC
 #define ARDUINO 10803
-#define ARDUINO_ESP8266_ESP01
+#define ARDUINO_ESP8266_GENERIC
 #define ARDUINO_ARCH_ESP8266
 
 #include "common.h" 

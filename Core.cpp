@@ -47,9 +47,9 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 		JsonArray& events = json.createNestedArray(EVENTS_JSON);
 		for(int i = 0; i < MAX_EVENTS; i++){
 			JsonObject& ev = jsonBuffer.createObject();
-			ev["date"] = "";
-			ev["value"] = "";
-			ev["server"] = false;
+			ev["d"] = "";
+			ev["v"] = "";
+			ev["s"] = false;
 			events.add(ev);	
 		}		
 		/*if (!json.success())
@@ -58,9 +58,9 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	
 	long n = json["cur_num"];
 	
-	json[EVENTS_JSON][n]["date"] = date;
-	json[EVENTS_JSON][n]["value"] = value;	
-	json[EVENTS_JSON][n]["server"] = flag;
+	json[EVENTS_JSON][n]["d"] = date;
+	json[EVENTS_JSON][n]["v"] = value;	
+	json[EVENTS_JSON][n]["s"] = flag;
 		
 	if ( ++n == MAX_EVENTS){
 		n = 0;
@@ -130,6 +130,7 @@ void CoreClass::handleSetAccessPoint(AsyncWebServerRequest * request){
 }
 
 void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {	
+	//Serial.println("saveValueSettingsHttp");
 	if (!browserServer.isAuthentified(request))
 		return request->requestAuthentication();
 	if (request->args() > 0){	// Save Settings
@@ -148,10 +149,10 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 			_settings.scaleLanIp = request->arg("lan_ip");			
 			_settings.scaleGateway = request->arg("gateway");
 			_settings.scaleSubnet = request->arg("subnet");
-			Serial.println("Save ssid");
+			//Serial.println("Save ssid");
 			CORE.setSSID(request->arg("ssid"));		
 			//_settings.scaleWlanSSID = request->arg("ssid");
-			Serial.println(CORE.getSSID());
+			//Serial.println(CORE.getSSID());
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
 		}
@@ -180,7 +181,6 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 	} 
 	
 	request->send(SPIFFS, request->url());
-		
 }
 
 String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){

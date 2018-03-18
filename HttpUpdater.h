@@ -4,7 +4,7 @@
 #define _HTTPUPDATER_h
 #include "BrowserServer.h"
 
-const char successResponse[] /*PROGMEM*/ = R"(<meta http-equiv='refresh' content='15;URL=/'>Обновление успешно! Перегрузка...)";
+const char successResponse[] /*PROGMEM*/ = R"(<META http-equiv=\"refresh\" content=\"15;URL=/\">Обновление успешно! Перегрузка...)";
 
 const char serverIndex[] /*PROGMEM*/ = R"(<html><body><form method='POST' action='' enctype='multipart/form-data'>
 										<input type='file' name='update'>

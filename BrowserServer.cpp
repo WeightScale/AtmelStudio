@@ -41,8 +41,8 @@ void BrowserServerClass::begin() {
 	//dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	//dnsServer.start(DNS_PORT, "*", apIP);	
 	_downloadHTTPAuth();
-	//ws.onEvent(onWsEvent);
-	//addHandler(&ws);
+	ws.onEvent(onWsEvent);
+	addHandler(&ws);
 	addHandler(new SPIFFSEditor(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str()));	
 	addHandler(new HttpUpdaterClass("sa", "654321"));
 	init();
@@ -57,12 +57,11 @@ void BrowserServerClass::init(){
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
 	on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Установить Настройки точки доступа */
 	on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Установить Настройки точки доступа */
-	on("/settings.html", std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Открыть страницу настроек или сохранить значения. */
+	on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Открыть страницу настроек или сохранить значения. */
 	on("/settings.json", handleFileReadAuth);
 	on("/sv", handleScaleProp);									/* Получить значения. */
 	on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
 	on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
-		
 		request->send(200, "text/plain", String(ESP.getFreeHeap()));
 	});
 	//on("/secret.json",handleFileReadAdmin);
@@ -80,8 +79,8 @@ void BrowserServerClass::init(){
 	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
 	//ask server to track these headers
 	collectHeaders(headerkeys, headerkeyssize );*/
-	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html").setFilter(ON_STA_FILTER);
-	serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
+	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+	//serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
 	//rewrite("/", "index.html").setFilter(ON_STA_FILTER);
 	//rewrite("/", "index-ap.html").setFilter(ON_AP_FILTER);
 	onNotFound([](AsyncWebServerRequest *request){
@@ -214,28 +213,28 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 	} else if(type == WS_EVT_DISCONNECT){
 	} else if(type == WS_EVT_ERROR){
 	} else if(type == WS_EVT_PONG){
-	} /*else if(type == WS_EVT_DATA){
-		AwsFrameInfo * info = (AwsFrameInfo*)arg;
+	} else if(type == WS_EVT_DATA){
+		//AwsFrameInfo * info = (AwsFrameInfo*)arg;
 		String msg = "";
-		/ *if(info->final && info->index == 0 && info->len == len){			
+		/*if(info->final && info->index == 0 && info->len == len){			
 			if(info->opcode == WS_TEXT){
 				for(size_t i=0; i < info->len; i++) {
 					msg += (char) data[i];
 				}
 				if (msg.equals("/wt")){
-					client->text(String("{\"w\":\""+String(ESP.getFreeHeap())+"\",\"c\":"+String(99)+",\"s\":"+String(true)+"}"));
+					client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(99)+",\"s\":"+String(true)+"}"));
 				}
 			} 
-		}* /		
-		for(size_t i=0; i < info->len; i++) {
+		}*/		
+		for(size_t i=0; i < len; i++) {
 			msg += (char) data[i];
 		}
 		if (msg.equals("/wt")){
-			/ *char buffer[10];		
+			/*char buffer[10];		
 			float w = Scale.forTest(ESP.getFreeHeap());
 			Scale.formatValue(w,buffer);
-			Scale.detectStable(w);* /
-			client->text(String("{\"w\":\""+String(ESP.getFreeHeap())+"\",\"c\":"+String(99)+",\"s\":"+String(Scale.getStableWeight())+"}"));
+			Scale.detectStable(w);*/			
+			client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
 		}
-	}*/
+	}
 }
