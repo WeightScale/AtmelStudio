@@ -25,12 +25,12 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	bool flag = WiFi.status() == WL_CONNECTED?eventToServer(date, event, value):false;
 	File readFile = SPIFFS.open("/events.json", "r");
     if (!readFile) {        
-        readFile.close();
-		if (!SPIFFS.exists("/events.json")){
+        //readFile.close();
+		//if (!SPIFFS.exists("/events.json")){
 			readFile = SPIFFS.open("/events.json", "w+");	
-		}else{
-			return false;	
-		}
+		//}else{
+			//return false;	
+		//}
     }
 	
     size_t size = readFile.size(); 	
@@ -130,17 +130,11 @@ void CoreClass::handleSetAccessPoint(AsyncWebServerRequest * request){
 }
 
 void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {	
-	//Serial.println("saveValueSettingsHttp");
 	if (!browserServer.isAuthentified(request))
 		return request->requestAuthentication();
 	if (request->args() > 0){	// Save Settings
 		String message = " ";
-		/*if (request->hasArg("ssids")){
-			_settings.autoIp = true;			
-			_settings.scaleWlanSSID = request->arg("ssids");			
-			_settings.scaleWlanKey = request->arg("key");	
-			goto save;
-		}else */if (request->hasArg("ssid")){
+		if (request->hasArg("ssid")){
 			_settings.autoIp = false;
 			if (request->hasArg("auto"))
 				_settings.autoIp = true;
@@ -150,8 +144,8 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 			_settings.scaleGateway = request->arg("gateway");
 			_settings.scaleSubnet = request->arg("subnet");
 			//Serial.println("Save ssid");
-			CORE.setSSID(request->arg("ssid"));		
-			//_settings.scaleWlanSSID = request->arg("ssid");
+			//CORE.setSSID(request->arg("ssid"));		
+			_settings.scaleWlanSSID = request->arg("ssid");
 			//Serial.println(CORE.getSSID());
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
@@ -305,6 +299,7 @@ bool CoreClass::_downloadSettings() {
 
 
 void powerOff(){
+	browserServer.stop();
 	Scale.power_down(); /// Выключаем ацп
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 	ESP.reset();

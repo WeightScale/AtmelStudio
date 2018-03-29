@@ -24,7 +24,7 @@ IPAddress gateway;
 
 BrowserServerClass browserServer(80);
 AsyncWebSocket ws("/ws");
-//DNSServer dnsServer;
+DNSServer dnsServer;
 //holds the current upload
 //File fsUploadFile;
 
@@ -38,11 +38,12 @@ BrowserServerClass::~BrowserServerClass(){}
 void BrowserServerClass::begin() {
 	
 	/* Setup the DNS server redirecting all the domains to the apIP */
-	//dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
-	//dnsServer.start(DNS_PORT, "*", apIP);	
+	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+	dnsServer.start(DNS_PORT, "*", apIP);	
 	_downloadHTTPAuth();
 	ws.onEvent(onWsEvent);
 	addHandler(&ws);
+	addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 	addHandler(new SPIFFSEditor(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str()));	
 	addHandler(new HttpUpdaterClass("sa", "654321"));
 	init();
@@ -53,6 +54,7 @@ void BrowserServerClass::init(){
 	on("/wt",HTTP_GET, [](AsyncWebServerRequest * request){					/* Получить вес и заряд. */
 		request->send(200, "text/html", String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
 	});				
+
 				
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
 	on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Установить Настройки точки доступа */
@@ -61,11 +63,11 @@ void BrowserServerClass::init(){
 	on("/settings.json", handleFileReadAuth);
 	on("/sv", handleScaleProp);									/* Получить значения. */
 	on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
-	on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
+	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
 		request->send(200, "text/plain", String(ESP.getFreeHeap()));
-	});
+	});*/
 	//on("/secret.json",handleFileReadAdmin);
-	serveStatic("/sc", SPIFFS, "/").setDefaultFile("secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
+	//serveStatic("/sc", SPIFFS, "/").setDefaultFile("secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
 												
 	/*on("/",[&](){												/ * Главная страница. * /
 		handleFileRead(uri());
@@ -188,6 +190,7 @@ void handleScaleProp(AsyncWebServerRequest * request){
 	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
 	root["id_ip"] = toStringIp(WiFi.localIP());
 	root["sl_id"] = String(Scale.getSeal());
+	root["chip_v"] = String(ESP.getCpuFreqMHz());
 	response->setLength();
 	request->send(response);
 	/*String values = "";
@@ -210,22 +213,8 @@ void handleAccessPoint(AsyncWebServerRequest * request){
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
 	if(type == WS_EVT_CONNECT){	
 		client->ping();	
-	} else if(type == WS_EVT_DISCONNECT){
-	} else if(type == WS_EVT_ERROR){
-	} else if(type == WS_EVT_PONG){
-	} else if(type == WS_EVT_DATA){
-		//AwsFrameInfo * info = (AwsFrameInfo*)arg;
+	}else if(type == WS_EVT_DATA){
 		String msg = "";
-		/*if(info->final && info->index == 0 && info->len == len){			
-			if(info->opcode == WS_TEXT){
-				for(size_t i=0; i < info->len; i++) {
-					msg += (char) data[i];
-				}
-				if (msg.equals("/wt")){
-					client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(99)+",\"s\":"+String(true)+"}"));
-				}
-			} 
-		}*/		
 		for(size_t i=0; i < len; i++) {
 			msg += (char) data[i];
 		}

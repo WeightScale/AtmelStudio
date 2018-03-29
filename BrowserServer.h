@@ -63,12 +63,32 @@ class BrowserServerClass : public AsyncWebServer{
 		bool isAuthentified(AsyncWebServerRequest * request);
 		String getName(){ return _httpAuth.wwwUsername;};
 		String getPass(){ return _httpAuth.wwwPassword;};
+		void stop(){_server.end();};
 		//friend CoreClass;
 		//friend BrowserServerClass;
 };
 
+class CaptiveRequestHandler : public AsyncWebHandler {
+	public:
+	CaptiveRequestHandler() {}
+	virtual ~CaptiveRequestHandler() {}
+	
+	bool canHandle(AsyncWebServerRequest *request){
+		if (!request->host().equalsIgnoreCase(WiFi.softAPIP().toString())){
+			return true;
+		}
+		return false;
+	}
+
+	void handleRequest(AsyncWebServerRequest *request) {
+		AsyncWebServerResponse *response = request->beginResponse(302,"text/plain","");
+		response->addHeader("Location", String("http://") + WiFi.softAPIP().toString());
+		request->send ( response);
+	}
+};
+
 //extern ESP8266HTTPUpdateServer httpUpdater;
-//extern DNSServer dnsServer;
+extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
 extern IPAddress lanIp;			// Надо сделать настройки ip адреса

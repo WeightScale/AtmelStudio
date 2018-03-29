@@ -21,7 +21,7 @@
 #define STABLE_NUM_MAX 10
 #define MAX_EVENTS 100
 //#define MAX_CHG 1013//980	//делитель U2=U*(R2/(R1+R2)) 0.25
-#define MIN_CHG 768			//ADC = (Vin * 1024)/Vref  Vref = 1V
+#define MIN_CHG 880			//ADC = (Vin * 1024)/Vref  Vref = 1V
 
 #define EN_NCP  12							/* сигнал включения питания  */
 #define PWR_SW  13							/* сигнал от кнопки питания */

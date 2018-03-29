@@ -20,14 +20,11 @@
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);
-//void onApModeDisconnect(const WiFiEventSoftAPModeStationDisconnected& evt);
-//void onApModeConnect(const WiFiEventSoftAPModeStationConnected& evt);
 void takeBlink();
 void takeBattery();
 void takeWeight();
 void powerSwitchInterrupt();
 void connectWifi();
-
 //
 TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
@@ -37,8 +34,6 @@ Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедени�
 Task taskWeight(takeWeight,100);
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
-//WiFiEventHandler apModeDisconnectHandler;
-//WiFiEventHandler apModeConnectHandler;
 
 unsigned int COUNT_FLASH = 500;
 unsigned int COUNT_BLINK = 500;
@@ -55,9 +50,6 @@ void setup() {
 		delay(100);
 	};*/
 	
-	//USE_SERIAL.begin(115200);
-	//USE_SERIAL.println("Start");
-	
 	CORE.begin();
 	delay(1000);	
 	takeBattery();
@@ -70,28 +62,22 @@ void setup() {
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
-	//apModeDisconnectHandler = WiFi.onSoftAPModeStationDisconnected(&onApModeDisconnect);
-	//apModeConnectHandler = WiFi.onSoftAPModeStationConnected(&onApModeConnect);
   
 	//ESP.eraseConfig();
 	WiFi.persistent(false);
-	WiFi.setAutoConnect(false);
-	WiFi.setAutoReconnect(false);
+	WiFi.setAutoConnect(true);
+	WiFi.setAutoReconnect(true);
 	//WiFi.smartConfigDone();
 	WiFi.mode(WIFI_AP_STA);
 	WiFi.hostname(MY_HOST_NAME);
-	//WiFi.softAPConfig(apIP, apIP, netMsk);
+	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
 	delay(500); 
 	
 	connectWifi();
-	//WiFi.begin ( "KONST", "3fal-rshc-nuo3");
-	//WiFi.waitForConnectResult();
-	//NBNS.begin(MY_HOST_NAME);
-	
-	browserServer.begin();
+	browserServer.begin();	
 	Scale.setup(&browserServer); 
-	CORE.saveEvent("power", "ON");
+	//CORE.saveEvent("power", "ON");
 }
 
 /*********************************/
@@ -137,8 +123,8 @@ void connectWifi() {
 	int n = WiFi.scanComplete();
 	if(n == -2){
 		n = WiFi.scanNetworks();
-		if (n > 0){
-			goto connect;
+		if (n <= 0){
+			goto scan;
 		}
 	}else if (n > 0){
 		goto connect;
@@ -162,7 +148,7 @@ void connectWifi() {
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 					}
 				}
-				Serial.println(String(chan_scan));
+				//Serial.println(String(chan_scan));
 				WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
 				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str(),chan_scan,BSSID_scan);
 				//WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());
@@ -171,29 +157,31 @@ void connectWifi() {
 				//USE_SERIAL.println("ConnectResult ");
 				if(status == WL_CONNECTED ){					
 					NBNS.begin(MY_HOST_NAME);
-					CORE.saveEvent("ip", CORE.getIp());
+					//CORE.saveEvent("ip", CORE.getIp());
 				}
 				//USE_SERIAL.println(String(status));
 				return;
 			}
 		}
 	scan:
-		WiFi.scanDelete();
-		WiFi.scanNetworks(true);	
-		
+	WiFi.scanDelete();
+	WiFi.scanNetworks(true);
+	
 }
 
 void loop() {
 	taskController.run();	
 	//DNS
-	//dnsServer.processNextRequest();
+	dnsServer.processNextRequest();
 	//HTTP
-	//Scale.fetchWeight();
+	if (Scale.isSave()){
+		CORE.saveEvent("weight", String(Scale.getSaveValue())+"_kg");
+		Scale.setIsSave(false);
+	}
 	powerSwitchInterrupt();
 }
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
-	//Serial.println("ConnectStation");
 	taskConnectWiFi.pause();
 	//Serial.println(String(evt.channel));
 	//WiFi.softAPdisconnect();
@@ -210,13 +198,3 @@ void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {
 	COUNT_FLASH = 500;
 	COUNT_BLINK = 500;
 }
-
-/*
-void onApModeDisconnect(const WiFiEventSoftAPModeStationDisconnected& evt){
-	Serial.println("DisconnectAP");
-}*/
-
-/*
-void onApModeConnect(const WiFiEventSoftAPModeStationConnected& evt){
-	Serial.println("ConnectAP");
-}*/

@@ -39,6 +39,11 @@ typedef struct {
 	String password;
 }t_scales_value;
 
+typedef struct{
+	bool isSave;
+	float value;
+}t_save_value;
+
 class BrowserServerClass;
 
 class ScaleClass : public HX711 , public ExponentialFilter<long>{
@@ -50,6 +55,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		//char _buffer[10];
 		bool _authenticated;
 		bool stableWeight;
+		t_save_value saveWeight;
 		t_scales_value _scales_value;
 		float _round;						/* множитиль для округления */
 		float _stable_step;					/* шаг для стабилизации */
@@ -96,6 +102,10 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		float getRound(){return _round;};
 		bool getStableWeight(){return stableWeight;};
 		void setStableWeight(bool s){stableWeight = s;};
+			
+		float isSave(){return saveWeight.isSave;};
+		float getSaveValue(){return saveWeight.value;};
+		void setIsSave(bool s){saveWeight.isSave = s;};
 		
 		float forTest(uint32_t h);		
 };

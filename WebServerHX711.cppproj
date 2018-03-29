@@ -66,6 +66,7 @@
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
+      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10803</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>printf=iprintf</Value>
@@ -118,6 +119,7 @@
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
+      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10803</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>printf=iprintf</Value>
@@ -693,7 +695,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
         <custom_esp8266_phoenix_v1_FlashSize>4M1M</custom_esp8266_phoenix_v1_FlashSize>
         <custom_esp8266_phoenix_v1_ResetMethod>nodemcu</custom_esp8266_phoenix_v1_ResetMethod>
         <custom_esp8266_d1_FlashSize>4M1M</custom_esp8266_d1_FlashSize>
-        <custom_esp8266_generic_FlashSize>4M1M</custom_esp8266_generic_FlashSize>
+        <custom_esp8266_generic_FlashSize>1M192</custom_esp8266_generic_FlashSize>
         <custom_esp8266_generic_UploadSpeed>921600</custom_esp8266_generic_UploadSpeed>
         <custom_esp8266_nodemcuv2_UploadSpeed>921600</custom_esp8266_nodemcuv2_UploadSpeed>
         <custom_esp8266_nodemcuv2_FlashSize>4M1M</custom_esp8266_nodemcuv2_FlashSize>
@@ -706,6 +708,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
         <custom_esp8266_generic_LwIPVariant>v2mss536</custom_esp8266_generic_LwIPVariant>
         <custom_esp8266_generic_Debug>Disabled</custom_esp8266_generic_Debug>
         <debug.remote.portname>Serial</debug.remote.portname>
+        <custom_esp8266_generic_DebugLevel>None____</custom_esp8266_generic_DebugLevel>
       </VisualMicroSettings>
     </VisualMicroSettings>
   </PropertyGroup>
@@ -721,6 +724,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
+      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10803</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>printf=iprintf</Value>
@@ -773,6 +777,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
     <ListValues>
       <Value>__ESP8266_ESp8266__</Value>
       <Value>__ESP8266_ESP8266__</Value>
+      <Value>_VMDEBUG=1</Value>
       <Value>ARDUINO=10803</Value>
       <Value>ARDUINO_MAIN</Value>
       <Value>printf=iprintf</Value>
@@ -1348,7 +1353,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
         <custom_esp8266_phoenix_v1_FlashSize>4M1M</custom_esp8266_phoenix_v1_FlashSize>
         <custom_esp8266_phoenix_v1_ResetMethod>nodemcu</custom_esp8266_phoenix_v1_ResetMethod>
         <custom_esp8266_d1_FlashSize>4M1M</custom_esp8266_d1_FlashSize>
-        <custom_esp8266_generic_FlashSize>4M1M</custom_esp8266_generic_FlashSize>
+        <custom_esp8266_generic_FlashSize>1M192</custom_esp8266_generic_FlashSize>
         <custom_esp8266_generic_UploadSpeed>921600</custom_esp8266_generic_UploadSpeed>
         <custom_esp8266_nodemcuv2_UploadSpeed>921600</custom_esp8266_nodemcuv2_UploadSpeed>
         <custom_esp8266_nodemcuv2_FlashSize>4M1M</custom_esp8266_nodemcuv2_FlashSize>
@@ -1361,6 +1366,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
         <custom_esp8266_generic_LwIPVariant>v2mss536</custom_esp8266_generic_LwIPVariant>
         <custom_esp8266_generic_Debug>Disabled</custom_esp8266_generic_Debug>
         <debug.remote.portname>Serial</debug.remote.portname>
+        <custom_esp8266_generic_DebugLevel>None____</custom_esp8266_generic_DebugLevel>
       </VisualMicroSettings>
     </VisualMicroSettings>
   </PropertyGroup>

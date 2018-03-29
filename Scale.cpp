@@ -7,6 +7,8 @@ ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 ScaleClass::ScaleClass(byte dout, byte pd_sck) : HX711(dout, pd_sck) , ExponentialFilter<long>(){
 	_server = NULL;	
 	_authenticated = false;	
+	saveWeight.isSave = false;
+	saveWeight.value = 0.0;
 }
 
 ScaleClass::~ScaleClass(){}
@@ -263,7 +265,9 @@ void ScaleClass::detectStable(float w){
 			if (stable_num > STABLE_NUM_MAX) {
 				if (!stableWeight){
 					if(fabs(w) > _stable_step){
-						CORE.saveEvent("weight", String(w)+"_kg");	
+						saveWeight.isSave = true;
+						saveWeight.value = w;
+						//CORE.saveEvent("weight", String(w)+"_kg");
 					}
 					stableWeight = true;
 				}

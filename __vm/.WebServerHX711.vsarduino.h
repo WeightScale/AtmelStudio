@@ -10,6 +10,7 @@
 
 #define __ESP8266_ESp8266__
 #define __ESP8266_ESP8266__
+#define _VMDEBUG 1
 #define ARDUINO 10803
 #define ARDUINO_MAIN
 #define printf iprintf
