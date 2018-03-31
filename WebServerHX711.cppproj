@@ -103,7 +103,7 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/variants/generic</Value>
       <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip2/include</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/libc/xtensa-lx106-elf/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
@@ -156,7 +156,7 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/variants/generic</Value>
       <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip2/include</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/libc/xtensa-lx106-elf/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
@@ -695,7 +695,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
         <custom_esp8266_phoenix_v1_FlashSize>4M1M</custom_esp8266_phoenix_v1_FlashSize>
         <custom_esp8266_phoenix_v1_ResetMethod>nodemcu</custom_esp8266_phoenix_v1_ResetMethod>
         <custom_esp8266_d1_FlashSize>4M1M</custom_esp8266_d1_FlashSize>
-        <custom_esp8266_generic_FlashSize>1M192</custom_esp8266_generic_FlashSize>
+        <custom_esp8266_generic_FlashSize>1M256</custom_esp8266_generic_FlashSize>
         <custom_esp8266_generic_UploadSpeed>921600</custom_esp8266_generic_UploadSpeed>
         <custom_esp8266_nodemcuv2_UploadSpeed>921600</custom_esp8266_nodemcuv2_UploadSpeed>
         <custom_esp8266_nodemcuv2_FlashSize>4M1M</custom_esp8266_nodemcuv2_FlashSize>
@@ -761,7 +761,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/variants/generic</Value>
       <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip2/include</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/libc/xtensa-lx106-elf/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
@@ -814,7 +814,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/variants/generic</Value>
       <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip2/include</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.1/tools/sdk/libc/xtensa-lx106-elf/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
@@ -1353,7 +1353,7 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
         <custom_esp8266_phoenix_v1_FlashSize>4M1M</custom_esp8266_phoenix_v1_FlashSize>
         <custom_esp8266_phoenix_v1_ResetMethod>nodemcu</custom_esp8266_phoenix_v1_ResetMethod>
         <custom_esp8266_d1_FlashSize>4M1M</custom_esp8266_d1_FlashSize>
-        <custom_esp8266_generic_FlashSize>1M192</custom_esp8266_generic_FlashSize>
+        <custom_esp8266_generic_FlashSize>1M256</custom_esp8266_generic_FlashSize>
         <custom_esp8266_generic_UploadSpeed>921600</custom_esp8266_generic_UploadSpeed>
         <custom_esp8266_nodemcuv2_UploadSpeed>921600</custom_esp8266_nodemcuv2_UploadSpeed>
         <custom_esp8266_nodemcuv2_FlashSize>4M1M</custom_esp8266_nodemcuv2_FlashSize>
@@ -1404,6 +1404,9 @@ ProjectDir=C:\Users\Kostya\Documents\Arduino\projects\WebServerHX711\
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="HX711.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Page.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Scale.cpp">

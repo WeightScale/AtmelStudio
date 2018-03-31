@@ -22,6 +22,11 @@
 #define ARDUINO 10803
 #define ARDUINO_ESP8266_GENERIC
 #define ARDUINO_ARCH_ESP8266
+//
+//
+void onApModeDisconnect(const WiFiEventSoftAPModeStationDisconnected& evt);
+//
+//
 
 #include "common.h" 
 #include "pins_arduino.h" 
