@@ -1,7 +1,7 @@
 {
   "scale":{
-    "id_name_admin":"admin",
-    "id_pass_admin":"1234",
+    "id_n_admin":"admin",
+    "id_p_admin":"1234",
     "id_ssid":"",
     "id_key":"",
     "id_lan_ip":"192.168.1.100",

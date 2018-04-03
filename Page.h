@@ -14,36 +14,25 @@ window.onload=function(){onBodyLoad();};function onBodyLoad(){w = new ScalesSock
 
 
 //settings.html
-	const char settings_html[] PROGMEM = R"(<!DOCTYPE html>
-	<html lang="en">
-	<head>
-	<meta charset="UTF-8">
-	<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/>
-	<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
-	<meta http-equiv="Pragma" content="no-cache"/>
-	<title>Настройки</title>
-	<link rel="stylesheet" type="text/css" href="global.css">
-	<style>input:focus{background: #FA6;outline: none;}table{width:100%;}input{width:100%;text-align:right;font-size:18px;}input[type=submit]{width:auto;}
-	</style>
-	<script>
+	const char settings_html[] PROGMEM = R"(<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><title>Настройки</title><link rel="stylesheet" type="text/css" href="global.css"><style>input:focus{background: #FA6;outline: none;}table{width:100%;}input{width:100%;text-align:right;font-size:18px;}input[type=submit]{width:auto;}</style><script>
 	function setOnBlur( input){
-		setTimeout( function(){
-			if (document.activeElement===input) {
+		setTimeout(function(){
+			if (document.activeElement===input){
 				input.onblur=function(){
-					if(input.value.length === 0 || !CheckIP(input)){
-						setTimeout( function(){input.focus()},0)
+					if(input.value.length===0 || !CheckIP(input)){
+						setTimeout(function(){input.focus()},0)
 					}else
-					input.onblur=null
+						input.onblur=null
 				}
 			}
 		},0)
 	}
 	function CheckIP(input){
-		ipParts = input.value.split(".");
+		ipParts=input.value.split(".");
 		if(ipParts.length===4){
 			for(i=0;i<4;i++){
-				TheNum = parseInt(ipParts[i]);
-				if(TheNum >= 0 && TheNum <= 255){}
+				TheNum=parseInt(ipParts[i]);
+				if(TheNum>=0 && TheNum <= 255){}
 				else{break;}
 			}
 			if(i==4)
@@ -52,145 +41,79 @@ window.onload=function(){onBodyLoad();};function onBodyLoad(){w = new ScalesSock
 		return false;
 	}
 	function sendDateTime(){
-		var formData = new FormData();
-		var date = new Date();
-		var d = date.toLocaleDateString();
+		var formData=new FormData();
+		var date=new Date();
+		var d=date.toLocaleDateString();
 		d+="-"+date.toLocaleTimeString();
-		formData.append('data', d.replace(/[^\x20-\x7E]+/g, ''));
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = function(){
-			if (this.readyState === 4 && this.status === 200){
-				if (this.responseText !== null){
-					document.getElementById('id_date').innerHTML = "<div>Обновлено<br/>" + this.responseText + "</div>";
-				}
+		formData.append('data',d.replace(/[^\x20-\x7E]+/g,''));
+		var request=new XMLHttpRequest();
+		request.onreadystatechange=function(){
+			if (this.readyState===4 && this.status===200){
+				if (this.responseText !== null){document.getElementById('id_date').innerHTML="<div>Обновлено<br/>"+this.responseText+"</div>";}
 			}
 		};
 		request.open("POST","settings.html?"+new Date().getTime(),true);
 		request.send(formData);
-	}
-	function saveServerValue(){
-		document.getElementById('id_submit_code').disabled = true;
-		var formData = new FormData();
-		formData.append("host", document.getElementById('id_host').value);
-		formData.append("email", document.getElementById('id_email').value);
-		formData.append("password", document.getElementById('id_password').value);
-		formData.append("pin", document.getElementById('id_pin').value);
-		var request = new XMLHttpRequest();
-		request.onreadystatechange = function(){
-			if (this.readyState === 4 ){
-				if (this.status === 200){
-					document.getElementById('id_submit_code').value='СОХРАНИЛИ';
-					}else if (this.status === 400){
-					document.getElementById('id_submit_code').value = this.responseText;
-				}
-				document.getElementById('id_submit_code').disabled = false;
-			}
-		};
-		request.open('POST','/settings.html',true);
-		request.send(formData);
-	}
+	}	
 	function GetValue() {
-		var http_request = new XMLHttpRequest();
+		var http_request=new XMLHttpRequest();
 		http_request.overrideMimeType('application/json');
-		http_request.onreadystatechange = function(){
-			if (this.readyState === 4  ){
-				if(this.status === 200){
-					var json = JSON.parse(this.responseText);
+		http_request.onreadystatechange=function(){
+			if (this.readyState===4){
+				if(this.status===200){
+					var json=JSON.parse(this.responseText);
 					for (entry in json) {
-						try {
-							document.getElementById(entry).innerHTML = json[entry];
-							}catch (e){}
+						try {document.getElementById(entry).innerHTML = json[entry];}catch (e){}
 						}
 					}
 				}
 			};
-			http_request.open("GET", "/sv", true);
+			http_request.open("GET","/sv",true);
 			http_request.send(null);
 		}
 		function GetSettings() {
-			var http_request = new XMLHttpRequest();
+			var http_request=new XMLHttpRequest();
 			http_request.overrideMimeType('application/json');
-			http_request.onreadystatechange = function(){
-				if (this.readyState === 4){
-					if(this.status === 200){
+			http_request.onreadystatechange=function(){
+				if (this.readyState===4){
+					if(this.status===200){
 						try{
-							var json = JSON.parse(http_request.responseText);
-							var scale = json.scale;
+							var json=JSON.parse(http_request.responseText);
+							var scale=json.scale;
 							for (entry in scale) {
-								try {
-									if(document.getElementById(entry).type === 'checkbox'){
-										document.getElementById(entry).checked = scale[entry];
-										enableAuthFields(document.getElementById(entry));
-									}else
-									document.getElementById(entry).value = scale[entry];
-									}catch (e){}
-								}
-								var server = json.server;
-								for (entry in server) {
-									try {
-										document.getElementById(entry).value=server[entry];
-										}catch (e){}
-									}
-									}catch(e){
-									alert("ОШИБКА "+e.toString());
-								}
-								}else{
-								alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");
-							}
-							document.body.style.visibility = 'visible';
+								try {if(document.getElementById(entry).type==='checkbox'){document.getElementById(entry).checked=scale[entry];enableAuthFields(document.getElementById(entry));}else document.getElementById(entry).value=scale[entry];}catch (e){}}
+								var server=json.server;
+								for (entry in server){
+									try{document.getElementById(entry).value=server[entry];}catch (e){}}}catch(e){alert("ОШИБКА "+e.toString());}
+								}else{alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");}
+							document.body.style.visibility='visible';
 							GetValue();
 						}
 					};
-					http_request.open('GET', '/settings.json', true);
+					http_request.open('GET','/settings.json', true);
 					http_request.send(null);
 				}
 				window.onload=function(){GetSettings();};
-				function openSDB() {
-					var url = 'https://'+document.getElementById('id_host').value+'/scale.php?code=' + document.getElementById('id_pin').value;
-					var win = window.open(url, '_blank');
+				function openSDB(){
+					var url='https://'+document.getElementById('id_host').value+'/scale.php?code='+document.getElementById('id_pin').value;
+					var win=window.open(url,'_blank');
 					win.focus();
 				}
-				function enableAuthFields(check){
-					if(check.checked){
-						document.getElementById('id_table_net').style.display = 'none';
-						}else {
-						document.getElementById('id_table_net').style.display = '';
-					}
-				}
-				function submitFormNet(f) {
-					var form = document.getElementById(f);
-					var formData = new FormData(form);
-					var request = new XMLHttpRequest();
-					request.onreadystatechange = function(){
-						if (this.readyState === 4 ){
-							if (this.status === 200){
-								var rec = confirm('Пересоеденится с новыми настройками');
-								if(rec){
-									this.onreadystatechange = null;
-									this.open('GET','/rc',true);
-									this.send(null);
-								}
-								}else if (this.status === 400){
-								alert('Ошибка при сохранении настроек')
-							}
-						}
-					};
+				function enableAuthFields(check){if(check.checked){document.getElementById('id_table_net').style.display='none';}else{document.getElementById('id_table_net').style.display='';}}
+				function submitFormNet(f){
+					var form=document.getElementById(f);
+					var formData=new FormData(form);
+					var request=new XMLHttpRequest();
+					request.onreadystatechange=function(){
+						if (this.readyState===4){if (this.status===200){var rec=confirm('Пересоеденится с новыми настройками');if(rec){this.onreadystatechange=null;this.open('GET','/rc',true);this.send(null);}}else if(this.status===400){alert('Ошибка при сохранении настроек')}}};
 					request.open('POST','/settings.html',true);
 					request.send(formData);
 				}
 				function submitFormServer() {
-					var form = document.getElementById('form_server_id');
-					var formData = new FormData(form);
-					var request = new XMLHttpRequest();
-					request.onreadystatechange = function(){
-						if (this.readyState === 4 ){
-							if (this.status === 200){
-								alert('OK')
-								}else if (this.status === 400){
-								alert('ERROR')
-							}
-						}
-					};
+					var form=document.getElementById('form_server_id');
+					var formData=new FormData(form);
+					var request=new XMLHttpRequest();
+					request.onreadystatechange=function(){if(this.readyState===4){if(this.status===200){alert('OK');}else if(this.status===400){alert('ERROR');}}};
 					request.open('POST','/settings.html',true);
 					request.send(formData);
 				}
@@ -223,7 +146,7 @@ window.onload=function(){onBodyLoad();};function onBodyLoad(){w = new ScalesSock
 				</form>
 				<hr>
 				<form method='POST'><h5>Доступ к настройкам</h5>
-				<table><tr><td>ИМЯ:</td><td><input id='id_name_admin' name='name_admin' placeholder='имя админ'></td></tr><tr><td>ПАРОЛЬ:</td><td><input type='password' id='id_pass_admin' name='pass_admin' placeholder='пароль админ'></td></tr><tr><td></td><td><input type='submit' value='СОХРАНИТЬ'/></td></tr></table>
+				<table><tr><td>ИМЯ:</td><td><input id='id_n_admin' name='n_admin' placeholder='имя админ'></td></tr><tr><td>ПАРОЛЬ:</td><td><input type='password' id='id_p_admin' name='p_admin' placeholder='пароль админ'></td></tr><tr><td></td><td><input type='submit' value='СОХРАНИТЬ'/></td></tr></table>
 				</form>
 				</details>
 				</fieldset><br/>
@@ -242,69 +165,35 @@ window.onload=function(){onBodyLoad();};function onBodyLoad(){w = new ScalesSock
 
 //calibr.html
 const char calibr_html[] PROGMEM = R"(
-<!DOCTYPE html>
-<html lang='en'>
-<head>
-<meta charset='UTF-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/>
-<meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'/>
-<meta http-equiv='Pragma' content='no-cache'/>
-<title>Калибровка</title>
-<link rel='shortcut icon' href='favicon.png' type='image/png'>
-<link rel='stylesheet' type='text/css' href='global.css'>
-<style>#wt_id{display:inline;background: #fff;font-size:28px;font-family:Arial,sans-serif;color:#618ad2;margin-left:auto;margin-right:auto;}table{width:100%;}input{width:100%;text-align:right;font-size:18px;height:auto;}input[type='submit']{width:auto;}select{width:100%;text-align-last:right;font-size:18px;height:auto;border:1px solid #ccc;}</style>
-<script>
-var weight;
-var w;
-function ScalesSocket(h, p, fm, fe)  {
-	var host = h;var protocol = p;var timerWeight;var timerSocket;var ws;
-	var startWeightTimeout = function()  {
-		clearTimeout(timerWeight);
-		timerWeight = setTimeout(function () {
-			fe();
-		},5000);
+<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/><meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'/><meta http-equiv='Pragma' content='no-cache'/><title>Калибровка</title><link rel='shortcut icon' href='favicon.png' type='image/png'><link rel='stylesheet' type='text/css' href='global.css'>
+<style>#wt_id{display:inline;background: #fff;font-size:28px;font-family:Arial,sans-serif;color:#618ad2;margin-left:auto;margin-right:auto;}table{width:100%;}input{width:100%;text-align:right;font-size:18px;height:auto;}input[type='submit']{width:auto;}select{width:100%;text-align-last:right;font-size:18px;height:auto;border:1px solid #ccc;}</style><script>
+var weight;var w;
+function ScalesSocket(h,p,fm,fe){
+	var host=h;var protocol=p;var timerWeight;var timerSocket;var ws;
+	var startWeightTimeout=function(){clearTimeout(timerWeight);timerWeight=setTimeout(function(){fe();},5000);};
+	this.getWeight=function(){ws.send('/wt');startWeightTimeout();};
+	this.openSocket=function(){
+		ws=new WebSocket(host,protocol);
+		ws.onopen=this.getWeight;
+		ws.onclose=function(e){clearTimeout(timerWeight);starSocketTimeout();fe();};
+		ws.onerror=function(e){fe();};
+		ws.onmessage=function(e){fm(JSON.parse(e.data));}
 	};
-	this.getWeight = function () {
-		ws.send('/wt');
-		startWeightTimeout();
-	};
-	this.openSocket = function () {
-		ws = new WebSocket(host, protocol);
-		ws.onopen = this.getWeight;
-		ws.onclose = function(e){
-			clearTimeout(timerWeight);
-			starSocketTimeout();
-			fe();
-		};
-		ws.onerror = function(e){
-			fe();
-		};
-		ws.onmessage = function (e) {
-			fm(JSON.parse(e.data));
-		}
-	};
-	var starSocketTimeout = function () {
-		clearTimeout(timerSocket);
-		timerSocket = setTimeout(function () {
-			this.prototype.openSocket();
-		},5000);
-	}
+	var starSocketTimeout=function(){clearTimeout(timerSocket);timerSocket=setTimeout(function(){this.prototype.openSocket();},5000);}
 }
-function go() {
-	document.getElementById('wt_id').innerHTML = '---';
-}
+function go(){document.getElementById('wt_id').innerHTML = '---';}
 function setMax(){
-	var form = document.getElementById('form_c_id');
-	var formData = new FormData(form);
-	formData.append('update', true);
-	var request = new XMLHttpRequest();
-	request.onreadystatechange = function(){
-		if (this.readyState === 4 && this.status === 200){
+	var form=document.getElementById('form_c_id');
+	var formData=new FormData(form);
+	formData.append('update',true);
+	var request=new XMLHttpRequest();
+	request.onreadystatechange=function(){
+		if (this.readyState===4 && this.status===200){
 			if (this.responseText !== null){
-				document.getElementById('form_max').disabled = true;
-				var f = document.createElement('fieldset');
-				f.id = 'form_zero';
-				f.innerHTML = "<legend>Нулевой вес</legend><form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form><br><div id='wt_id'>---</div>";
+				document.getElementById('form_max').disabled=true;
+				var f=document.createElement('fieldset');
+				f.id='form_zero';
+				f.innerHTML="<legend>Нулевой вес</legend><form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form><br><div id='wt_id'>---</div>";
 				document.body.appendChild(f);
 				setupWeight();
 			}
@@ -314,17 +203,17 @@ function setMax(){
 	request.send(formData);
 }
 function setZero(){
-	var request = new XMLHttpRequest();
-	var formData = new FormData();
-	formData.append('zero', true);
-	formData.append('weightCal', '0');
-	request.onreadystatechange = function(){
-		if (this.readyState === 4 && this.status === 200){
+	var request=new XMLHttpRequest();
+	var formData=new FormData();
+	formData.append('zero',true);
+	formData.append('weightCal','0');
+	request.onreadystatechange=function(){
+		if (this.readyState===4 && this.status===200){
 			if (this.responseText !== null){
-				document.getElementById('form_zero').disabled = true;
-				var f = document.createElement('fieldset');
-				f.id = 'form_weight';
-				f.innerHTML = "<legend>Калиброваный вес</legend><form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.Значение вводится с точностью которое выбрано в пункте Точность измерения.</p><table><tr><td>ГИРЯ:</td><td><input id='gr_id' value='0' type='number' step='any' required placeholder='Калиброваная гиря'/></td></tr><tr><td>ГРУЗ:</td><td><input id='id_cal_wt' value='0' type='number' step='any' title='Введите значение веса установленого на весах'  max='100000' required placeholder='Калиброваный вес'/></td></tr><tr><td>ОШИБКА:</td><td><div id='dif_gr_id'></div></td></tr><tr><td><input type='submit' value='УСТАНОВИТЬ'/></td><td><a href='javascript:calculate();'>подобрать</a></td></tr></table></form>";
+				document.getElementById('form_zero').disabled=true;
+				var f=document.createElement('fieldset');
+				f.id='form_weight';
+				f.innerHTML="<legend>Калиброваный вес</legend><form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.Значение вводится с точностью которое выбрано в пункте Точность измерения.</p><table><tr><td>ГИРЯ:</td><td><input id='gr_id' value='0' type='number' step='any' required placeholder='Калиброваная гиря'/></td></tr><tr><td>ГРУЗ:</td><td><input id='id_cal_wt' value='0' type='number' step='any' title='Введите значение веса установленого на весах'  max='100000' required placeholder='Калиброваный вес'/></td></tr><tr><td>ОШИБКА:</td><td><div id='dif_gr_id'></div></td></tr><tr><td><input type='submit' value='УСТАНОВИТЬ'/></td><td><a href='javascript:calculate();'>подобрать</a></td></tr></table></form>";
 				document.body.appendChild(f);
 			}
 		}
@@ -341,7 +230,6 @@ function setWeight(){
 		if (this.readyState === 4){
 			if(this.status === 200){
 				if (this.responseText !== null){
-					//document.getElementById('form_weight').disabled = true;
 					if(document.getElementById('form_seal') === null){
 						var f = document.createElement('fieldset');
 						f.id = 'form_seal';
@@ -428,7 +316,7 @@ function GetSettings() {
 		weight = d.w;
 		document.getElementById('wt_id').innerHTML = weight;
 		try {
-			document.getElementById('form_seal').disabled = d.s === 0;
+			document.getElementById('form_seal').disabled = (d.s === false);
 			}catch (e){}
 			if(d.s){
 				document.getElementById('wt_id').setAttribute('style', 'background: #fff;');

@@ -67,13 +67,16 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 			_settings.hostPin = request->arg("pin");
 			goto save;	
 		}
-		if (request->hasArg("name_admin")){
-			_settings.scaleName = request->arg("name_admin");
-			_settings.scalePass = request->arg("pass_admin");
-			goto url;
+		if (request->hasArg("n_admin")){
+			_settings.scaleName = request->arg("n_admin");
+			_settings.scalePass = request->arg("p_admin");
+			goto save;
 		}		
 		save:
 		if (saveSettings()){
+			if (request->hasArg("n_admin")){
+				goto url;
+			}
 			return request->send(200, TEXT_HTML, "OK");
 		}
 		return request->send(400);
@@ -103,14 +106,15 @@ void CoreClass::begin(){
 bool CoreClass::saveEvent(const String& event, const String& value) {
 	String date = getDateTime();
 	bool flag = WiFi.status() == WL_CONNECTED?eventToServer(date, event, value):false;
-	File readFile = SPIFFS.open("/events.json", "r");
+	File readFile;
+	readFile = SPIFFS.open("/events.json", "r+");
     if (!readFile) {        
-        //readFile.close();
-		//if (!SPIFFS.exists("/events.json")){
+        readFile.close();
+		if (!SPIFFS.exists("/events.json")){
 			readFile = SPIFFS.open("/events.json", "w+");	
-		//}else{
-			//return false;	
-		//}
+		}else{
+			return false;	
+		}
     }
 	
     size_t size = readFile.size(); 	
@@ -118,7 +122,8 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
     readFile.readBytes(buf.get(), size);	
     readFile.close();
 		
-    DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(110));
+    //DynamicJsonBuffer jsonBuffer(JSON_OBJECT_SIZE(110));
+	DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(110));
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
     if (!json.containsKey(EVENTS_JSON)) {	
@@ -150,7 +155,8 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	//TODO add AP data to html
 	File saveFile = SPIFFS.open("/events.json", "w");
 	if (!saveFile) {
-		saveFile.close();
+		SPIFFS.remove("/events.json");
+		//saveFile.close();
 		return false;
 	}
 
@@ -244,9 +250,9 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 			_settings.hostPin = request->arg("pin");
 			goto save;	
 		}
-		if (request->hasArg("name_admin")){
-			_settings.scaleName = request->arg("name_admin");
-			_settings.scalePass = request->arg("pass_admin");
+		if (request->hasArg("n_admin")){
+			_settings.scaleName = request->arg("n_admin");
+			_settings.scalePass = request->arg("p_admin");
 			goto save;
 		}		
 		save:
@@ -293,8 +299,8 @@ bool CoreClass::saveSettings() {
 		JsonObject& scale = json.createNestedObject(SCALE_JSON);
 	}
 	
-	json[SCALE_JSON]["id_name_admin"] = _settings.scaleName;
-	json[SCALE_JSON]["id_pass_admin"] = _settings.scalePass;
+	json[SCALE_JSON]["id_n_admin"] = _settings.scaleName;
+	json[SCALE_JSON]["id_p_admin"] = _settings.scalePass;
 	json[SCALE_JSON]["id_auto"] = _settings.autoIp;
 	json[SCALE_JSON]["id_lan_ip"] = _settings.scaleLanIp;
 	json[SCALE_JSON]["id_gateway"] = _settings.scaleGateway;
@@ -352,8 +358,8 @@ bool CoreClass::_downloadSettings() {
 		return false;
 	}
 	if (json.containsKey(SCALE_JSON)){
-		_settings.scaleName = json[SCALE_JSON]["id_name_admin"].as<String>();
-		_settings.scalePass = json[SCALE_JSON]["id_pass_admin"].as<String>();
+		_settings.scaleName = json[SCALE_JSON]["id_n_admin"].as<String>();
+		_settings.scalePass = json[SCALE_JSON]["id_p_admin"].as<String>();
 		_settings.autoIp = json[SCALE_JSON]["id_auto"];
 		_settings.scaleLanIp = json[SCALE_JSON]["id_lan_ip"].as<String>();
 		_settings.scaleGateway = json[SCALE_JSON]["id_gateway"].as<String>();
@@ -374,6 +380,7 @@ bool CoreClass::_downloadSettings() {
 
 void powerOff(){
 	browserServer.stop();
+	SPIFFS.end();
 	Scale.power_down(); /// Выключаем ацп
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 	ESP.reset();
@@ -383,15 +390,9 @@ void reconnectWifi(AsyncWebServerRequest * request){
 	AsyncWebServerResponse *response = request->beginResponse_P(200, PSTR(TEXT_HTML), "RECONNECT...");
 	response->addHeader("Connection", "close");
 	request->onDisconnect([](){
-		//WiFi.setAutoConnect(false);
-		//WiFi.setAutoReconnect(false);
-		//connectWifi();
+		SPIFFS.end();
 		ESP.reset();});
 	request->send(response);
-	
-	//request->client()->close(true);
-	//request->onDisconnect([](){connectWifi();});
-	//connectWifi();	
 }
 
 int BatteryClass::fetchCharge(int times){

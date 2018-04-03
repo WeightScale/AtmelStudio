@@ -17,28 +17,12 @@ extern "C" uint32_t _SPIFFS_end;
 
 
 //HttpUpdaterClass httpUpdater;
-String updaterError;
-int command;
+
 
 HttpUpdaterClass::HttpUpdaterClass(const String& username, const String& password)
 :_username(username)
 ,_password(password),_authenticated(false)
 {}
-
-/*
-void HttpUpdaterClass::setup(BrowserServerClass *server, const char * path, const char * username, const char * password){
-	_server = server;
-	_username = (char *)username;
-	_password = (char *)password;
-
-	// handler for the /update form page						
-	_server->on(path, HTTP_GET, handleUpdatePage);						/ * Обновление локально * /
-
-	// handler for the /update form POST (once file upload finishes)
-	_server->on(path, HTTP_POST, handleEndUpdate, handleStartUpdate);	/ * Процесс обновления локально * /
-	
-	_server->on("/hu", HTTP_GET, handleHttpStartUpdate);				/ * Обновление чере интернет address/hu?host=sdb.net.ua/update.php * /
-}*/
 
 bool HttpUpdaterClass::canHandle(AsyncWebServerRequest *request){
 	if(request->url().equalsIgnoreCase("/update")){
@@ -56,15 +40,15 @@ void HttpUpdaterClass::handleRequest(AsyncWebServerRequest *request){
 		request->send_P(200, TEXT_HTML, serverIndex);
 		}else if (request->method()==HTTP_POST){
 		digitalWrite(2, LOW); //led off
-		if (command == U_SPIFFS){
+		if (_command == U_SPIFFS){
 			//delay(1000);
 			CORE->saveSettings();
 			Scale.saveDate();
 			request->redirect("/");
 			return;
 		}
-		if(updaterError && updaterError[0] != 0x00){
-			AsyncWebServerResponse * response = request->beginResponse(200, TEXT_HTML, updaterError);
+		if(_updaterError && _updaterError[0] != 0x00){
+			AsyncWebServerResponse * response = request->beginResponse(200, TEXT_HTML, _updaterError);
 			request->send(response);
 			}else{
 			AsyncWebServerResponse * response = request->beginResponse_P(200, TEXT_HTML, successResponse);
@@ -79,26 +63,24 @@ void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String
 	digitalWrite(LED, !digitalRead(LED));	//led on
 	
 	if(!index){
-		updaterError = String();
+		_updaterError = String();
 		if(!_authenticated){
-			//updaterError = "filed authenticated";
 			return;
 		}
 		size_t size;
 		if(filename.indexOf("spiffs.bin",0) != -1) {
-			command = U_SPIFFS;
+			_command = U_SPIFFS;
 			size = ((size_t) &_SPIFFS_end - (size_t) &_SPIFFS_start);
 		}else if(filename.indexOf("ino.bin",0) != -1) {
-			command = U_FLASH;
+			_command = U_FLASH;
 			size = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 		}else{
-			//updaterError = "error file";
 			request->client()->close(true);
 			return;
 		}
 		
 		Update.runAsync(true);
-		if(!Update.begin(size, command)){
+		if(!Update.begin(size, _command)){
 			setUpdaterError();
 		}
 	}
@@ -114,10 +96,10 @@ void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String
 	}		
 }
 
-void setUpdaterError(){	
+void HttpUpdaterClass::setUpdaterError(){	
 	StreamString str;
 	Update.printError(str);
-	updaterError = str.c_str();
+	_updaterError = str.c_str();
 }
 
 /*
