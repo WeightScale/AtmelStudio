@@ -116,12 +116,13 @@
                                 }catch (e){}
                             }
                         }catch(e){
-                            alert(e.toString());
-                        }finally {
-                            document.body.style.visibility = 'visible';
-                            GetValue();
+                            alert("ОШИБКА "+e.toString());
                         }
+                    }else{
+                        alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");
                     }
+                    document.body.style.visibility = 'visible';
+                    GetValue();
                 }
             };
             http_request.open('GET', '/settings.json', true);
@@ -185,7 +186,7 @@
 <fieldset><details><summary>Конфигурация сети</summary>
     <br>
     <h5 align='left'><b>Точка доступа WiFi роутера</b></h5>
-    <form id='form_id' action='javascript:submitFormNet('form_id')'>
+    <form id='form_id' action='javascript:submitFormNet("form_id")'>
         Получать IP:
         <input type='checkbox' id='id_auto' name='auto' onclick='enableAuthFields(this);'>
         <div id='id_ip'></div>

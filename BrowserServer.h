@@ -32,12 +32,7 @@ typedef struct {
 	String wwwPassword;
 } strHTTPAuth;
 
-const char netIndex[]= /*PROGMEM =*/ R"(	<html><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
-												<body><form method='POST'>
-												<input name='ssids'><br/>
-												<input type='password' name='key'><br/>
-												<input type='submit' value='ÑÎÕÐÀÍÈÒÜ'>
-												</form></body></html>)";
+
 
 class AsyncWebServer;
 
@@ -100,7 +95,10 @@ extern AsyncWebSocket ws;
 //void setUpdateMD5();
 //void handleFileReadAdmin(AsyncWebServerRequest*);
 void handleFileReadAuth(AsyncWebServerRequest*);
-void handleAccessPoint(AsyncWebServerRequest*);
+/*
+#if! HTML_PROGMEM
+	void handleAccessPoint(AsyncWebServerRequest*);
+#endif*/
 void handleScaleProp(AsyncWebServerRequest*);
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 

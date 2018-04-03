@@ -5,19 +5,99 @@
 #include "DateTime.h"
 #include "BrowserServer.h"
 #include "HttpUpdater.h"
+#include "web_server_config.h"
 
-CoreClass CORE;
+CoreClass * CORE;
+BatteryClass BATTERY;
 
-CoreClass::CoreClass(){
+CoreClass::CoreClass(const String& username, const String& password):
+_username(username),
+_password(password),
+_authenticated(false){
+	begin();
 }
 
 CoreClass::~CoreClass(){}
 
-void CoreClass::begin(){
-	SPIFFS.begin();	
+bool CoreClass::canHandle(AsyncWebServerRequest *request){	
+	if(request->url().equalsIgnoreCase("/settings.html")){
+		goto auth;
+	}
+#if HTML_PROGMEM
+	else if(request->url().equalsIgnoreCase("/sn")){
+		goto auth;
+	}
+#endif
+	else
+		return false;
+	auth:
+		if (!request->authenticate(_settings.scaleName.c_str(), _settings.scalePass.c_str())){
+			if(!request->authenticate(_username.c_str(), _password.c_str())){
+				request->requestAuthentication();
+				return false;
+			}
+		}
+		return true;
+}
+
+void CoreClass::handleRequest(AsyncWebServerRequest *request){
+	if (request->args() > 0){		
+		String message = " ";
+		if (request->hasArg("ssid")){
+			_settings.autoIp = false;
+			if (request->hasArg("auto"))
+				_settings.autoIp = true;
+			else
+				_settings.autoIp = false;
+			_settings.scaleLanIp = request->arg("lan_ip");			
+			_settings.scaleGateway = request->arg("gateway");
+			_settings.scaleSubnet = request->arg("subnet");
+			_settings.scaleWlanSSID = request->arg("ssid");
+			_settings.scaleWlanKey = request->arg("key");	
+			goto save;
+		}		
+		if(request->hasArg("data")){
+			DateTimeClass DateTime(request->arg("data"));
+			Rtc.SetDateTime(DateTime.toRtcDateTime());
+			request->send(200, TEXT_HTML, getDateTime());
+			return;
+		}
+		if (request->hasArg("host")){
+			_settings.hostUrl = request->arg("host");
+			_settings.hostPin = request->arg("pin");
+			goto save;	
+		}
+		if (request->hasArg("name_admin")){
+			_settings.scaleName = request->arg("name_admin");
+			_settings.scalePass = request->arg("pass_admin");
+			goto url;
+		}		
+		save:
+		if (saveSettings()){
+			return request->send(200, TEXT_HTML, "OK");
+		}
+		return request->send(400);
+	}
+	url:	
+	#if HTML_PROGMEM
+		request->send_P(200,F(TEXT_HTML), settings_html);
+	#else
+		if(request->url().equalsIgnoreCase("/sn")){
+			request->send_P(200, F(TEXT_HTML), netIndex);
+		}else
+			request->send(SPIFFS, request->url());
+	#endif
+		
+}
+
+void CoreClass::begin(){		
 	Rtc.Begin();
 	_downloadSettings();
-	_callibratedBaterry();	
+	BATTERY.setMax(_settings.bat_max);
+	if(BATTERY.callibrated()){		
+		_settings.bat_max = BATTERY.getMax();
+		saveSettings();	
+	};	
 }
 
 bool CoreClass::saveEvent(const String& event, const String& value) {
@@ -112,6 +192,8 @@ bool CoreClass::eventToServer(const String& date, const String& type, const Stri
 	return false;
 }
 
+
+/*
 void CoreClass::handleSetAccessPoint(AsyncWebServerRequest * request){	
 	if (request->hasArg("ssids")){
 		_settings.autoIp = true;
@@ -127,8 +209,9 @@ void CoreClass::handleSetAccessPoint(AsyncWebServerRequest * request){
 		response = request->beginResponse(400);
 	}
 	request->send(response);	
-}
+}*/
 
+#if! HTML_PROGMEM
 void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {	
 	if (!browserServer.isAuthentified(request))
 		return request->requestAuthentication();
@@ -145,8 +228,7 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 			_settings.scaleSubnet = request->arg("subnet");
 			//Serial.println("Save ssid");
 			//CORE.setSSID(request->arg("ssid"));		
-			_settings.scaleWlanSSID = request->arg("ssid");
-			//Serial.println(CORE.getSSID());
+			_settings.scaleWlanSSID = request->arg("ssid");			
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
 		}
@@ -172,10 +254,11 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 			return request->send(200, TEXT_HTML, "OK");
 		}
 		return request->send(400);	
-	} 
-	
+	} 		
 	request->send(SPIFFS, request->url());
 }
+#endif
+
 
 String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){
 	
@@ -194,13 +277,6 @@ String CoreClass::getHash(const String& code, const String& date, const String& 
 		hash += "%"; hash += d1; hash += d2;
 	} 
 	return hash;
-}
-
-int CoreClass::getBattery(int times){
-	_charge = getADC(times);
-	_charge = constrain(_charge, MIN_CHG, _settings.bat_max);
-	_charge = map(_charge, MIN_CHG, _settings.bat_max, 0, 100);
-	return _charge;	
 }
 
 bool CoreClass::saveSettings() {	
@@ -250,7 +326,7 @@ bool CoreClass::_downloadSettings() {
 	_settings.scaleSubnet = "255.255.255.0";
 	_settings.hostUrl = HOST_URL;
 	_settings.timeout = TIMEOUT_HTTP;
-	_settings.bat_max = MIN_CHG+1;
+	_settings.bat_max = MIN_CHG;
 	File serverFile;
 	if (SPIFFS.exists(SETTINGS_FILE)){
 		serverFile = SPIFFS.open(SETTINGS_FILE, "r");	
@@ -290,9 +366,7 @@ bool CoreClass::_downloadSettings() {
 		_settings.hostUrl = json[SERVER_JSON]["id_host"].as<String>();
 		_settings.hostPin = json[SERVER_JSON]["id_pin"].as<String>();	
 		_settings.timeout = json[SERVER_JSON]["timeout"];	
-	}
-		
-	_settings.bat_max = constrain(_settings.bat_max, MIN_CHG+1, 1024);
+	}	
 	return true;
 }
 
@@ -311,7 +385,8 @@ void reconnectWifi(AsyncWebServerRequest * request){
 	request->onDisconnect([](){
 		//WiFi.setAutoConnect(false);
 		//WiFi.setAutoReconnect(false);
-		connectWifi();});
+		//connectWifi();
+		ESP.reset();});
 	request->send(response);
 	
 	//request->client()->close(true);
@@ -319,7 +394,14 @@ void reconnectWifi(AsyncWebServerRequest * request){
 	//connectWifi();	
 }
 
-int CoreClass::getADC(byte times){
+int BatteryClass::fetchCharge(int times){
+	_charge = _get_adc(times);
+	_charge = constrain(_charge, MIN_CHG, _max);
+	_charge = map(_charge, MIN_CHG, _max, 0, 100);
+	return _charge;
+}
+
+int BatteryClass::_get_adc(byte times){
 	long sum = 0;
 	for (byte i = 0; i < times; i++) {
 		sum += analogRead(A0);
@@ -327,17 +409,20 @@ int CoreClass::getADC(byte times){
 	return times == 0?sum :sum / times;	
 }
 
-void CoreClass::_callibratedBaterry(){
-	int charge = getADC();
-	
+bool BatteryClass::callibrated(){
+	bool flag = false;
+	int charge = _get_adc();	
+	int t = _max;
+	_max = constrain(t, MIN_CHG, 1024);
+	if(t != _max){
+		flag = true;	
+	}
 	charge = constrain(charge, MIN_CHG, 1024);
-	if (_settings.bat_max < MIN_CHG){
-		_settings.bat_max = MIN_CHG;
+	if (_max < charge){
+		_max = charge;	
+		flag = true;
 	}
-	if (_settings.bat_max < charge){
-		_settings.bat_max = charge;	
-		saveSettings();
-	}
+	return flag;
 }
 
 

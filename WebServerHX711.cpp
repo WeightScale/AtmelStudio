@@ -1,4 +1,4 @@
-#define PROGMEM_PAGE
+//#define PROGMEM_PAGE
 #include <ESP8266WiFi.h>
 //#include <ESP8266mDNS.h>
 #include "BrowserServer.h"
@@ -31,7 +31,7 @@ TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
 Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
-Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедениться с точкой доступа каждые 60 секунд */
+Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедениться с точкой доступа каждые 20 секунд */
 Task taskWeight(takeWeight,100);
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
@@ -51,8 +51,10 @@ void setup() {
 		delay(100);
 	};*/
 	
-	CORE.begin();
-	delay(1000);	
+	//CORE.begin();
+	//delay(1000);
+	browserServer.begin();	
+	Scale.setup(&browserServer);	
 	takeBattery();
   
 	taskController.add(&taskBlink);
@@ -73,11 +75,8 @@ void setup() {
 	WiFi.hostname(MY_HOST_NAME);
 	WiFi.softAPConfig(apIP, apIP, netMsk);
 	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
-	delay(500); 
-	
-	connectWifi();
-	browserServer.begin();	
-	Scale.setup(&browserServer); 
+	delay(500); 	
+	connectWifi();	
 	//CORE.saveEvent("power", "ON");
 }
 
@@ -92,12 +91,12 @@ void takeBlink() {
 
 /**/
 void takeBattery(){
-	CORE.getBattery(1);
+	BATTERY.fetchCharge(1);
 }
 
 void takeWeight(){
-	taskPower.updateCache();
 	Scale.fetchWeight();
+	taskWeight.updateCache();
 }
 
 void powerSwitchInterrupt(){
@@ -134,7 +133,7 @@ void connectWifi() {
 	}
 	connect:
 		for (int i = 0; i < n; ++i)	{
-			if(WiFi.SSID(i) == CORE.getSSID().c_str()){
+			if(WiFi.SSID(i) == CORE->getSSID().c_str()){
 				//USE_SERIAL.println(CORE.getSSID());
 				String ssid_scan;
 				int32_t rssi_scan;
@@ -144,14 +143,14 @@ void connectWifi() {
 				bool hidden_scan;
 
 				WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, BSSID_scan, chan_scan, hidden_scan);
-				if (!CORE.isAuto()){
-					if (lanIp.fromString(CORE.getLanIp()) && gateway.fromString(CORE.getGateway())){
+				if (!CORE->isAuto()){
+					if (lanIp.fromString(CORE->getLanIp()) && gateway.fromString(CORE->getGateway())){
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 					}
 				}
 				//Serial.println(String(chan_scan));
 				WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
-				WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str(),chan_scan,BSSID_scan);
+				WiFi.begin ( CORE->getSSID().c_str(), CORE->getPASS().c_str(),chan_scan,BSSID_scan);
 				//WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());
 				//USE_SERIAL.println("waitForConnectResult");
 				int status = WiFi.waitForConnectResult();
@@ -176,7 +175,7 @@ void loop() {
 	dnsServer.processNextRequest();
 	//HTTP
 	if (Scale.isSave()){
-		CORE.saveEvent("weight", String(Scale.getSaveValue())+"_kg");
+		CORE->saveEvent("weight", String(Scale.getSaveValue())+"_kg");
 		Scale.setIsSave(false);
 	}
 	powerSwitchInterrupt();

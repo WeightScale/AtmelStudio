@@ -1,6 +1,7 @@
 #include <FS.h>
 #include <ArduinoJson.h>
 #include "Scale.h"
+#include "web_server_config.h"
 
 ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 
@@ -21,7 +22,12 @@ void ScaleClass::setup(BrowserServerClass *server){
 		Serial.println("saveValueCalibratedHttp GET");
 		saveValueCalibratedHttp(request);	
 	});*/
-	_server->on(PAGE_FILE, HTTP_POST, [this](AsyncWebServerRequest * request) {								/* Открыть страницу калибровки.*/
+	/*#if HTML_PROGMEM
+		_server->on(PAGE_FILE,[](AsyncWebServerRequest * reguest){	reguest->send_P(200,"text/html",calibr_html);});
+	#else
+	
+	#endif*/
+	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {								/* Открыть страницу калибровки.*/
 		if(!request->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
 			if (!_server->checkAdminAuth(request)){
 				return request->requestAuthentication();
@@ -91,8 +97,13 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 		err:
 			return request->send(400, TEXT_HTML, "Ошибка ");	
 	}
-	url:		
-	request->send(SPIFFS, request->url());
+	url:
+	#if HTML_PROGMEM
+		request->send_P(200,F(TEXT_HTML), calibr_html);
+	#else
+		request->send(SPIFFS, request->url());
+	#endif		
+	
 	
 	//}
 }
@@ -282,15 +293,16 @@ void ScaleClass::detectStable(float w){
 		weight_temp = w;
 }
 
+/*
 void ScaleClass::handleWeight(AsyncWebServerRequest * request){
-	/*char buffer[10];
+	/ *char buffer[10];
 	float w = Scale.getWeight();
 	Scale.formatValue(w, buffer	);
 	Scale.detectStable(w);
 	
-	taskPower.updateCache();*/
-	request->send(200, "text/plain", String("{\"w\":\""+String(Scale.getTest())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
-}
+	taskPower.updateCache();* /
+	request->send(200, "text/plain", String("{\"w\":\""+String(Scale.getTest())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
+}*/
 
 void handleSeal(AsyncWebServerRequest * request){
 	randomSeed(Scale.readAverage());

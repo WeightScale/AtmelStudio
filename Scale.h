@@ -71,7 +71,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		void setup(BrowserServerClass *server/*, const char * username, const char * password*/);	
 		bool saveDate();
 		void saveValueCalibratedHttp(AsyncWebServerRequest *);
-		void handleWeight(AsyncWebServerRequest*);
+		//void handleWeight(AsyncWebServerRequest*);
 		void fetchWeight();
 		void mathScale(float referenceW, long calibrateW);
 		void mathRound();

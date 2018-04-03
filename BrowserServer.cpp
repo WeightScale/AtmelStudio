@@ -1,4 +1,3 @@
-//#include <ESP8266WebServer.h>
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFSEditor.h>
@@ -12,6 +11,7 @@
 #include "Version.h"
 #include "DateTime.h"
 #include "HttpUpdater.h"
+#include "web_server_config.h"
 
 /* */
 //ESP8266HTTPUpdateServer httpUpdater;
@@ -36,13 +36,15 @@ BrowserServerClass::BrowserServerClass(uint16_t port) : AsyncWebServer(port) {}
 BrowserServerClass::~BrowserServerClass(){}
 	
 void BrowserServerClass::begin() {
-	
+	SPIFFS.begin();
 	/* Setup the DNS server redirecting all the domains to the apIP */
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(DNS_PORT, "*", apIP);	
 	_downloadHTTPAuth();
 	ws.onEvent(onWsEvent);
 	addHandler(&ws);
+	CORE = new CoreClass(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
+	addHandler(CORE);
 	addHandler(new CaptiveRequestHandler()).setFilter(ON_AP_FILTER);
 	addHandler(new SPIFFSEditor(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str()));	
 	addHandler(new HttpUpdaterClass("sa", "654321"));
@@ -51,15 +53,22 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){
+	#if HTML_PROGMEM
+		on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});
+		on("/settings.html",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),settings_html);});	
+		serveStatic("/", SPIFFS, "/");		
+	#else
+		on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Открыть страницу настроек или сохранить значения. */
+		//on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Установить Настройки точки доступа */
+		//on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Установить Настройки точки доступа */
+		serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+	#endif // PROGMEM_PAGE	
+		
 	on("/wt",HTTP_GET, [](AsyncWebServerRequest * request){					/* Получить вес и заряд. */
-		request->send(200, "text/html", String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
-	});				
-
-				
+		request->send(200, "text/html", String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
+	});		
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
-	on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Установить Настройки точки доступа */
-	on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Установить Настройки точки доступа */
-	on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Открыть страницу настроек или сохранить значения. */
+		
 	on("/settings.json", handleFileReadAuth);
 	on("/sv", handleScaleProp);									/* Получить значения. */
 	on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
@@ -81,10 +90,11 @@ void BrowserServerClass::init(){
 	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
 	//ask server to track these headers
 	collectHeaders(headerkeys, headerkeyssize );*/
-	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+	
 	//serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
 	//rewrite("/", "index.html").setFilter(ON_STA_FILTER);
 	//rewrite("/", "index-ap.html").setFilter(ON_AP_FILTER);
+	
 	onNotFound([](AsyncWebServerRequest *request){
 		request->send(404);
 	});
@@ -164,7 +174,7 @@ void BrowserServerClass::restart_esp() {
 }*/
 
 bool BrowserServerClass::isAuthentified(AsyncWebServerRequest * request){
-	if (!request->authenticate(CORE.getNameAdmin().c_str(), CORE.getPassAdmin().c_str())){
+	if (!request->authenticate(CORE->getNameAdmin().c_str(), CORE->getPassAdmin().c_str())){
 		if (!checkAdminAuth(request)){
 			return false;
 		}
@@ -204,11 +214,14 @@ void handleScaleProp(AsyncWebServerRequest * request){
 	request->send(200, "text/plain", values);*/
 }
 
+/*
+#if! HTML_PROGMEM
 void handleAccessPoint(AsyncWebServerRequest * request){
 	if (!browserServer.isAuthentified(request))
 		return request->requestAuthentication();
-	request->send(200, TEXT_HTML, netIndex);	
+	request->send_P(200, F(TEXT_HTML), netIndex);	
 }
+#endif*/
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
 	if(type == WS_EVT_CONNECT){	
@@ -219,11 +232,21 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 			msg += (char) data[i];
 		}
 		if (msg.equals("/wt")){
-			/*char buffer[10];		
-			float w = Scale.forTest(ESP.getFreeHeap());
-			Scale.formatValue(w,buffer);
-			Scale.detectStable(w);*/			
-			client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
+			DynamicJsonBuffer jsonBuffer;
+			JsonObject& json = jsonBuffer.createObject();
+			json["w"]= String(Scale.getBuffer());
+			json["c"]= BATTERY.getCharge();
+			json["s"]= Scale.getStableWeight();
+			size_t len = json.measureLength();
+			AsyncWebSocketMessageBuffer * buffer = ws.makeBuffer(len);
+			if (buffer) {
+				json.printTo((char *)buffer->get(), len + 1);
+				if (client) {
+					client->text(buffer);
+				}
+			}	
+			taskPower.updateCache();	
+			//client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
 		}
 	}
 }

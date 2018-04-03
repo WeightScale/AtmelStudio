@@ -49,23 +49,29 @@ bool HttpUpdaterClass::canHandle(AsyncWebServerRequest *request){
 
 void HttpUpdaterClass::handleRequest(AsyncWebServerRequest *request){
 	if(_username.length() && _password.length() && !request->authenticate(_username.c_str(), _password.c_str()))
-		return request->requestAuthentication();
+	return request->requestAuthentication();
 	_authenticated = true;
+	Serial.println(String(Update.hasError()));
 	if(request->method() == HTTP_GET){
-		request->send_P(200, TEXT_HTML, serverIndex);	
-	}else if (request->method()==HTTP_POST){
+		request->send_P(200, TEXT_HTML, serverIndex);
+		}else if (request->method()==HTTP_POST){
 		digitalWrite(2, LOW); //led off
 		if (command == U_SPIFFS){
 			//delay(1000);
-			CORE.saveSettings();
+			CORE->saveSettings();
 			Scale.saveDate();
 			request->redirect("/");
 			return;
 		}
-		AsyncWebServerResponse *response = request->beginResponse_P(200, TEXT_HTML, successResponse);
-		response->addHeader("Connection", "close");
-		request->send(response);
-		request->onDisconnect([](){ESP.reset();});
+		if(updaterError && updaterError[0] != 0x00){
+			AsyncWebServerResponse * response = request->beginResponse(200, TEXT_HTML, updaterError);
+			request->send(response);
+			}else{
+			AsyncWebServerResponse * response = request->beginResponse_P(200, TEXT_HTML, successResponse);
+			response->addHeader("Connection", "close");
+			request->send(response);
+			request->onDisconnect([](){ESP.reset();});
+		}
 	}
 }
 
@@ -75,7 +81,7 @@ void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String
 	if(!index){
 		updaterError = String();
 		if(!_authenticated){
-			updaterError = "filed authenticated";
+			//updaterError = "filed authenticated";
 			return;
 		}
 		size_t size;
@@ -86,7 +92,8 @@ void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String
 			command = U_FLASH;
 			size = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 		}else{
-			updaterError = "error file";
+			//updaterError = "error file";
+			request->client()->close(true);
 			return;
 		}
 		
@@ -192,7 +199,7 @@ void HttpUpdaterClass::handleHttpStartUpdate(AsyncWebServerRequest * request){		
 		url += host;
 		t_httpUpdate_return ret = ESPhttpUpdate.updateSpiffs(url,SPIFFS_VERSION);
 		if (ret == HTTP_UPDATE_OK){
-			CORE.saveSettings();
+			CORE->saveSettings();
 			Scale.saveDate();
 			ret = ESPhttpUpdate.update(url, SKETCH_VERSION);
 		}

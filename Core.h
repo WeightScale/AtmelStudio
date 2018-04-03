@@ -38,6 +38,13 @@ extern Task taskBattery;							/*  */
 extern Task taskPower;
 extern void connectWifi();
 
+const char netIndex[] PROGMEM = R"(<html><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
+										<body><form method='POST'>
+										<input name='ssid'><br/>
+										<input type='password' name='key'><br/>
+										<input type='submit' value='СОХРАНИТЬ'>
+										</form></body></html>)";
+
 typedef struct {	
 	bool autoIp;
 	String scaleName;
@@ -53,18 +60,21 @@ typedef struct {
 	int bat_max;	
 } settings_t;
 
-class CoreClass /*: public HX711, public ScaleMemClass*/{
-	protected:
+class CoreClass : public AsyncWebHandler{
+	private:
 	settings_t _settings;
-	unsigned int _charge;
+	
+	String _username;
+	String _password;
+	bool _authenticated;
 	
 	bool saveAuth();
 	bool loadAuth();		
 	bool _downloadSettings();
-	void _callibratedBaterry();		
+			
 
 	public:			
-		CoreClass();
+		CoreClass(const String& username, const String& password);
 		~CoreClass();
 		void begin();
 		bool saveSettings();
@@ -77,23 +87,47 @@ class CoreClass /*: public HX711, public ScaleMemClass*/{
 		void setPASS(const String& pass){_settings.scaleWlanKey = pass;};	
 		String& getPASS(){return _settings.scaleWlanKey;};
 		bool saveEvent(const String&, const String&);
+		void setBatMax(int m){_settings.bat_max = m;};
 		String getIp();
 		bool eventToServer(const String&, const String&, const String&);
-		void saveValueSettingsHttp(AsyncWebServerRequest*);	
+		#if! HTML_PROGMEM
+			void saveValueSettingsHttp(AsyncWebServerRequest*);
+		#endif			
 		void handleSetAccessPoint(AsyncWebServerRequest*);	
 		String getHash(const String&, const String&, const String&, const String&);
-		int getBattery(int);		
-		void setCharge(unsigned int ch){_charge = ch;};
-		unsigned int getCharge(){return _charge;};
-		bool isAuto(){return _settings.autoIp;};
-		int getADC(byte times = 1);
+				
+		
+		bool isAuto(){return _settings.autoIp;};		
+		virtual bool canHandle(AsyncWebServerRequest *request) override final;
+		virtual void handleRequest(AsyncWebServerRequest *request) override final;
+		virtual bool isRequestHandlerTrivial() override final {return false;}
 		
 		
 };
 
+class BatteryClass{	
+	protected:
+		unsigned int _charge;
+		int _max;
+		int _get_adc(byte times = 1);
+	
+	public:
+		BatteryClass(){};
+		~BatteryClass(){};
+		int fetchCharge(int);
+		bool callibrated();		
+		void setCharge(unsigned int ch){_charge = ch;};
+		unsigned int getCharge(){return _charge;};
+		void setMax(int m){_max = m;};	
+		int getMax(){return _max;};
+};
+
+
+
 void powerOff();
 void reconnectWifi(AsyncWebServerRequest*);
-extern CoreClass CORE;
+extern CoreClass * CORE;
+extern BatteryClass BATTERY;
 
 #endif //_CORE_h
 
