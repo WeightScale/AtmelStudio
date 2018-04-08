@@ -1,4 +1,4 @@
-/*
+п»ї/*
  * web_server_config.h
  *
  * Created: 01.04.2018 8:50:55
@@ -9,7 +9,7 @@
 #ifndef WEB_SERVER_CONFIG_H_
 #define WEB_SERVER_CONFIG_H_
 
-//Использовать веб страницы из flash памяти
+//РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІРµР± СЃС‚СЂР°РЅРёС†С‹ РёР· flash РїР°РјСЏС‚Рё
 #define HTML_PROGMEM 1
 #if HTML_PROGMEM
 	#include "Page.h"

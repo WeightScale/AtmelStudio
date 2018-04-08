@@ -14,109 +14,17 @@ window.onload=function(){onBodyLoad();};function onBodyLoad(){w = new ScalesSock
 
 
 //settings.html
-	const char settings_html[] PROGMEM = R"(<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><title>Настройки</title><link rel="stylesheet" type="text/css" href="global.css"><style>input:focus{background: #FA6;outline: none;}table{width:100%;}input{width:100%;text-align:right;font-size:18px;}input[type=submit]{width:auto;}</style><script>
-	function setOnBlur( input){
-		setTimeout(function(){
-			if (document.activeElement===input){
-				input.onblur=function(){
-					if(input.value.length===0 || !CheckIP(input)){
-						setTimeout(function(){input.focus()},0)
-					}else
-						input.onblur=null
-				}
-			}
-		},0)
-	}
-	function CheckIP(input){
-		ipParts=input.value.split(".");
-		if(ipParts.length===4){
-			for(i=0;i<4;i++){
-				TheNum=parseInt(ipParts[i]);
-				if(TheNum>=0 && TheNum <= 255){}
-				else{break;}
-			}
-			if(i==4)
-			return true;
-		}
-		return false;
-	}
-	function sendDateTime(){
-		var formData=new FormData();
-		var date=new Date();
-		var d=date.toLocaleDateString();
-		d+="-"+date.toLocaleTimeString();
-		formData.append('data',d.replace(/[^\x20-\x7E]+/g,''));
-		var request=new XMLHttpRequest();
-		request.onreadystatechange=function(){
-			if (this.readyState===4 && this.status===200){
-				if (this.responseText !== null){document.getElementById('id_date').innerHTML="<div>Обновлено<br/>"+this.responseText+"</div>";}
-			}
-		};
-		request.open("POST","settings.html?"+new Date().getTime(),true);
-		request.send(formData);
-	}	
-	function GetValue() {
-		var http_request=new XMLHttpRequest();
-		http_request.overrideMimeType('application/json');
-		http_request.onreadystatechange=function(){
-			if (this.readyState===4){
-				if(this.status===200){
-					var json=JSON.parse(this.responseText);
-					for (entry in json) {
-						try {document.getElementById(entry).innerHTML = json[entry];}catch (e){}
-						}
-					}
-				}
-			};
-			http_request.open("GET","/sv",true);
-			http_request.send(null);
-		}
-		function GetSettings() {
-			var http_request=new XMLHttpRequest();
-			http_request.overrideMimeType('application/json');
-			http_request.onreadystatechange=function(){
-				if (this.readyState===4){
-					if(this.status===200){
-						try{
-							var json=JSON.parse(http_request.responseText);
-							var scale=json.scale;
-							for (entry in scale) {
-								try {if(document.getElementById(entry).type==='checkbox'){document.getElementById(entry).checked=scale[entry];enableAuthFields(document.getElementById(entry));}else document.getElementById(entry).value=scale[entry];}catch (e){}}
-								var server=json.server;
-								for (entry in server){
-									try{document.getElementById(entry).value=server[entry];}catch (e){}}}catch(e){alert("ОШИБКА "+e.toString());}
-								}else{alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");}
-							document.body.style.visibility='visible';
-							GetValue();
-						}
-					};
-					http_request.open('GET','/settings.json', true);
-					http_request.send(null);
-				}
-				window.onload=function(){GetSettings();};
-				function openSDB(){
-					var url='https://'+document.getElementById('id_host').value+'/scale.php?code='+document.getElementById('id_pin').value;
-					var win=window.open(url,'_blank');
-					win.focus();
-				}
-				function enableAuthFields(check){if(check.checked){document.getElementById('id_table_net').style.display='none';}else{document.getElementById('id_table_net').style.display='';}}
-				function submitFormNet(f){
-					var form=document.getElementById(f);
-					var formData=new FormData(form);
-					var request=new XMLHttpRequest();
-					request.onreadystatechange=function(){
-						if (this.readyState===4){if (this.status===200){var rec=confirm('Пересоеденится с новыми настройками');if(rec){this.onreadystatechange=null;this.open('GET','/rc',true);this.send(null);}}else if(this.status===400){alert('Ошибка при сохранении настроек')}}};
-					request.open('POST','/settings.html',true);
-					request.send(formData);
-				}
-				function submitFormServer() {
-					var form=document.getElementById('form_server_id');
-					var formData=new FormData(form);
-					var request=new XMLHttpRequest();
-					request.onreadystatechange=function(){if(this.readyState===4){if(this.status===200){alert('OK');}else if(this.status===400){alert('ERROR');}}};
-					request.open('POST','/settings.html',true);
-					request.send(formData);
-				}
+const char settings_html[] PROGMEM = R"(<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/><meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/><meta http-equiv="Pragma" content="no-cache"/><title>Настройки</title><link rel="stylesheet" type="text/css" href="global.css"><style>input:focus{background: #FA6;outline: none;}table{width:100%;}input,select{width:100%;text-align:right;font-size:18px;}input[type=submit]{width:auto;}input[type=checkbox]{width:auto;}</style><script>
+function setOnBlur(input){setTimeout(function(){if (document.activeElement===input){input.onblur=function(){if(input.value.length===0 || !CheckIP(input)){setTimeout(function(){input.focus()},0);}else input.onblur=null;}}},0)}
+function CheckIP(input){ipParts=input.value.split(".");if(ipParts.length===4){for(i=0;i<4;i++){TheNum=parseInt(ipParts[i]);if(TheNum>=0 && TheNum <= 255){}else{break;}}if(i==4)return true;}return false;}
+function sendDateTime(){var fd=new FormData();var date=new Date();var d=date.toLocaleDateString();d+="-"+date.toLocaleTimeString();fd.append('data',d.replace(/[^\x20-\x7E]+/g,''));var req=new XMLHttpRequest();req.onreadystatechange=function(){if (this.readyState===4 && this.status===200){if(this.responseText !== null){document.getElementById('id_date').innerHTML="<div>Обновлено<br/>"+this.responseText+"</div>";}}};req.open("POST","settings.html?"+new Date().getTime(),true);req.send(fd);}	
+function GetValue(){var req=new XMLHttpRequest();req.overrideMimeType('application/json');req.onreadystatechange=function(){if (this.readyState===4){if(this.status===200){var json=JSON.parse(this.responseText);for(entry in json){try{document.getElementById(entry).innerHTML=json[entry];}catch (e){}}}}};req.open('GET','/sv',true);req.send(null);}
+function GetSettings(){var req=new XMLHttpRequest();req.overrideMimeType('application/json');req.onreadystatechange=function(){if (this.readyState===4){if(this.status===200){try{var json=JSON.parse(this.responseText);var scale=json.scale;for(entry in scale){try{if(document.getElementById(entry).type==='checkbox'){document.getElementById(entry).checked=scale[entry];enableAuthFields(document.getElementById(entry));}else document.getElementById(entry).value=scale[entry];}catch (e){}}var server=json.server;for(entry in server){try{document.getElementById(entry).value=server[entry];}catch (e){}}}catch(e){alert("ОШИБКА "+e.toString());}}else{alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");}document.body.style.visibility='visible';GetValue();}};req.open('GET','/settings.json', true);req.send(null);}
+window.onload=function(){GetSettings();};
+function openSDB(){var url='https://'+document.getElementById('id_host').value+'/scale.php?code='+document.getElementById('id_pin').value;var win=window.open(url,'_blank');win.focus();}
+function enableAuthFields(check){if(check.checked){document.getElementById('id_table_net').style.display='none';}else{document.getElementById('id_table_net').style.display='';}}				
+function submitFormNet(f){var form=document.getElementById(f);var formData=new FormData(form);var request=new XMLHttpRequest();request.onreadystatechange=function(){if (this.readyState===4){if (this.status===200){var rec=confirm('Пересоеденится с новыми настройками');if(rec){this.onreadystatechange=null;this.open('GET','/rc',true);this.send(null);}}else if(this.status===400){alert('Ошибка при сохранении настроек')}}};request.open('POST','/settings.html',true);request.send(formData);}
+function submitFormServer(){var form=document.getElementById('form_server_id');var formData=new FormData(form);var request=new XMLHttpRequest();request.onreadystatechange=function(){if(this.readyState===4){if(this.status===200){alert('OK');}else if(this.status===400){alert('ERROR');}}};request.open('POST','/settings.html',true);request.send(formData);}
 				</script>
 				</head>
 				<body style='visibility: hidden'>
@@ -139,6 +47,8 @@ window.onload=function(){onBodyLoad();};function onBodyLoad(){w = new ScalesSock
 				<form action='javascript:sendDateTime()'><h5 align='left'><b>Установка дата время</b></h5>
 				<table><tr><td><h5 id='id_date'>дата время</h5></td><td><input type='submit' name='data' value='УСТАНОВИТЬ'/></td></tr></table>
 				</form>
+				<hr>
+				<form method='POST'><h5 align='left'><b>Время выключения</b></h5><table><tr><td><input type='checkbox' id='id_pe' name='pe'></td><td><select id='id_pt' name='pt' title="Время выключения"><option value='600000'>10мин</option><option value='1200000'>20мин</option><option value='1800000'>30мин</option><option value='2400000'>40мин</option></select></td><td><input type='submit' value='УСТАНОВИТЬ'/></td></tr></table></form>
 				<hr>
 				<form id='form_server_id' action='javascript:submitFormServer()'>
 				<h5>Настройки база данных интернет</h5>
@@ -181,160 +91,22 @@ function ScalesSocket(h,p,fm,fe){
 	};
 	var starSocketTimeout=function(){clearTimeout(timerSocket);timerSocket=setTimeout(function(){this.prototype.openSocket();},5000);}
 }
-function go(){document.getElementById('wt_id').innerHTML = '---';}
-function setMax(){
-	var form=document.getElementById('form_c_id');
-	var formData=new FormData(form);
-	formData.append('update',true);
-	var request=new XMLHttpRequest();
-	request.onreadystatechange=function(){
-		if (this.readyState===4 && this.status===200){
-			if (this.responseText !== null){
-				document.getElementById('form_max').disabled=true;
-				var f=document.createElement('fieldset');
-				f.id='form_zero';
-				f.innerHTML="<legend>Нулевой вес</legend><form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form><br><div id='wt_id'>---</div>";
-				document.body.appendChild(f);
-				setupWeight();
-			}
-		}
-	};
-	request.open('POST','calibr.html',true);
-	request.send(formData);
-}
-function setZero(){
-	var request=new XMLHttpRequest();
-	var formData=new FormData();
-	formData.append('zero',true);
-	formData.append('weightCal','0');
-	request.onreadystatechange=function(){
-		if (this.readyState===4 && this.status===200){
-			if (this.responseText !== null){
-				document.getElementById('form_zero').disabled=true;
-				var f=document.createElement('fieldset');
-				f.id='form_weight';
+function go(){document.getElementById('wt_id').innerHTML='---';}
+function setMax(){var form=document.getElementById('form_c_id');var formData=new FormData(form);formData.append('update',true);var request=new XMLHttpRequest();request.onreadystatechange=function(){if (this.readyState===4 && this.status===200){if (this.responseText !== null){if(document.getElementById("form_zero")===null){document.getElementById("id_bs").value='ОБНОВИТЬ';var f=document.createElement('fieldset');f.id='form_zero';f.innerHTML="<legend>Нулевой вес</legend><form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form><br><div id='wt_id'>---</div>";document.body.appendChild(f);setupWeight();}}}};request.open('POST','calibr.html',true);request.send(formData);}
+function setZero(){var req=new XMLHttpRequest();var formData=new FormData();formData.append('zero',true);formData.append('weightCal','0');req.onreadystatechange=function(){if(this.readyState===4 && this.status===200){if(this.responseText !== null){document.getElementById('form_zero').disabled=true;var f=document.createElement('fieldset');f.id='form_weight';
 				f.innerHTML="<legend>Калиброваный вес</legend><form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.Значение вводится с точностью которое выбрано в пункте Точность измерения.</p><table><tr><td>ГИРЯ:</td><td><input id='gr_id' value='0' type='number' step='any' required placeholder='Калиброваная гиря'/></td></tr><tr><td>ГРУЗ:</td><td><input id='id_cal_wt' value='0' type='number' step='any' title='Введите значение веса установленого на весах'  max='100000' required placeholder='Калиброваный вес'/></td></tr><tr><td>ОШИБКА:</td><td><div id='dif_gr_id'></div></td></tr><tr><td><input type='submit' value='УСТАНОВИТЬ'/></td><td><a href='javascript:calculate();'>подобрать</a></td></tr></table></form>";
-				document.body.appendChild(f);
-			}
-		}
-	};
-	request.open('POST','calibr.html',true);
-	request.send(formData);
-}
-function setWeight(){
-	var formData = new FormData();
-	var w = parseFloat(document.getElementById('id_cal_wt').value) + parseFloat(document.getElementById('gr_id').value);
-	formData.append('weightCal', w.toString());
-	var request = new XMLHttpRequest();
-	request.onreadystatechange = function(){
-		if (this.readyState === 4){
-			if(this.status === 200){
-				if (this.responseText !== null){
-					if(document.getElementById('form_seal') === null){
-						var f = document.createElement('fieldset');
-						f.id = 'form_seal';
-						f.innerHTML = "<legend>Пломбировка</legend><form action='javascript:setSeal()'><left><p>Сохранение процесса калибровки. Данные калибровки сохраняются в память весов.</p><input type='submit' value='ОПЛОМБИРОВАТЬ'/></left></form>";
-						document.body.appendChild(f);
-					}
-				}
-				}else if(this.status === 400){
-				alert(this.responseText);
-			}
-		}
-	};
-	request.open('POST','calibr.html',true);
-	request.send(formData);
-}
-function setSeal(){
-	var request = new XMLHttpRequest();
-	request.onreadystatechange = function(){
-		if (this.readyState === 4 && this.status === 200){
-			alert('Номер пломбы: ' + this.responseText);
-			window.location.replace('/');
-		}
-	};
-	request.open('GET','/sl',true);
-	request.send(null);
-}
-function GetSettings() {
-	var http_request = new XMLHttpRequest();
-	http_request.overrideMimeType('application/json');
-	http_request.onreadystatechange = function(){
-		if (http_request.readyState === 4  ){
-			try {
-				var json = JSON.parse(http_request.responseText);
-				for (entry in json) {
-					try {
-						if(document.getElementById(entry)!== null)
-						document.getElementById(entry).value=json[entry];
-						}catch(e) {}
-
-					}
-					}catch (e){
-					alert(e.toString());
-				}
-				document.body.style.visibility = 'visible';
-			}
-		};
-		http_request.open('GET', '/cdate.json', true);
-		http_request.send(null);
-	}
-	window.onload = function () {
-		GetSettings();
-	};
-	function saveValue(){
-		var form = document.getElementById('form_c_id');
-		var formData = new FormData(form);
-		formData.append('update', true);
-		var http_request = new XMLHttpRequest();
-		http_request.onreadystatechange = function(){
-			if (this.readyState === 4 && this.status === 200){
-				if (this.responseText !== null){
-					window.open('/','_self');
-				}
-			}
-		};
-		http_request.onerror = function(){alert('Ошибка');};
-		http_request.open('POST','calibr.html',true);
-		http_request.send(formData);
-	};
-	function getWeight(){
-		w = new ScalesSocket('ws://'+document.location.host+'/ws',['arduino'],handleWeight,function(){
-			go();
-			w.openSocket();
-		});
-		w.openSocket();
-	}
-	function calculate(){
-		var dif = weight - parseFloat(document.getElementById('id_cal_wt').value);
-		dif = parseFloat(document.getElementById('gr_id').value) / dif;
-		dif =  parseFloat(document.getElementById('id_cal_wt').value) * dif;
-		document.getElementById('id_cal_wt').value = dif.toFixed(document.getElementById('ac_id').value);
-		setWeight();
-	}
-	function handleWeight(d) {
-		weight = d.w;
-		document.getElementById('wt_id').innerHTML = weight;
-		try {
-			document.getElementById('form_seal').disabled = (d.s === false);
-			}catch (e){}
-			if(d.s){
-				document.getElementById('wt_id').setAttribute('style', 'background: #fff;');
-				}else{
-				document.getElementById('wt_id').setAttribute('style', 'background: #C4C4C4;');
-			}
-			try {
-				var dif_gr = parseFloat(document.getElementById('id_cal_wt').value) + parseFloat(document.getElementById('gr_id').value);
-				dif_gr -= weight;
-				document.getElementById('dif_gr_id').innerHTML = dif_gr.toFixed(document.getElementById('ac_id').value);
-				}catch (e){}
-				w.getWeight();
-			}
-			function setupWeight() {
-				getWeight();
-			}
-			</script>
-			</head>
+				document.body.appendChild(f);}}};req.open('POST','calibr.html',true);req.send(formData);}
+function setWeight(){var fd=new FormData();var w=parseFloat(document.getElementById('id_cal_wt').value) + parseFloat(document.getElementById('gr_id').value);fd.append('weightCal',w.toString());var request=new XMLHttpRequest();request.onreadystatechange=function(){if(this.readyState===4){if(this.status===200){if(this.responseText !== null){if(document.getElementById('form_seal')===null){var f=document.createElement('fieldset');f.id='form_seal';f.innerHTML = "<legend>Пломбировка</legend><form action='javascript:setSeal()'><left><p>Сохранение процесса калибровки. Данные калибровки сохраняются в память весов.</p><input type='submit' value='ОПЛОМБИРОВАТЬ'/></left></form>";document.body.appendChild(f);}}}else if(this.status === 400){alert(this.responseText);}}};request.open('POST','calibr.html',true);request.send(fd);}
+function setSeal(){var req=new XMLHttpRequest();req.onreadystatechange=function(){if(this.readyState===4 && this.status===200){alert('Номер пломбы: '+this.responseText);window.location.replace('/');}};req.open('GET','/sl',true);req.send(null);}
+function GetSettings(){var req=new XMLHttpRequest();req.overrideMimeType('application/json');req.onreadystatechange=function(){if(req.readyState===4){try{var json=JSON.parse(req.responseText);for(entry in json){try{if(document.getElementById(entry)!== null)document.getElementById(entry).value=json[entry];}catch(e){}}}catch(e){alert(e.toString());}document.body.style.visibility='visible';}};req.open('GET','/cdate.json',true);req.send(null);}
+window.onload=function(){GetSettings();};
+function saveValue(){var f=document.getElementById('form_c_id');var fd=new FormData(f);fd.append('update',true);var req=new XMLHttpRequest();req.onreadystatechange=function(){if(this.readyState===4 && this.status===200){if(this.responseText !== null){window.open('/','_self');}}};req.onerror = function(){alert('Ошибка');};req.open('POST','calibr.html',true);req.send(fd);};
+function getWeight(){w=new ScalesSocket('ws://'+document.location.host+'/ws',['arduino'],handleWeight,function(){go();w.openSocket();});w.openSocket();}
+function calculate(){var dif=weight-parseFloat(document.getElementById('id_cal_wt').value);dif=parseFloat(document.getElementById('gr_id').value)/dif;dif=parseFloat(document.getElementById('id_cal_wt').value)*dif;document.getElementById('id_cal_wt').value=dif.toFixed(document.getElementById('ac_id').value);setWeight();}
+function handleWeight(d){weight=d.w;document.getElementById('wt_id').innerHTML=weight;try{document.getElementById('form_seal').disabled=(d.s===false);}catch(e){}if(d.s){document.getElementById('wt_id').setAttribute('style','background: #fff;');}else{document.getElementById('wt_id').setAttribute('style','background: #C4C4C4;');}try {var dif_gr=parseFloat(document.getElementById('id_cal_wt').value)+parseFloat(document.getElementById('gr_id').value);dif_gr -= weight;document.getElementById('dif_gr_id').innerHTML=dif_gr.toFixed(document.getElementById('ac_id').value);}catch (e){}w.getWeight();}
+function setupWeight(){getWeight();}
+</script>
+</head>
 <body style='visibility: hidden'>
 <a href='/settings.html' class='btn btn--s btn--blue'>&lt;</a>&nbsp;&nbsp;<strong>Калибровка</strong>
 <hr>
@@ -348,7 +120,7 @@ function GetSettings() {
 <tr><td>Фильтр</td><td><select id='fl_id' name='weightFilter' title='Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение'><option name='5%' value='5'>5 %</option><option name='10%' value='10'>10 %</option><option name='20%' value='20'>20 %</option><option name='30%' value='30'>30 %</option>
 <option name='40%' value='40'>40 %</option><option name='50%' value='50'>50 %</option><option name='60%' value='60'>60 %</option><option name='70%' value='70'>70 %</option><option name='80%' value='80'>80 %</option><option name='90%' value='90'>90 %</option><option name='100%' value='100'>100 %</option></select></td></tr>
 <tr><td>НВП</td><td><input title='Введите значение максимального веса' type='number' min='1' max='100000' id='mw_id' name='weightMax' placeholder='Найбольший предел'></td></tr>
-<tr><td><a href='javascript:saveValue();'>сохранить и выйти</a></td><td><input type='submit' value='ДАЛЬШЕ >>'/></td></tr>
+<tr><td><a href='javascript:saveValue();'>сохранить и выйти</a></td><td><input id='id_bs' type='submit' value='ДАЛЬШЕ >>'/></td></tr>
 </table>
 </form>
 </fieldset>

@@ -30,7 +30,7 @@ void connectWifi();
 TaskController taskController = TaskController();		/*  */
 Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
-Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
+//Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
 Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедениться с точкой доступа каждые 20 секунд */
 Task taskWeight(takeWeight,100);
 WiFiEventHandler stationModeConnectedHandler;
@@ -61,7 +61,7 @@ void setup() {
 	taskController.add(&taskBattery);
 	taskController.add(&taskWeight);
 	taskController.add(&taskConnectWiFi);
-	taskController.add(&taskPower);	
+	taskController.add(&POWER);	
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);

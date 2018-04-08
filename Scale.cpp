@@ -1,4 +1,4 @@
-#include <FS.h>
+п»ї#include <FS.h>
 #include <ArduinoJson.h>
 #include "Scale.h"
 #include "web_server_config.h"
@@ -17,7 +17,7 @@ ScaleClass::~ScaleClass(){}
 void ScaleClass::setup(BrowserServerClass *server){
 	init();
 	_server = server;
-	//_server->on("/wt",HTTP_GET, std::bind(&ScaleClass::handleWeight, Scale, std::placeholders::_1));						/* Получить вес и заряд. */
+	//_server->on("/wt",HTTP_GET, std::bind(&ScaleClass::handleWeight, Scale, std::placeholders::_1));						/* РџРѕР»СѓС‡РёС‚СЊ РІРµСЃ Рё Р·Р°СЂСЏРґ. */
 	/*_server->on("/cb",HTTP_GET,[this](AsyncWebServerRequest * request){
 		Serial.println("saveValueCalibratedHttp GET");
 		saveValueCalibratedHttp(request);	
@@ -27,7 +27,7 @@ void ScaleClass::setup(BrowserServerClass *server){
 	#else
 	
 	#endif*/
-	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {								/* Открыть страницу калибровки.*/
+	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {								/* РћС‚РєСЂС‹С‚СЊ СЃС‚СЂР°РЅРёС†Сѓ РєР°Р»РёР±СЂРѕРІРєРё.*/
 		if(!request->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
 			if (!_server->checkAdminAuth(request)){
 				return request->requestAuthentication();
@@ -35,14 +35,14 @@ void ScaleClass::setup(BrowserServerClass *server){
 		_authenticated = true;
 		saveValueCalibratedHttp(request);
 	});
-	_server->on("/av", [this](AsyncWebServerRequest * request){									/* Получить значение АЦП усредненное. */
+	_server->on("/av", [this](AsyncWebServerRequest * request){									/* РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёРµ РђР¦Рџ СѓСЃСЂРµРґРЅРµРЅРЅРѕРµ. */
 		request->send(200, TEXT_HTML, String(readAverage()));
 	});
-	_server->on("/tp", [this](AsyncWebServerRequest * request){									/* Установить тару. */
+	_server->on("/tp", [this](AsyncWebServerRequest * request){									/* РЈСЃС‚Р°РЅРѕРІРёС‚СЊ С‚Р°СЂСѓ. */
 		tare();
 		request->send(204, TEXT_HTML, "");
 	});
-	_server->on("/sl", handleSeal);									/* Опломбировать */	
+	_server->on("/sl", handleSeal);									/* РћРїР»РѕРјР±РёСЂРѕРІР°С‚СЊ */	
 }
 
 void ScaleClass::init(){
@@ -54,7 +54,7 @@ void ScaleClass::init(){
 }
 
 void ScaleClass::mathRound(){
-	_round = pow(10.0, _scales_value.accuracy) / _scales_value.step; // множитель для округления}
+	_round = pow(10.0, _scales_value.accuracy) / _scales_value.step; // РјРЅРѕР¶РёС‚РµР»СЊ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ}
 	_stable_step = 1/_round;
 }
 
@@ -95,7 +95,7 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 		ok:
 			return request->send(200, TEXT_HTML, "");
 		err:
-			return request->send(400, TEXT_HTML, "Ошибка ");	
+			return request->send(400, TEXT_HTML, "РћС€РёР±РєР° ");	
 	}
 	url:
 	#if HTML_PROGMEM
@@ -257,11 +257,11 @@ void ScaleClass::mathScale(float referenceW, long calibrateW){
 	_scales_value.scale = referenceW / float(calibrateW - _scales_value.offset);
 }
 
-/*! Функция для форматирования значения веса
-	value - Форматируемое значение
-	digits - Количество знаков после запятой
-	accuracy - Точновть шага значений (1, 2, 5, ...)
-	string - Выходная строка отфармотронова значение 
+/*! Р¤СѓРЅРєС†РёСЏ РґР»СЏ С„РѕСЂРјР°С‚РёСЂРѕРІР°РЅРёСЏ Р·РЅР°С‡РµРЅРёСЏ РІРµСЃР°
+	value - Р¤РѕСЂРјР°С‚РёСЂСѓРµРјРѕРµ Р·РЅР°С‡РµРЅРёРµ
+	digits - РљРѕР»РёС‡РµСЃС‚РІРѕ Р·РЅР°РєРѕРІ РїРѕСЃР»Рµ Р·Р°РїСЏС‚РѕР№
+	accuracy - РўРѕС‡РЅРѕРІС‚СЊ С€Р°РіР° Р·РЅР°С‡РµРЅРёР№ (1, 2, 5, ...)
+	string - Р’С‹С…РѕРґРЅР°СЏ СЃС‚СЂРѕРєР° РѕС‚С„Р°СЂРјРѕС‚СЂРѕРЅРѕРІР° Р·РЅР°С‡РµРЅРёРµ 
 */
 void ScaleClass::formatValue(float value, char* string){
 	dtostrf(value, 6-_scales_value.accuracy, _scales_value.accuracy, string);
@@ -269,26 +269,26 @@ void ScaleClass::formatValue(float value, char* string){
 
 /* */
 void ScaleClass::detectStable(float w){
+	static long int time,time1;
 	static float weight_temp;
 	static unsigned char stable_num;
 		if (weight_temp == w) {
-			//if (stable_num <= STABLE_NUM_MAX){
 			if (stable_num > STABLE_NUM_MAX) {
 				if (!stableWeight){
-					if(fabs(w) > _stable_step){
+					if(fabs(w) > _stable_step && time > (time1 + 6000)){
 						saveWeight.isSave = true;
 						saveWeight.value = w;
-						//CORE.saveEvent("weight", String(w)+"_kg");
+						time1 = millis();
 					}
 					stableWeight = true;
-				}
+				}				
 				return;
 			}
 			stable_num++;
-			//}
-			} else {
+		} else {
 			stable_num = 0;
 			stableWeight = false;
+			time = millis();
 		}
 		weight_temp = w;
 }

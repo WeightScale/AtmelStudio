@@ -35,18 +35,14 @@
 extern TaskController taskController;		/*  */
 extern Task taskBlink;								/*  */
 extern Task taskBattery;							/*  */
-extern Task taskPower;
+//extern Task taskPower;
 extern void connectWifi();
 
-const char netIndex[] PROGMEM = R"(<html><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/>
-										<body><form method='POST'>
-										<input name='ssid'><br/>
-										<input type='password' name='key'><br/>
-										<input type='submit' value='СОХРАНИТЬ'>
-										</form></body></html>)";
+const char netIndex[] PROGMEM = R"(<html><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/><body><form method='POST'><input name='ssid'><br/><input type='password' name='key'><br/><input type='submit' value='СОХРАНИТЬ'></form></body></html>)";
 
 typedef struct {	
 	bool autoIp;
+	bool power_time_enable;
 	String scaleName;
 	String scalePass;
 	String scaleLanIp;
@@ -55,8 +51,9 @@ typedef struct {
 	String scaleWlanSSID;
 	String scaleWlanKey;
 	String hostUrl;
-	String hostPin;
+	int hostPin;
 	int timeout;
+	int time_off;
 	int bat_max;	
 } settings_t;
 
@@ -94,7 +91,8 @@ class CoreClass : public AsyncWebHandler{
 			void saveValueSettingsHttp(AsyncWebServerRequest*);
 		#endif			
 		void handleSetAccessPoint(AsyncWebServerRequest*);	
-		String getHash(const String&, const String&, const String&, const String&);
+		String getHash(const int, const String&, const String&, const String&);
+		int getPin(){return _settings.hostPin;};
 				
 		
 		bool isAuto(){return _settings.autoIp;};		
@@ -122,12 +120,20 @@ class BatteryClass{
 		int getMax(){return _max;};
 };
 
+class PowerClass : public Task{
+	protected:
+	
+	public:
+		PowerClass(){};
+		~PowerClass(){};	
+};
 
 
 void powerOff();
 void reconnectWifi(AsyncWebServerRequest*);
 extern CoreClass * CORE;
 extern BatteryClass BATTERY;
+extern PowerClass POWER;
 
 #endif //_CORE_h
 

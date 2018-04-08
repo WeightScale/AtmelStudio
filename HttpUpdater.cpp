@@ -1,4 +1,4 @@
-#include <Arduino.h>
+ï»¿#include <Arduino.h>
 #include <WiFiClient.h>
 #include <WiFiServer.h>
 //#include <ESP8266WebServer.h>
@@ -127,7 +127,7 @@ void handleStartUpdate(AsyncWebServerRequest *request, String filename, size_t i
 			command = U_FLASH;
 			size = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
 		}else{
-			updaterError = "Íå âåðíûé ôàèë";
+			updaterError = "ÐÐµ Ð²ÐµÑ€Ð½Ñ‹Ð¹ Ñ„Ð°Ð¸Ð»";
 			return;
 		}		
 		
@@ -169,7 +169,7 @@ void handleEndUpdate(AsyncWebServerRequest * request){
 	}
 }*/
 
-void HttpUpdaterClass::handleHttpStartUpdate(AsyncWebServerRequest * request){										/* Îáíîâëåíèå ÷åðå èíòåðíåò address/hu?host=sdb.net.ua/update.php */
+void HttpUpdaterClass::handleHttpStartUpdate(AsyncWebServerRequest * request){										/* ÐžÐ±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ Ñ‡ÐµÑ€Ðµ Ð¸Ð½Ñ‚ÐµÑ€Ð½ÐµÑ‚ address/hu?host=sdb.net.ua/update.php */
 	if(!request->authenticate(_username.c_str(), _password.c_str()))
 		return request->requestAuthentication();
 	if(request->hasArg("host")){
@@ -190,7 +190,7 @@ void HttpUpdaterClass::handleHttpStartUpdate(AsyncWebServerRequest * request){		
 				request->send(404, "text/plain", ESPhttpUpdate.getLastErrorString());
 			break;
 			case HTTP_UPDATE_NO_UPDATES:
-				request->send(304, "text/plain", "Îáíîâëåíèå íå òðåáóåòñÿ");
+				request->send(304, "text/plain", "ÐžÐ±Ð½Ð¾Ð²Ð»ÐµÐ½Ð¸Ðµ Ð½Ðµ Ñ‚Ñ€ÐµÐ±ÑƒÐµÑ‚ÑÑ");
 			break;
 			case HTTP_UPDATE_OK:
 				request->client()->stop();

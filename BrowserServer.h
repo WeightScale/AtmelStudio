@@ -1,4 +1,4 @@
-#ifndef _BROWSERSERVER_h
+п»ї#ifndef _BROWSERSERVER_h
 #define _BROWSERSERVER_h
 
 /*
@@ -86,7 +86,7 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
-extern IPAddress lanIp;			// Надо сделать настройки ip адреса
+extern IPAddress lanIp;			// РќР°РґРѕ СЃРґРµР»Р°С‚СЊ РЅР°СЃС‚СЂРѕР№РєРё ip Р°РґСЂРµСЃР°
 extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 extern AsyncWebSocket ws;

@@ -19,7 +19,7 @@
 IPAddress apIP(192,168,4,1);
 IPAddress netMsk(255, 255, 255, 0);
 
-IPAddress lanIp;			// Íàäî ñäåëàòü íàñòðîéêè ip àäðåñà
+IPAddress lanIp;			// ÐÐ°Ð´Ð¾ ÑÐ´ÐµÐ»Ð°Ñ‚ÑŒ Ð½Ð°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ ip Ð°Ð´Ñ€ÐµÑÐ°
 IPAddress gateway;
 
 BrowserServerClass browserServer(80);
@@ -58,27 +58,28 @@ void BrowserServerClass::init(){
 		on("/settings.html",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),settings_html);});	
 		serveStatic("/", SPIFFS, "/");		
 	#else
-		on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Îòêðûòü ñòðàíèöó íàñòðîåê èëè ñîõðàíèòü çíà÷åíèÿ. */
-		//on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Óñòàíîâèòü Íàñòðîéêè òî÷êè äîñòóïà */
-		//on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Óñòàíîâèòü Íàñòðîéêè òî÷êè äîñòóïà */
+		on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* ÐžÑ‚ÐºÑ€Ñ‹Ñ‚ÑŒ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ñƒ Ð½Ð°ÑÑ‚Ñ€Ð¾ÐµÐº Ð¸Ð»Ð¸ ÑÐ¾Ñ…Ñ€Ð°Ð½Ð¸Ñ‚ÑŒ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ. */
+		//on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ñ‚Ð¾Ñ‡ÐºÐ¸ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð° */
+		//on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Ð£ÑÑ‚Ð°Ð½Ð¾Ð²Ð¸Ñ‚ÑŒ ÐÐ°ÑÑ‚Ñ€Ð¾Ð¹ÐºÐ¸ Ñ‚Ð¾Ñ‡ÐºÐ¸ Ð´Ð¾ÑÑ‚ÑƒÐ¿Ð° */
 		serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 	#endif // PROGMEM_PAGE	
 		
-	on("/wt",HTTP_GET, [](AsyncWebServerRequest * request){					/* Ïîëó÷èòü âåñ è çàðÿä. */
+	on("/wt",HTTP_GET, [](AsyncWebServerRequest * request){					/* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð²ÐµÑ Ð¸ Ð·Ð°Ñ€ÑÐ´. */
+		POWER.updateCache();
 		request->send(200, "text/html", String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
 	});		
-	on("/rc", reconnectWifi);									/* Ïåðåñîåäèíèòüñÿ ïî WiFi. */
+	on("/rc", reconnectWifi);									/* ÐŸÐµÑ€ÐµÑÐ¾ÐµÐ´Ð¸Ð½Ð¸Ñ‚ÑŒÑÑ Ð¿Ð¾ WiFi. */
 		
 	on("/settings.json", handleFileReadAuth);
-	on("/sv", handleScaleProp);									/* Ïîëó÷èòü çíà÷åíèÿ. */
+	on("/sv", handleScaleProp);									/* ÐŸÐ¾Ð»ÑƒÑ‡Ð¸Ñ‚ÑŒ Ð·Ð½Ð°Ñ‡ÐµÐ½Ð¸Ñ. */
 	on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
-	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
-		request->send(200, "text/plain", String(ESP.getFreeHeap()));
-	});*/
+	on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
+		request->send(200, "text/plain", String(CORE->getPin()));
+	});
 	//on("/secret.json",handleFileReadAdmin);
 	//serveStatic("/sc", SPIFFS, "/").setDefaultFile("secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
 												
-	/*on("/",[&](){												/ * Ãëàâíàÿ ñòðàíèöà. * /
+	/*on("/",[&](){												/ * Ð“Ð»Ð°Ð²Ð½Ð°Ñ ÑÑ‚Ñ€Ð°Ð½Ð¸Ñ†Ð°. * /
 		handleFileRead(uri());
 		taskPower.resume();
 	});		
@@ -245,7 +246,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 					client->text(buffer);
 				}
 			}	
-			taskPower.updateCache();	
+			POWER.updateCache();	
 			//client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
 		}
 	}

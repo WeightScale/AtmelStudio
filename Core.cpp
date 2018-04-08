@@ -9,6 +9,7 @@
 
 CoreClass * CORE;
 BatteryClass BATTERY;
+PowerClass POWER;
 
 CoreClass::CoreClass(const String& username, const String& password):
 _username(username),
@@ -44,7 +45,6 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 	if (request->args() > 0){		
 		String message = " ";
 		if (request->hasArg("ssid")){
-			_settings.autoIp = false;
 			if (request->hasArg("auto"))
 				_settings.autoIp = true;
 			else
@@ -64,12 +64,20 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 		}
 		if (request->hasArg("host")){
 			_settings.hostUrl = request->arg("host");
-			_settings.hostPin = request->arg("pin");
+			_settings.hostPin = request->arg("pin").toInt();
 			goto save;	
 		}
 		if (request->hasArg("n_admin")){
 			_settings.scaleName = request->arg("n_admin");
 			_settings.scalePass = request->arg("p_admin");
+			goto save;
+		}
+		if (request->hasArg("pt")){
+			if (request->hasArg("pe"))
+				POWER.enabled = _settings.power_time_enable = true;
+			else
+				POWER.enabled = _settings.power_time_enable = false;
+			_settings.time_off = request->arg("pt").toInt();
 			goto save;
 		}		
 		save:
@@ -96,6 +104,9 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 void CoreClass::begin(){		
 	Rtc.Begin();
 	_downloadSettings();
+	POWER.onRun(powerOff);
+	POWER.enabled = _settings.power_time_enable;	
+	POWER.setInterval(_settings.time_off);
 	BATTERY.setMax(_settings.bat_max);
 	if(BATTERY.callibrated()){		
 		_settings.bat_max = BATTERY.getMax();
@@ -183,10 +194,12 @@ String CoreClass::getIp(){
 
 /* */	
 bool CoreClass::eventToServer(const String& date, const String& type, const String& value){
+	if(_settings.hostPin == 0)
+		return false;
 	HTTPClient http;
 	String message = "http://";
 	message += _settings.hostUrl.c_str();
-	String hash = getHash(_settings.hostPin.c_str(), date, type, value);	
+	String hash = getHash(_settings.hostPin, date, type, value);	
 	message += "/scales.php?hash=" + hash;
 	http.begin(message);
 	http.setTimeout(_settings.timeout);
@@ -266,7 +279,7 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 #endif
 
 
-String CoreClass::getHash(const String& code, const String& date, const String& type, const String& value){
+String CoreClass::getHash(const int code, const String& date, const String& type, const String& value){
 	
 	String event = String(code);
 	event += "\t" + date + "\t" + type + "\t" + value;
@@ -307,7 +320,9 @@ bool CoreClass::saveSettings() {
 	json[SCALE_JSON]["id_subnet"] = _settings.scaleSubnet;
 	json[SCALE_JSON]["id_ssid"] = _settings.scaleWlanSSID;
 	json[SCALE_JSON]["id_key"] = _settings.scaleWlanKey;
-	json[SCALE_JSON]["bat_max"] = _settings.bat_max;	
+	json[SCALE_JSON]["bat_max"] = _settings.bat_max;
+	json[SCALE_JSON]["id_pe"] = _settings.power_time_enable;
+	json[SCALE_JSON]["id_pt"] = _settings.time_off;	
 	
 	if (!json.containsKey(SERVER_JSON)) {
 		JsonObject& server = json.createNestedObject(SERVER_JSON);
@@ -331,8 +346,11 @@ bool CoreClass::_downloadSettings() {
 	_settings.scaleGateway = "192.168.1.1";
 	_settings.scaleSubnet = "255.255.255.0";
 	_settings.hostUrl = HOST_URL;
+	_settings.hostPin = 0;
 	_settings.timeout = TIMEOUT_HTTP;
 	_settings.bat_max = MIN_CHG;
+	_settings.power_time_enable = false;
+	_settings.time_off = 2400000;
 	File serverFile;
 	if (SPIFFS.exists(SETTINGS_FILE)){
 		serverFile = SPIFFS.open(SETTINGS_FILE, "r");	
@@ -366,11 +384,13 @@ bool CoreClass::_downloadSettings() {
 		_settings.scaleSubnet = json[SCALE_JSON]["id_subnet"].as<String>();
 		_settings.scaleWlanSSID = json[SCALE_JSON]["id_ssid"].as<String>();
 		_settings.scaleWlanKey = json[SCALE_JSON]["id_key"].as<String>();
-		_settings.bat_max = json[SCALE_JSON]["bat_max"];	
+		_settings.bat_max = json[SCALE_JSON]["bat_max"];
+		_settings.power_time_enable = json[SCALE_JSON]["id_pe"];
+		_settings.time_off = json[SCALE_JSON]["id_pt"];	
 	}
 	if (json.containsKey(SERVER_JSON)){
 		_settings.hostUrl = json[SERVER_JSON]["id_host"].as<String>();
-		_settings.hostPin = json[SERVER_JSON]["id_pin"].as<String>();	
+		_settings.hostPin = json[SERVER_JSON]["id_pin"];	
 		_settings.timeout = json[SERVER_JSON]["timeout"];	
 	}	
 	return true;

@@ -57,14 +57,17 @@
             request.onreadystatechange = function(){
                 if (this.readyState === 4 && this.status === 200){
                     if (this.responseText !== null){
-                        document.getElementById('form_max').disabled = true;
-                        var f = document.createElement('fieldset');
-                        f.id = 'form_zero';
-                        f.innerHTML = "<legend>Нулевой вес</legend>" +
-                            "<form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form>"+
-                            "<br><div id='wt_id'>---</div>";
-                        document.body.appendChild(f);
-                        setupWeight();
+                        //document.getElementById('form_max').disabled = true;
+                        if(document.getElementById("form_zero") === null){
+                            document.getElementById("id_bs").value = "ОБНОВИТЬ";
+                            var f = document.createElement('fieldset');
+                            f.id = 'form_zero';
+                            f.innerHTML = "<legend>Нулевой вес</legend>" +
+                                "<form  action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form>"+
+                                "<br><div id='wt_id'>---</div>";
+                            document.body.appendChild(f);
+                            setupWeight();
+                        }
                     }
                 }
             };
@@ -224,7 +227,7 @@
             <tr><td>Кол-во измерений</td><td><select id="av_id" name='weightAverage' title="Выбор количества измерений АЦП"><option name="одно" value="1">ОДИН</option><option name="два" value="2">ДВА</option><option name="пять" value="5">ПЯТЬ</option></select></td></tr>
             <tr><td>Фильтр</td><td><select id="fl_id" name='weightFilter' title="Выбор значения фильтра. Чем меньше значение тем лутшее фильтрация но дольше измерение"><option name="5%" value="5">5 %</option><option name="10%" value="10">10 %</option><option name="20%" value="20">20 %</option><option name="30%" value="30">30 %</option><option name="40%" value="40">40 %</option><option name="50%" value="50">50 %</option><option name="60%" value="60">60 %</option><option name="70%" value="70">70 %</option><option name="80%" value="80">80 %</option><option name="90%" value="90">90 %</option><option name="100%" value="100">100 %</option></select></td></tr>
             <tr><td>НВП</td><td><input title="Введите значение максимального веса" type='number' min='1' max='100000' id='mw_id' name='weightMax' placeholder='Найбольший предел'></td></tr>
-            <tr><td><a href="javascript:saveValue();">сохранить и выйти</a></td><td><input type='submit' value='ДАЛЬШЕ >>'/></td></tr>
+            <tr><td><a href="javascript:saveValue();">сохранить и выйти</a></td><td><input id="id_bs" type='submit' value='ДАЛЬШЕ >>'/></td></tr>
         </table>
     </form>
 </fieldset>

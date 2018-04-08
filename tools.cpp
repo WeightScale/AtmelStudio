@@ -1,4 +1,4 @@
-
+п»ї
 #include "tools.h"
 
 /** Is this an IP? */
@@ -21,10 +21,10 @@ String toStringIp(IPAddress ip) {
 	res += String(((ip >> 8 * 3)) & 0xFF);
 	return res;
 }
-/** sInput - входящая строка
-	cDelim - разделитель
-	sParams - масив выходных параметров
-	iMaxParams - кол параметров */
+/** sInput - РІС…РѕРґСЏС‰Р°СЏ СЃС‚СЂРѕРєР°
+	cDelim - СЂР°Р·РґРµР»РёС‚РµР»СЊ
+	sParams - РјР°СЃРёРІ РІС‹С…РѕРґРЅС‹С… РїР°СЂР°РјРµС‚СЂРѕРІ
+	iMaxParams - РєРѕР» РїР°СЂР°РјРµС‚СЂРѕРІ */
 
 int StringSplit(String sInput, char cDelim, String sParams[], int iMaxParams)
 {

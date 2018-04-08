@@ -1,4 +1,4 @@
-#include "Task.h"
+﻿#include "Task.h"
 
 Task::Task(void (*callback)(void), unsigned long _interval){
 	enabled = true;
@@ -44,7 +44,7 @@ void Task::onRun(void (*callback)(void)){
 }
 
 void Task::run(){
-	if(_onRun != NULL && !Paused)
+	if(_onRun != NULL && !_paused)
 		_onRun();
 
 	// Update last_run and _cached_next_run

@@ -1,4 +1,4 @@
-
+п»ї
 #ifndef _SCALE_h
 #define _SCALE_h
 
@@ -31,7 +31,7 @@ typedef struct {
 	unsigned char average;				/*  */
 	unsigned char step;					/*  */
 	int accuracy;					/*  */
-	//unsigned char w_filter; /*! Значение для фильтра от 1-100 % */
+	//unsigned char w_filter; /*! Р—РЅР°С‡РµРЅРёРµ РґР»СЏ С„РёР»СЊС‚СЂР° РѕС‚ 1-100 % */
 	unsigned int max;					/*  */
 	float scale;
 	int seal;
@@ -57,8 +57,8 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		bool stableWeight;
 		t_save_value saveWeight;
 		t_scales_value _scales_value;
-		float _round;						/* множитиль для округления */
-		float _stable_step;					/* шаг для стабилизации */
+		float _round;						/* РјРЅРѕР¶РёС‚РёР»СЊ РґР»СЏ РѕРєСЂСѓРіР»РµРЅРёСЏ */
+		float _stable_step;					/* С€Р°Рі РґР»СЏ СЃС‚Р°Р±РёР»РёР·Р°С†РёРё */
 		//float _referenceWeight;				/*  */
 		//long _calibrateWeightValue;			/*  */
 				

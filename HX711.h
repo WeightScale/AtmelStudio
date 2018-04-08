@@ -1,4 +1,4 @@
-#ifndef _HX711_h
+﻿#ifndef _HX711_h
 #define _HX711_h
 
 #if ARDUINO >= 100

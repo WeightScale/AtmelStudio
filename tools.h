@@ -1,4 +1,4 @@
-// tools1.h
+﻿// tools1.h
 
 #ifndef _TOOLS_h
 #define _TOOLS_h

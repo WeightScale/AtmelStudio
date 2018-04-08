@@ -1,4 +1,4 @@
-// Tasks.h
+﻿// Tasks.h
 
 #ifndef _TASK_h
 #define _TASK_h
@@ -25,13 +25,13 @@ protected:
 	/*! Интервал между запусками */
 	unsigned long interval;
 
-	/*! Последнее время запкска в милисекундах */
+	/*! Последнее время запуска в милисекундах */
 	unsigned long last_run;
 
 	/*! Запланированый пробег в милисекундах */	
 	unsigned long _cached_next_run;
 	
-	bool Paused = false;
+	bool _paused = false;
 
 	/*!
 		IMPORTANT! Run after all calls to run()
@@ -77,8 +77,8 @@ public:
 	/// Запуск
 	virtual void run();
 	
-	void resume(){Paused = false; runned();};
-	void pause(){Paused = true;};
+	void resume(){_paused = false; runned();};
+	void pause(){_paused = true;};
 	void updateCache(){runned();}
 };
 
