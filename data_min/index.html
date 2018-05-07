@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang='en'>
+<html lang="en">
 <head>
-    <meta charset='UTF-8'>
+    <meta charset="UTF-8">
     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/>
-    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'/>
-    <meta http-equiv='Pragma' content='no-cache'/>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
+    <meta http-equiv="Pragma" content="no-cache"/>
     <title>WEB SCALES</title>
-    <link rel='stylesheet' type='text/css' href='global.css'>
-    <link rel='shortcut icon' href='favicon.png' type='image/png'>
+    <link rel="stylesheet" type="text/css" href="global.css">
+    <link rel="shortcut icon" href="favicon.png" type="image/png">
     <style>#w_style{background:#fff;font-size:80px;font-family:Arial,sans-serif;color:#618ad2;margin-left:auto;margin-right:auto;}table {width:100%;}input{font-size:20px;text-align:center;}</style>
     <script>
         var w;
@@ -20,7 +20,7 @@
                 },5000);
             };
             this.getWeight=function () {
-                ws.send('/wt');
+                ws.send("/wt");
                 startWeightTimeout();
             };
             this.openSocket=function(){
@@ -45,7 +45,7 @@
         function setZero(){
             document.getElementById('buttonZero').style.visibility='hidden';
             var request=new XMLHttpRequest();
-            document.getElementById('weight').innerHTML='...';
+            document.getElementById('weight').innerHTML="...";
             request.onreadystatechange=function(){
                 if (this.readyState===4 && this.status===204){
                     document.getElementById('buttonZero').style.visibility='visible';
@@ -82,19 +82,19 @@
     </script>
 </head>
 <body>
-<div align='center'>
-    <table><tr><td ><img src='scales.png' style='height: 42px;' /></td><td align='right'><h3 id='brand_name'>scale.in.ua</h3></td></tr></table>
-    <p hidden='hidden' id='dnt'></p>
+<div align="center">
+    <table><tr><td ><img src="scales.png" style="height: 42px;" /></td><td align="right"><h3 id="brand_name">scale.in.ua</h3></td></tr></table>
+    <p hidden="hidden" id='dnt'></p>
 </div>
 <hr>
 <div align='right' id='w_style'>
     <b id='weight'>---</b>
 </div>
 <hr>
-<table><tr><td style='width:1%; white-space: nowrap'><img src='battery.png' alt='B'/></td><td><h3 id='charge_id' style='display: inline'>--%</h3></td><td align='right'><b><a href='javascript:setZero()' id='buttonZero' class='btn btn--s btn--blue'>&gt;0&lt;</a></b></td></tr></table>
+<table><tr><td style="width:1%; white-space: nowrap"><img src="battery.png" alt="B"/></td><td><h3 id="charge_id" style="display: inline">--%</h3></td><td align="right"><b><a href="javascript:setZero()" id="buttonZero" class="btn btn--s btn--blue">&lt;0&gt;</a></b></td></tr></table>
 <hr>
-<table><tr><td><a href='/events.html' class='btn btn--m btn--blue'>события</a><br></td></tr><tr><td><br/><a href='/settings.html'>настройки</a><br></td></tr></table>
+<table><tr><td><a href='/events.html' class="btn btn--m btn--blue">события</a><br></td></tr><tr><td><br/><a href='/settings.html'>настройки</a><br></td></tr></table>
 <hr>
-<footer align='center'>2018 © Powered by www.scale.in.ua</footer>
+<footer align="center">2018 © Powered by www.scale.in.ua</footer>
 </body>
 </html>

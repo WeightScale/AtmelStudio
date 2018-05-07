@@ -19,7 +19,7 @@
 IPAddress apIP(192,168,4,1);
 IPAddress netMsk(255, 255, 255, 0);
 
-IPAddress lanIp;			// ĞĞ°Ğ´Ğ¾ ÑĞ´ĞµĞ»Ğ°Ñ‚ÑŒ Ğ½Ğ°ÑÑ‚Ñ€Ğ¾Ğ¹ĞºĞ¸ ip Ğ°Ğ´Ñ€ĞµÑĞ°
+IPAddress lanIp;			// Íàäî ñäåëàòü íàñòğîéêè ip àäğåñà
 IPAddress gateway;
 
 BrowserServerClass browserServer(80);
@@ -36,7 +36,6 @@ BrowserServerClass::BrowserServerClass(uint16_t port) : AsyncWebServer(port) {}
 BrowserServerClass::~BrowserServerClass(){}
 	
 void BrowserServerClass::begin() {
-	SPIFFS.begin();
 	/* Setup the DNS server redirecting all the domains to the apIP */
 	dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 	dnsServer.start(DNS_PORT, "*", apIP);	
@@ -53,48 +52,35 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){
-	#if HTML_PROGMEM
-		on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});
-		on("/settings.html",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),settings_html);});	
-		serveStatic("/", SPIFFS, "/");		
-	#else
-		on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* ĞÑ‚ĞºÑ€Ñ‹Ñ‚ÑŒ ÑÑ‚Ñ€Ğ°Ğ½Ğ¸Ñ†Ñƒ Ğ½Ğ°ÑÑ‚Ñ€Ğ¾ĞµĞº Ğ¸Ğ»Ğ¸ ÑĞ¾Ñ…Ñ€Ğ°Ğ½Ğ¸Ñ‚ÑŒ Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ñ. */
-		//on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Ğ£ÑÑ‚Ğ°Ğ½Ğ¾Ğ²Ğ¸Ñ‚ÑŒ ĞĞ°ÑÑ‚Ñ€Ğ¾Ğ¹ĞºĞ¸ Ñ‚Ğ¾Ñ‡ĞºĞ¸ Ğ´Ğ¾ÑÑ‚ÑƒĞ¿Ğ° */
-		//on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Ğ£ÑÑ‚Ğ°Ğ½Ğ¾Ğ²Ğ¸Ñ‚ÑŒ ĞĞ°ÑÑ‚Ñ€Ğ¾Ğ¹ĞºĞ¸ Ñ‚Ğ¾Ñ‡ĞºĞ¸ Ğ´Ğ¾ÑÑ‚ÑƒĞ¿Ğ° */
-		serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-	#endif // PROGMEM_PAGE	
-		
-	on("/wt",HTTP_GET, [](AsyncWebServerRequest * request){					/* ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ Ğ²ĞµÑ Ğ¸ Ğ·Ğ°Ñ€ÑĞ´. */
-		POWER.updateCache();
-		request->send(200, "text/html", String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
-	});		
-	on("/rc", reconnectWifi);									/* ĞŸĞµÑ€ĞµÑĞ¾ĞµĞ´Ğ¸Ğ½Ğ¸Ñ‚ÑŒÑÑ Ğ¿Ğ¾ WiFi. */
-		
-	on("/settings.json", handleFileReadAuth);
-	on("/sv", handleScaleProp);									/* ĞŸĞ¾Ğ»ÑƒÑ‡Ğ¸Ñ‚ÑŒ Ğ·Ğ½Ğ°Ñ‡ĞµĞ½Ğ¸Ñ. */
+	on("/settings.json",HTTP_ANY, handleFileReadAuth);
+	//serveStatic("/settings.json",SPIFFS,"/settings.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
+	//serveStatic("/secret.json", SPIFFS, "/secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
+	on("/rc", reconnectWifi);									/* Ïåğåñîåäèíèòüñÿ ïî WiFi. */
+	on("/sv", handleScaleProp);									/* Ïîëó÷èòü çíà÷åíèÿ. */
 	on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
 	on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
-		request->send(200, "text/plain", String(CORE->getPin()));
+		request->send(200, "text/plain", String(ESP.getFreeHeap()));
 	});
-	//on("/secret.json",handleFileReadAdmin);
-	//serveStatic("/sc", SPIFFS, "/").setDefaultFile("secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
-												
-	/*on("/",[&](){												/ * Ğ“Ğ»Ğ°Ğ²Ğ½Ğ°Ñ ÑÑ‚Ñ€Ğ°Ğ½Ğ¸Ñ†Ğ°. * /
-		handleFileRead(uri());
-		taskPower.resume();
-	});		
-	
-	//on("/generate_204", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Android captive portal. Maybe not needed. Might be handled by notFound handler.
-	//on("/fwlink", [this](){if (!handleFileRead("/index.html"))	this->send(404, "text/plain", "FileNotFound");});  //Microsoft captive portal. Maybe not needed. Might be handled by notFound handler.	
-	
-	const char * headerkeys[] = {"User-Agent","Cookie"/ *,"x-SETNET"* /} ;
-	size_t headerkeyssize = sizeof(headerkeys)/sizeof(char*);
-	//ask server to track these headers
-	collectHeaders(headerkeys, headerkeyssize );*/
+	on("/secret.json",[](AsyncWebServerRequest * reguest){
+		if (!browserServer.isAuthentified(reguest)){
+			return reguest->requestAuthentication();
+		}
+		reguest->send(SPIFFS, reguest->url());	
+	});
+	#if HTML_PROGMEM
+		on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Ãëàâíàÿ ñòğàíèöà. */
+		rewrite("/sn", "/settings.html");	
+		serveStatic("/", SPIFFS, "/");	
+	#else
+		//on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Îòêğûòü ñòğàíèöó íàñòğîåê èëè ñîõğàíèòü çíà÷åíèÿ. */
+		//on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Óñòàíîâèòü Íàñòğîéêè òî÷êè äîñòóïà */
+		//on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Óñòàíîâèòü Íàñòğîéêè òî÷êè äîñòóïà */
+		serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+	#endif // PROGMEM_PAGE	
 	
 	//serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
 	//rewrite("/", "index.html").setFilter(ON_STA_FILTER);
-	//rewrite("/", "index-ap.html").setFilter(ON_AP_FILTER);
+	
 	
 	onNotFound([](AsyncWebServerRequest *request){
 		request->send(404);

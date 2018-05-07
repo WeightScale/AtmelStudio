@@ -9,7 +9,7 @@
 
 CoreClass * CORE;
 BatteryClass BATTERY;
-PowerClass POWER;
+Task POWER;
 
 CoreClass::CoreClass(const String& username, const String& password):
 _username(username),
@@ -20,11 +20,24 @@ _authenticated(false){
 
 CoreClass::~CoreClass(){}
 
+void CoreClass::begin(){		
+	Rtc.Begin();
+	_downloadSettings();
+	POWER.onRun(powerOff);
+	POWER.enabled = _settings.power_time_enable;	
+	POWER.setInterval(_settings.time_off);
+	BATTERY.setMax(_settings.bat_max);
+	if(BATTERY.callibrated()){		
+		_settings.bat_max = BATTERY.getMax();
+		saveSettings();	
+	};	
+}
+
 bool CoreClass::canHandle(AsyncWebServerRequest *request){	
 	if(request->url().equalsIgnoreCase("/settings.html")){
 		goto auth;
 	}
-#if HTML_PROGMEM
+#if! HTML_PROGMEM
 	else if(request->url().equalsIgnoreCase("/sn")){
 		goto auth;
 	}
@@ -52,7 +65,12 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 			_settings.scaleLanIp = request->arg("lan_ip");			
 			_settings.scaleGateway = request->arg("gateway");
 			_settings.scaleSubnet = request->arg("subnet");
-			_settings.scaleWlanSSID = request->arg("ssid");
+			_settings.scaleWlanSSID = request->arg("ssid");			
+			if(_settings.scaleWlanSSID.length()>0){				
+				taskConnectWiFi.resume();
+			}else{
+				taskConnectWiFi.pause();
+			}
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
 		}		
@@ -82,10 +100,7 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 		}		
 		save:
 		if (saveSettings()){
-			if (request->hasArg("n_admin")){
-				goto url;
-			}
-			return request->send(200, TEXT_HTML, "OK");
+			goto url;
 		}
 		return request->send(400);
 	}
@@ -101,18 +116,6 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 		
 }
 
-void CoreClass::begin(){		
-	Rtc.Begin();
-	_downloadSettings();
-	POWER.onRun(powerOff);
-	POWER.enabled = _settings.power_time_enable;	
-	POWER.setInterval(_settings.time_off);
-	BATTERY.setMax(_settings.bat_max);
-	if(BATTERY.callibrated()){		
-		_settings.bat_max = BATTERY.getMax();
-		saveSettings();	
-	};	
-}
 
 bool CoreClass::saveEvent(const String& event, const String& value) {
 	String date = getDateTime();
@@ -133,8 +136,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
     readFile.readBytes(buf.get(), size);	
     readFile.close();
 		
-    //DynamicJsonBuffer jsonBuffer(JSON_OBJECT_SIZE(110));
-	DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(110));
+    DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(110));
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
     if (!json.containsKey(EVENTS_JSON)) {	
@@ -230,12 +232,12 @@ void CoreClass::handleSetAccessPoint(AsyncWebServerRequest * request){
 	request->send(response);	
 }*/
 
+/*
 #if! HTML_PROGMEM
 void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {	
 	if (!browserServer.isAuthentified(request))
 		return request->requestAuthentication();
 	if (request->args() > 0){	// Save Settings
-		String message = " ";
 		if (request->hasArg("ssid")){
 			_settings.autoIp = false;
 			if (request->hasArg("auto"))
@@ -245,8 +247,6 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 			_settings.scaleLanIp = request->arg("lan_ip");			
 			_settings.scaleGateway = request->arg("gateway");
 			_settings.scaleSubnet = request->arg("subnet");
-			//Serial.println("Save ssid");
-			//CORE.setSSID(request->arg("ssid"));		
 			_settings.scaleWlanSSID = request->arg("ssid");			
 			_settings.scaleWlanKey = request->arg("key");	
 			goto save;
@@ -260,23 +260,32 @@ void CoreClass::saveValueSettingsHttp(AsyncWebServerRequest *request) {
 		}
 		if (request->hasArg("host")){
 			_settings.hostUrl = request->arg("host");
-			_settings.hostPin = request->arg("pin");
+			_settings.hostPin = request->arg("pin").toInt();
 			goto save;	
 		}
 		if (request->hasArg("n_admin")){
 			_settings.scaleName = request->arg("n_admin");
 			_settings.scalePass = request->arg("p_admin");
 			goto save;
-		}		
+		}	
+		if (request->hasArg("pt")){
+			if (request->hasArg("pe"))
+				POWER.enabled = _settings.power_time_enable = true;
+			else
+				POWER.enabled = _settings.power_time_enable = false;
+			_settings.time_off = request->arg("pt").toInt();
+			goto save;
+		}	
 		save:
 		if (saveSettings()){
-			return request->send(200, TEXT_HTML, "OK");
+			goto url;
 		}
 		return request->send(400);	
-	} 		
+	}
+	url: 		
 	request->send(SPIFFS, request->url());
 }
-#endif
+#endif*/
 
 
 String CoreClass::getHash(const int code, const String& date, const String& type, const String& value){

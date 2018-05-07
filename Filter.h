@@ -15,7 +15,7 @@
 * Implements a simple linear recursive exponential filter.
 * See: http://www.statistics.com/glossary&term_id=756 */
 template<class T> class ExponentialFilter{
-	
+	protected:
 	// Weight for new values, as a percentage ([0..100])
 	T m_WeightNew;
 

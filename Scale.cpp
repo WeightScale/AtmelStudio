@@ -16,18 +16,12 @@ ScaleClass::~ScaleClass(){}
 	
 void ScaleClass::setup(BrowserServerClass *server){
 	init();
-	_server = server;
-	//_server->on("/wt",HTTP_GET, std::bind(&ScaleClass::handleWeight, Scale, std::placeholders::_1));						/* Получить вес и заряд. */
-	/*_server->on("/cb",HTTP_GET,[this](AsyncWebServerRequest * request){
-		Serial.println("saveValueCalibratedHttp GET");
-		saveValueCalibratedHttp(request);	
-	});*/
-	/*#if HTML_PROGMEM
-		_server->on(PAGE_FILE,[](AsyncWebServerRequest * reguest){	reguest->send_P(200,"text/html",calibr_html);});
-	#else
-	
-	#endif*/
-	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {								/* Открыть страницу калибровки.*/
+	_server = server;	
+	_server->on("/wt",HTTP_GET, [this](AsyncWebServerRequest * request){						/* Получить вес и заряд. */
+		POWER.updateCache();
+		request->send(200, "text/html", String("{\"w\":\""+String(getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(getStableWeight())+"}"));
+	});
+	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {							/* Открыть страницу калибровки.*/
 		if(!request->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
 			if (!_server->checkAdminAuth(request)){
 				return request->requestAuthentication();
@@ -42,7 +36,7 @@ void ScaleClass::setup(BrowserServerClass *server){
 		tare();
 		request->send(204, TEXT_HTML, "");
 	});
-	_server->on("/sl", handleSeal);									/* Опломбировать */	
+	_server->on("/sl", handleSeal);																/* Опломбировать */	
 }
 
 void ScaleClass::init(){
@@ -102,34 +96,13 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 		request->send_P(200,F(TEXT_HTML), calibr_html);
 	#else
 		request->send(SPIFFS, request->url());
-	#endif		
-	
-	
-	//}
+	#endif
 }
 
 void ScaleClass::fetchWeight(){
-	//char buffer[10];
-	//float w = Scale.forTest(ESP.getFreeHeap());
 	float w = getWeight();
 	formatValue(w,_buffer);
 	detectStable(w);
-	//_weight = w;
-	//ws.textAll(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(CORE.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
-	//_weight = String(buffer).toFloat();
-	//taskPower.updateCache();
-	/*char buffer[10];
-	float w = getWeight();
-	formatValue(w,buffer);
-	detectStable(w);
-	
-	_weight = String(buffer);*/
-	//_weight = String(ESP.getFreeHeap());
-	//_weight = s.toFloat();
-	//setTest(random(100,millis()));
-	//setTest(s);
-	//_weight = float(11.23);
-	//taskPower.updateCache();	
 }
 
 bool ScaleClass::_downloadValue(){

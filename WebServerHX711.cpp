@@ -1,4 +1,3 @@
-//#define PROGMEM_PAGE
 #include <ESP8266WiFi.h>
 //#include <ESP8266mDNS.h>
 #include "BrowserServer.h"
@@ -51,10 +50,10 @@ void setup() {
 		delay(100);
 	};*/
 	
-	//CORE.begin();
-	//delay(1000);
-	browserServer.begin();	
-	Scale.setup(&browserServer);	
+	SPIFFS.begin();
+	//Scale.setup(&browserServer);		
+	browserServer.begin();
+	Scale.setup(&browserServer);
 	takeBattery();
   
 	taskController.add(&taskBlink);
@@ -132,6 +131,7 @@ void connectWifi() {
 		goto scan;
 	}
 	connect:
+	if (CORE->getSSID().length()>0){
 		for (int i = 0; i < n; ++i)	{
 			if(WiFi.SSID(i) == CORE->getSSID().c_str()){
 				//USE_SERIAL.println(CORE.getSSID());
@@ -148,21 +148,19 @@ void connectWifi() {
 						WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 					}
 				}
-				//Serial.println(String(chan_scan));
 				WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
 				WiFi.begin ( CORE->getSSID().c_str(), CORE->getPASS().c_str(),chan_scan,BSSID_scan);
-				//WiFi.begin ( CORE.getSSID().c_str(), CORE.getPASS().c_str());
-				//USE_SERIAL.println("waitForConnectResult");
 				int status = WiFi.waitForConnectResult();
-				//USE_SERIAL.println("ConnectResult ");
-				if(status == WL_CONNECTED ){					
+				if(status == WL_CONNECTED ){
 					NBNS.begin(MY_HOST_NAME);
-					//CORE.saveEvent("ip", CORE.getIp());
 				}
-				//USE_SERIAL.println(String(status));
 				return;
 			}
-		}
+		}	
+	}else{
+		taskConnectWiFi.pause();
+		return;
+	}		
 	scan:
 	WiFi.scanDelete();
 	WiFi.scanNetworks(true);
