@@ -38,7 +38,7 @@ class AsyncWebServer;
 class BrowserServerClass : public AsyncWebServer{
 	protected:
 		strHTTPAuth _httpAuth;
-		bool _saveHTTPAuth();		
+		//bool _saveHTTPAuth();		
 		bool _downloadHTTPAuth();		
 
 	public:
@@ -49,9 +49,9 @@ class BrowserServerClass : public AsyncWebServer{
 		void init();
 		//static String urldecode(String input); // (based on https://code.google.com/p/avr-netino/)
 		//static unsigned char h2int(char c);
-		void send_wwwauth_configuration_html(AsyncWebServerRequest *request);
+		//void send_wwwauth_configuration_html(AsyncWebServerRequest *request);
 		//void restart_esp();		
-		String getContentType(String filename);	
+		//String getContentType(String filename);	
 		//bool isValidType(String filename);		
 		bool checkAdminAuth(AsyncWebServerRequest * request);
 		bool isAuthentified(AsyncWebServerRequest * request);

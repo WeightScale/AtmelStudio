@@ -9,7 +9,6 @@
 	#include "WProgram.h"
 #endif*/
 #include "HX711.h"
-#include "Filter.h"
 #include "BrowserServer.h"
 
 #define PAGE_FILE			"/calibr.html"
@@ -46,7 +45,7 @@ typedef struct{
 
 class BrowserServerClass;
 
-class ScaleClass : public HX711 , public ExponentialFilter<long>{
+class ScaleClass : public HX711/* , public ExponentialFilter<long>*/{
 	private:
 		float _weight;
 		char _buffer[10];
@@ -107,6 +106,7 @@ class ScaleClass : public HX711 , public ExponentialFilter<long>{
 		float getSaveValue(){return saveWeight.value;};
 		void setIsSave(bool s){saveWeight.isSave = s;};
 		
+		size_t doData(JsonObject& json );
 		float forTest(uint32_t h);		
 };
 

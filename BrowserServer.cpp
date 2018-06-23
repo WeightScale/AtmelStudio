@@ -57,26 +57,23 @@ void BrowserServerClass::init(){
 	//serveStatic("/secret.json", SPIFFS, "/secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
 	on("/sv", handleScaleProp);									/* Получить значения. */
-	on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
-	on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
+	//on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
+	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
 		request->send(200, "text/plain", String(ESP.getFreeHeap()));
-	});
+	});*/
 	on("/secret.json",[](AsyncWebServerRequest * reguest){
 		if (!browserServer.isAuthentified(reguest)){
 			return reguest->requestAuthentication();
 		}
 		reguest->send(SPIFFS, reguest->url());	
 	});
-	#if HTML_PROGMEM
-		on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */
-		rewrite("/sn", "/settings.html");	
-		serveStatic("/", SPIFFS, "/");	
-	#else
-		//on("/settings.html", HTTP_ANY, std::bind(&CoreClass::saveValueSettingsHttp, CORE, std::placeholders::_1));					/* Открыть страницу настроек или сохранить значения. */
-		//on("/sn",WebRequestMethod::HTTP_GET,handleAccessPoint);						/* Установить Настройки точки доступа */
-		//on("/sn",WebRequestMethod::HTTP_POST, std::bind(&CoreClass::handleSetAccessPoint, CORE, std::placeholders::_1));					/* Установить Настройки точки доступа */
-		serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-	#endif // PROGMEM_PAGE	
+#ifdef HTML_PROGMEM
+	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */
+	rewrite("/sn", "/settings.html");
+	serveStatic("/", SPIFFS, "/");
+#else
+	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+#endif	
 	
 	//serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
 	//rewrite("/", "index.html").setFilter(ON_STA_FILTER);
@@ -87,6 +84,7 @@ void BrowserServerClass::init(){
 	});
 }
 
+/*
 void BrowserServerClass::send_wwwauth_configuration_html(AsyncWebServerRequest *request) {
 	if (!checkAdminAuth(request))
 		return request->requestAuthentication();
@@ -98,8 +96,9 @@ void BrowserServerClass::send_wwwauth_configuration_html(AsyncWebServerRequest *
 		_saveHTTPAuth();
 	}
 	request->send(SPIFFS, request->url());
-}
+}*/
 
+/*
 bool BrowserServerClass::_saveHTTPAuth() {
 	
 	DynamicJsonBuffer jsonBuffer(256);
@@ -119,7 +118,7 @@ bool BrowserServerClass::_saveHTTPAuth() {
 	configFile.flush();
 	configFile.close();
 	return true;
-}
+}*/
 
 bool BrowserServerClass::_downloadHTTPAuth() {
 	_httpAuth.wwwUsername = "sa";
@@ -140,7 +139,7 @@ bool BrowserServerClass::_downloadHTTPAuth() {
 
 	if (!json.success()) {
 		return false;
-	}	
+	}
 	_httpAuth.wwwUsername = json["user"].as<String>();
 	_httpAuth.wwwPassword = json["pass"].as<String>();
 	return true;
@@ -178,7 +177,7 @@ void handleFileReadAuth(AsyncWebServerRequest * request){
 
 void handleScaleProp(AsyncWebServerRequest * request){
 	if (!browserServer.isAuthentified(request))
-		return request->requestAuthentication();
+	return request->requestAuthentication();
 	AsyncJsonResponse * response = new AsyncJsonResponse();
 	JsonObject& root = response->getRoot();
 	root["id_date"] = getDateTime();
@@ -186,19 +185,11 @@ void handleScaleProp(AsyncWebServerRequest * request){
 	root["id_ap_ssid"] = String(SOFT_AP_SSID);
 	root["id_ap_ip"] = toStringIp(WiFi.softAPIP());
 	root["id_ip"] = toStringIp(WiFi.localIP());
-	root["sl_id"] = String(Scale.getSeal());
+	root["sl_id"] = String(Scale.getSeal());					
 	root["chip_v"] = String(ESP.getCpuFreqMHz());
+	root["id_mac"] = WiFi.macAddress();
 	response->setLength();
 	request->send(response);
-	/*String values = "";
-	values += "id_date|" + getDateTime() + "|div\n";
-	values += "id_local_host|"+String(MY_HOST_NAME)+"/|div\n";
-	values += "id_ap_ssid|" + String(SOFT_AP_SSID) + "|div\n";
-	values += "id_ap_ip|" + toStringIp(WiFi.softAPIP()) + "|div\n";
-	values += "id_ip|" + toStringIp(WiFi.localIP()) + "|div\n";
-	values += "sl_id|" + String(Scale.getSeal()) + "|div\n";
-	
-	request->send(200, "text/plain", values);*/
 }
 
 /*
@@ -211,9 +202,9 @@ void handleAccessPoint(AsyncWebServerRequest * request){
 #endif*/
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
-	if(type == WS_EVT_CONNECT){	
-		client->ping();	
-	}else if(type == WS_EVT_DATA){
+	if(type == WS_EVT_CONNECT){
+		client->ping();
+		}else if(type == WS_EVT_DATA){
 		String msg = "";
 		for(size_t i=0; i < len; i++) {
 			msg += (char) data[i];
@@ -221,19 +212,15 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 		if (msg.equals("/wt")){
 			DynamicJsonBuffer jsonBuffer;
 			JsonObject& json = jsonBuffer.createObject();
-			json["w"]= String(Scale.getBuffer());
-			json["c"]= BATTERY.getCharge();
-			json["s"]= Scale.getStableWeight();
-			size_t len = json.measureLength();
+			size_t len = Scale.doData(json);							//TODO
 			AsyncWebSocketMessageBuffer * buffer = ws.makeBuffer(len);
 			if (buffer) {
 				json.printTo((char *)buffer->get(), len + 1);
 				if (client) {
 					client->text(buffer);
 				}
-			}	
-			POWER.updateCache();	
-			//client->text(String("{\"w\":\""+String(Scale.getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));
+			}
+			POWER.updateCache();
 		}
 	}
 }

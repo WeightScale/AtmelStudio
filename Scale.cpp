@@ -5,7 +5,7 @@
 
 ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 
-ScaleClass::ScaleClass(byte dout, byte pd_sck) : HX711(dout, pd_sck) , ExponentialFilter<long>(){
+ScaleClass::ScaleClass(byte dout, byte pd_sck) : HX711(dout, pd_sck) /*, ExponentialFilter<long>()*/{
 	_server = NULL;	
 	_authenticated = false;	
 	saveWeight.isSave = false;
@@ -18,8 +18,14 @@ void ScaleClass::setup(BrowserServerClass *server){
 	init();
 	_server = server;	
 	_server->on("/wt",HTTP_GET, [this](AsyncWebServerRequest * request){						/* Получить вес и заряд. */
+		AsyncResponseStream *response = request->beginResponseStream("text/json");
+		DynamicJsonBuffer jsonBuffer;
+		JsonObject &json = jsonBuffer.createObject();
+		Scale.doData(json);
+		json.printTo(*response);
 		POWER.updateCache();
-		request->send(200, "text/html", String("{\"w\":\""+String(getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(getStableWeight())+"}"));
+		request->send(response);
+		//request->send(200, "text/html", String("{\"w\":\""+String(getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(getStableWeight())+"}"));
 	});
 	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {							/* Открыть страницу калибровки.*/
 		if(!request->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
@@ -92,7 +98,7 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 			return request->send(400, TEXT_HTML, "Ошибка ");	
 	}
 	url:
-	#if HTML_PROGMEM
+	#ifdef HTML_PROGMEM
 		request->send_P(200,F(TEXT_HTML), calibr_html);
 	#else
 		request->send(SPIFFS, request->url());
@@ -157,18 +163,9 @@ bool ScaleClass::_downloadValue(){
 	
 }
 
-bool ScaleClass::saveDate() {
-	File cdateFile = SPIFFS.open(CDATE_FILE, "w+");
-	if (!cdateFile) {
-		cdateFile.close();
-		return false;
-	}
+bool ScaleClass::saveDate() {	
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
-
-	if (!json.success()) {
-		return false;
-	}
 	
 	json[STEP_JSON] = _scales_value.step;
 	json[AVERAGE_JSON] = _scales_value.average;
@@ -180,6 +177,11 @@ bool ScaleClass::saveDate() {
 	json[SEAL_JSON] = _scales_value.seal;
 	json[USER_JSON] = _scales_value.user;
 	json[PASS_JSON] = _scales_value.password;
+	
+	File cdateFile = SPIFFS.open(CDATE_FILE, "w");
+	if (!cdateFile) {
+		return false;
+	}
 	
 	json.printTo(cdateFile);
 	cdateFile.flush();
@@ -264,6 +266,13 @@ void ScaleClass::detectStable(float w){
 			time = millis();
 		}
 		weight_temp = w;
+}
+
+size_t ScaleClass::doData(JsonObject& json ){
+	json["w"]= String(_buffer);
+	json["c"]= BATTERY.getCharge();
+	json["s"]= stableWeight;	
+	return json.measureLength();
 }
 
 /*

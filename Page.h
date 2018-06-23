@@ -3,6 +3,7 @@
 #ifndef _PAGE_h
 #define _PAGE_h
 
+//index.html
 const char index_html[] PROGMEM = R"(<!DOCTYPE html><html lang='en'><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/><meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'/><meta http-equiv='Pragma' content='no-cache'/>
 <title>WEB SCALES</title><link rel='stylesheet' type='text/css' href='global.css'><link rel='shortcut icon' href='favicon.png' type='image/png'><style>#w_style{background:#fff;font-size:80px;font-family:Arial,sans-serif;color:#618ad2;margin-left:auto;margin-right:auto;}table {width:100%;}input{font-size:20px;text-align:center;}</style>
 <script>var w;function ScalesSocket(h, p, fm, fe){var host=h;var protocol=p;var timerWeight;var timerSocket;var ws;var startWeightTimeout=function(){clearTimeout(timerWeight);timerWeight=setTimeout(function(){fe();},5000);};

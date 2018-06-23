@@ -10,8 +10,8 @@
 #define WEB_SERVER_CONFIG_H_
 
 //Использовать веб страницы из flash памяти
-#define HTML_PROGMEM 1
-#if HTML_PROGMEM
+#define HTML_PROGMEM
+#ifdef HTML_PROGMEM
 	#include "Page.h"
 #endif
 

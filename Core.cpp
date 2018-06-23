@@ -37,6 +37,25 @@ bool CoreClass::canHandle(AsyncWebServerRequest *request){
 	if(request->url().equalsIgnoreCase("/settings.html")){
 		goto auth;
 	}
+#ifndef HTML_PROGMEM
+	else if(request->url().equalsIgnoreCase("/sn")){
+		goto auth;
+	}
+#endif
+	else
+		return false;
+	auth:
+	if (!request->authenticate(_settings.scaleName.c_str(), _settings.scalePass.c_str())){
+		if(!request->authenticate(_username.c_str(), _password.c_str())){
+			request->requestAuthentication();
+			return false;
+		}
+	}
+	return true;
+	
+	/*if(request->url().equalsIgnoreCase("/settings.html")){
+		goto auth;
+	}
 #if! HTML_PROGMEM
 	else if(request->url().equalsIgnoreCase("/sn")){
 		goto auth;
@@ -51,11 +70,70 @@ bool CoreClass::canHandle(AsyncWebServerRequest *request){
 				return false;
 			}
 		}
-		return true;
+		return true;*/
 }
 
 void CoreClass::handleRequest(AsyncWebServerRequest *request){
-	if (request->args() > 0){		
+	if (request->args() > 0){
+		String message = " ";
+		if (request->hasArg("ssid")){
+			if (request->hasArg("auto"))
+			_settings.autoIp = true;
+			else
+			_settings.autoIp = false;
+			_settings.scaleLanIp = request->arg("lan_ip");
+			_settings.scaleGateway = request->arg("gateway");
+			_settings.scaleSubnet = request->arg("subnet");
+			_settings.scaleWlanSSID = request->arg("ssid");
+			if(_settings.scaleWlanSSID.length()>0){
+				taskConnectWiFi.resume();
+			}else{
+				taskConnectWiFi.pause();
+			}
+			_settings.scaleWlanKey = request->arg("key");
+			goto save;
+		}
+		if(request->hasArg("data")){
+			DateTimeClass DateTime(request->arg("data"));
+			Rtc.SetDateTime(DateTime.toRtcDateTime());
+			request->send(200, TEXT_HTML, getDateTime());
+			return;
+		}
+		if (request->hasArg("host")){
+			_settings.hostUrl = request->arg("host");
+			_settings.hostPin = request->arg("pin").toInt();
+			goto save;
+		}
+		if (request->hasArg("n_admin")){
+			_settings.scaleName = request->arg("n_admin");
+			_settings.scalePass = request->arg("p_admin");
+			goto save;
+		}
+		if (request->hasArg("pt")){
+			if (request->hasArg("pe"))
+			POWER.enabled = _settings.power_time_enable = true;
+			else
+			POWER.enabled = _settings.power_time_enable = false;
+			_settings.time_off = request->arg("pt").toInt();
+			goto save;
+		}
+		save:
+		if (saveSettings()){
+			goto url;
+		}
+		return request->send(400);
+	}
+	url:
+	#ifdef HTML_PROGMEM
+	request->send_P(200,F("text/html"), settings_html);
+	#else
+	if(request->url().equalsIgnoreCase("/sn"))
+	request->send_P(200, F("text/html"), netIndex);
+	else
+	request->send(SPIFFS, request->url());
+	#endif
+	
+	/*if (request->args() > 0){		
 		String message = " ";
 		if (request->hasArg("ssid")){
 			if (request->hasArg("auto"))
@@ -112,7 +190,7 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 			request->send_P(200, F(TEXT_HTML), netIndex);
 		}else
 			request->send(SPIFFS, request->url());
-	#endif
+	#endif*/
 		
 }
 
@@ -121,14 +199,15 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	String date = getDateTime();
 	bool flag = WiFi.status() == WL_CONNECTED?eventToServer(date, event, value):false;
 	File readFile;
-	readFile = SPIFFS.open("/events.json", "r+");
+	readFile = SPIFFS.open("/events.json", "r");
     if (!readFile) {        
-        readFile.close();
-		if (!SPIFFS.exists("/events.json")){
+        //readFile.close();
+		/*if (!SPIFFS.exists("/events.json")){
 			readFile = SPIFFS.open("/events.json", "w+");	
 		}else{
 			return false;	
-		}
+		}*/
+		return false;
     }
 	
     size_t size = readFile.size(); 	
@@ -137,6 +216,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
     readFile.close();
 		
     DynamicJsonBuffer jsonBuffer(JSON_ARRAY_SIZE(110));
+	//DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
     if (!json.containsKey(EVENTS_JSON)) {	
@@ -168,7 +248,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	//TODO add AP data to html
 	File saveFile = SPIFFS.open("/events.json", "w");
 	if (!saveFile) {
-		SPIFFS.remove("/events.json");
+		//SPIFFS.remove("/events.json");
 		//saveFile.close();
 		return false;
 	}
@@ -181,6 +261,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 
 
 
+/*
 String CoreClass::getIp(){	
 	HTTPClient http;	
 	http.begin("http://sdb.net.ua/ip.php");
@@ -192,7 +273,7 @@ String CoreClass::getIp(){
 		return ip;
 	}	
 	return String(httpCode);
-}
+}*/
 
 /* */	
 bool CoreClass::eventToServer(const String& date, const String& type, const String& value){
@@ -308,7 +389,40 @@ String CoreClass::getHash(const int code, const String& date, const String& type
 }
 
 bool CoreClass::saveSettings() {	
-	File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
+	
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject& json = jsonBuffer.createObject();
+	
+	JsonObject& scale = json.createNestedObject(SCALE_JSON);
+	scale["id_n_admin"] = _settings.scaleName;
+	scale["id_p_admin"] = _settings.scalePass;
+	scale["id_auto"] = _settings.autoIp;
+	scale["id_lan_ip"] = _settings.scaleLanIp;
+	scale["id_gateway"] = _settings.scaleGateway;
+	scale["id_subnet"] = _settings.scaleSubnet;
+	scale["id_ssid"] = _settings.scaleWlanSSID;
+	scale["id_key"] = _settings.scaleWlanKey;
+	scale["bat_max"] = _settings.bat_max;
+	scale["id_pe"] = _settings.power_time_enable;
+	scale["id_pt"] = _settings.time_off;
+	
+	JsonObject& server = json.createNestedObject(SERVER_JSON);
+	server["id_host"] = _settings.hostUrl;
+	server["id_pin"] = _settings.hostPin;
+	server["timeout"] = _settings.timeout;
+	
+	File serverFile = SPIFFS.open(SETTINGS_FILE, "w");
+	if (!serverFile) {
+		//serverFile.close();
+		return false;
+	}
+
+	json.printTo(serverFile);
+	serverFile.flush();
+	serverFile.close();
+	return true;
+	
+	/*File serverFile = SPIFFS.open(SETTINGS_FILE, "w+");
 	if (!serverFile) {
 		serverFile.close();
 		return false;
@@ -344,11 +458,60 @@ bool CoreClass::saveSettings() {
 	json.printTo(serverFile);
 	serverFile.flush();
 	serverFile.close();
-	return true;
+	return true;*/
 }
 
 bool CoreClass::_downloadSettings() {
 	_settings.scaleName = "admin";
+	_settings.scalePass = "1234";
+	_settings.autoIp = true;
+	_settings.scaleLanIp = "192.168.1.100";
+	_settings.scaleGateway = "192.168.1.1";
+	_settings.scaleSubnet = "255.255.255.0";
+	_settings.hostUrl = HOST_URL;
+	_settings.hostPin = 0;
+	_settings.timeout = TIMEOUT_HTTP;
+	_settings.bat_max = MIN_CHG;
+	_settings.power_time_enable = false;
+	_settings.time_off = 2400000;
+	File serverFile = SPIFFS.open(SETTINGS_FILE, "r");
+	if (!serverFile) {
+		return false;
+	}
+	size_t size = serverFile.size();
+
+	// Allocate a buffer to store contents of the file.
+	std::unique_ptr<char[]> buf(new char[size]);
+	
+	serverFile.readBytes(buf.get(), size);
+	serverFile.close();
+	DynamicJsonBuffer jsonBuffer(size);
+	JsonObject& json = jsonBuffer.parseObject(buf.get());
+
+	if (!json.success()) {
+		return false;
+	}
+	if (json.containsKey(SCALE_JSON)){
+		_settings.scaleName = json[SCALE_JSON]["id_n_admin"].as<String>();
+		_settings.scalePass = json[SCALE_JSON]["id_p_admin"].as<String>();
+		_settings.autoIp = json[SCALE_JSON]["id_auto"];
+		_settings.scaleLanIp = json[SCALE_JSON]["id_lan_ip"].as<String>();
+		_settings.scaleGateway = json[SCALE_JSON]["id_gateway"].as<String>();
+		_settings.scaleSubnet = json[SCALE_JSON]["id_subnet"].as<String>();
+		_settings.scaleWlanSSID = json[SCALE_JSON]["id_ssid"].as<String>();
+		_settings.scaleWlanKey = json[SCALE_JSON]["id_key"].as<String>();
+		_settings.bat_max = json[SCALE_JSON]["bat_max"];
+		_settings.power_time_enable = json[SCALE_JSON]["id_pe"];
+		_settings.time_off = json[SCALE_JSON]["id_pt"];
+	}
+	if (json.containsKey(SERVER_JSON)){
+		_settings.hostUrl = json[SERVER_JSON]["id_host"].as<String>();
+		_settings.hostPin = json[SERVER_JSON]["id_pin"];
+		_settings.timeout = json[SERVER_JSON]["timeout"];
+	}
+	return true;
+	
+	/*_settings.scaleName = "admin";
 	_settings.scalePass = "1234";
 	_settings.autoIp = true;
 	_settings.scaleLanIp = "192.168.1.100";
@@ -402,7 +565,7 @@ bool CoreClass::_downloadSettings() {
 		_settings.hostPin = json[SERVER_JSON]["id_pin"];	
 		_settings.timeout = json[SERVER_JSON]["timeout"];	
 	}	
-	return true;
+	return true;*/
 }
 
 
