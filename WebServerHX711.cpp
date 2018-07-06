@@ -137,22 +137,22 @@ void connectWifi() {
 	for (int i = 0; i < n; ++i)	{
 		if(WiFi.SSID(i) == CORE->getSSID().c_str()){
 			//USE_SERIAL.println(CORE.getSSID());
-			String ssid_scan;
-			int32_t rssi_scan;
-			uint8_t sec_scan;
-			uint8_t* BSSID_scan;
-			int32_t chan_scan;
-			bool hidden_scan;
+			//String ssid_scan;
+			//int32_t rssi_scan;
+			//uint8_t sec_scan;
+			//uint8_t* BSSID_scan;
+			int32_t chan_scan = WiFi.channel(i);
+			//bool hidden_scan;
 			WiFi.setAutoConnect(true);
 			WiFi.setAutoReconnect(true);
-			WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, BSSID_scan, chan_scan, hidden_scan);
+			//WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, BSSID_scan, chan_scan, hidden_scan);
 			if (!CORE->isAuto()){
 				if (lanIp.fromString(CORE->getLanIp()) && gateway.fromString(CORE->getGateway())){
 					WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 				}
 			}
 			WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
-			WiFi.begin ( CORE->getSSID().c_str(), CORE->getPASS().c_str(),chan_scan,BSSID_scan);
+			WiFi.begin ( CORE->getSSID().c_str(), CORE->getPASS().c_str(),chan_scan/*,BSSID_scan*/);
 			int status = WiFi.waitForConnectResult();
 			if(status == WL_CONNECTED ){
 				NBNS.begin(MY_HOST_NAME);

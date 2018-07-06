@@ -121,14 +121,14 @@ bool ScaleClass::_downloadValue(){
 	SetFilterWeight(80);
 	_scales_value.user = "admin";
 	_scales_value.password = "1234";
-	File dateFile;
-	if (SPIFFS.exists(CDATE_FILE)){
+	File dateFile = SPIFFS.open(CDATE_FILE, "r");
+	/*if (SPIFFS.exists(CDATE_FILE)){
 		dateFile = SPIFFS.open(CDATE_FILE, "r");
 	}else{
 		dateFile = SPIFFS.open(CDATE_FILE, "w+");
-	}
+	}*/
 	if (!dateFile) {
-		dateFile.close();
+		//dateFile.close();
 		return false;
 	}
 	size_t size = dateFile.size();
@@ -211,14 +211,6 @@ float ScaleClass::getWeight(){
 	return round(getUnits() * _round) / _round; 
 }
 
-float ScaleClass::forTest(uint32_t h){
-	Filter(h);
-	float v = Current();
-	v*= _scales_value.scale;
-	v = round(v * _round) / _round;
-	return v;
-}
-
 void ScaleClass::tare() {
 	long sum = readAverage();
 	setOffset(sum);
@@ -274,17 +266,6 @@ size_t ScaleClass::doData(JsonObject& json ){
 	json["s"]= stableWeight;	
 	return json.measureLength();
 }
-
-/*
-void ScaleClass::handleWeight(AsyncWebServerRequest * request){
-	/ *char buffer[10];
-	float w = Scale.getWeight();
-	Scale.formatValue(w, buffer	);
-	Scale.detectStable(w);
-	
-	taskPower.updateCache();* /
-	request->send(200, "text/plain", String("{\"w\":\""+String(Scale.getTest())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(Scale.getStableWeight())+"}"));	
-}*/
 
 void handleSeal(AsyncWebServerRequest * request){
 	randomSeed(Scale.readAverage());

@@ -53,11 +53,8 @@ void BrowserServerClass::begin() {
 
 void BrowserServerClass::init(){
 	on("/settings.json",HTTP_ANY, handleFileReadAuth);
-	//serveStatic("/settings.json",SPIFFS,"/settings.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
-	//serveStatic("/secret.json", SPIFFS, "/secret.json").setAuthentication(_httpAuth.wwwUsername.c_str(), _httpAuth.wwwPassword.c_str());
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
-	on("/sv", handleScaleProp);									/* Получить значения. */
-	//on("/admin.html", std::bind(&BrowserServerClass::send_wwwauth_configuration_html, this, std::placeholders::_1));
+	on("/sv", handleScaleProp);									/* Получить значения. */	
 	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
 		request->send(200, "text/plain", String(ESP.getFreeHeap()));
 	});*/
@@ -74,51 +71,11 @@ void BrowserServerClass::init(){
 #else
 	serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
 #endif	
-	
-	//serveStatic("/", SPIFFS, "/").setDefaultFile("index-ap.html").setFilter(ON_AP_FILTER);
-	//rewrite("/", "index.html").setFilter(ON_STA_FILTER);
-	
-	
+		
 	onNotFound([](AsyncWebServerRequest *request){
 		request->send(404);
 	});
 }
-
-/*
-void BrowserServerClass::send_wwwauth_configuration_html(AsyncWebServerRequest *request) {
-	if (!checkAdminAuth(request))
-		return request->requestAuthentication();
-	if (request->args() > 0){  // Save Settings
-		if (request->hasArg("wwwuser")){
-			_httpAuth.wwwUsername = request->arg("wwwuser");
-			_httpAuth.wwwPassword = request->arg("wwwpass");
-		}		
-		_saveHTTPAuth();
-	}
-	request->send(SPIFFS, request->url());
-}*/
-
-/*
-bool BrowserServerClass::_saveHTTPAuth() {
-	
-	DynamicJsonBuffer jsonBuffer(256);
-	//StaticJsonBuffer<256> jsonBuffer;
-	JsonObject& json = jsonBuffer.createObject();
-	json["user"] = _httpAuth.wwwUsername;
-	json["pass"] = _httpAuth.wwwPassword;
-
-	//TODO add AP data to html
-	File configFile = SPIFFS.open(SECRET_FILE, "w");
-	if (!configFile) {
-		configFile.close();
-		return false;
-	}
-
-	json.printTo(configFile);
-	configFile.flush();
-	configFile.close();
-	return true;
-}*/
 
 bool BrowserServerClass::_downloadHTTPAuth() {
 	_httpAuth.wwwUsername = "sa";
@@ -192,15 +149,6 @@ void handleScaleProp(AsyncWebServerRequest * request){
 	request->send(response);
 }
 
-/*
-#if! HTML_PROGMEM
-void handleAccessPoint(AsyncWebServerRequest * request){
-	if (!browserServer.isAuthentified(request))
-		return request->requestAuthentication();
-	request->send_P(200, F(TEXT_HTML), netIndex);	
-}
-#endif*/
-
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
 	if(type == WS_EVT_CONNECT){
 		client->ping();
@@ -212,7 +160,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 		if (msg.equals("/wt")){
 			DynamicJsonBuffer jsonBuffer;
 			JsonObject& json = jsonBuffer.createObject();
-			size_t len = Scale.doData(json);							//TODO
+			size_t len = Scale.doData(json);							
 			AsyncWebSocketMessageBuffer * buffer = ws.makeBuffer(len);
 			if (buffer) {
 				json.printTo((char *)buffer->get(), len + 1);

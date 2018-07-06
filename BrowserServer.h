@@ -1,12 +1,6 @@
 ﻿#ifndef _BROWSERSERVER_h
 #define _BROWSERSERVER_h
 
-/*
-#if defined(ARDUINO) && ARDUINO >= 100
-	#include "arduino.h"
-#else
-	#include "WProgram.h"
-#endif*/
 #include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <IPAddress.h>
@@ -37,8 +31,7 @@ class AsyncWebServer;
 
 class BrowserServerClass : public AsyncWebServer{
 	protected:
-		strHTTPAuth _httpAuth;
-		//bool _saveHTTPAuth();		
+		strHTTPAuth _httpAuth;	
 		bool _downloadHTTPAuth();		
 
 	public:
@@ -46,20 +39,12 @@ class BrowserServerClass : public AsyncWebServer{
 		BrowserServerClass(uint16_t port);
 		~BrowserServerClass();
 		void begin();
-		void init();
-		//static String urldecode(String input); // (based on https://code.google.com/p/avr-netino/)
-		//static unsigned char h2int(char c);
-		//void send_wwwauth_configuration_html(AsyncWebServerRequest *request);
-		//void restart_esp();		
-		//String getContentType(String filename);	
-		//bool isValidType(String filename);		
+		void init();				
 		bool checkAdminAuth(AsyncWebServerRequest * request);
 		bool isAuthentified(AsyncWebServerRequest * request);
 		String getName(){ return _httpAuth.wwwUsername;};
 		String getPass(){ return _httpAuth.wwwPassword;};
 		void stop(){_server.end();};
-		//friend CoreClass;
-		//friend BrowserServerClass;
 };
 
 class CaptiveRequestHandler : public AsyncWebHandler {
@@ -81,7 +66,6 @@ class CaptiveRequestHandler : public AsyncWebHandler {
 	}
 };
 
-//extern ESP8266HTTPUpdateServer httpUpdater;
 extern DNSServer dnsServer;
 extern IPAddress apIP;
 extern IPAddress netMsk;
@@ -90,14 +74,8 @@ extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 extern AsyncWebSocket ws;
 
-//void send_update_firmware_values_html();
-//void setUpdateMD5();
-//void handleFileReadAdmin(AsyncWebServerRequest*);
 void handleFileReadAuth(AsyncWebServerRequest*);
-/*
-#if! HTML_PROGMEM
-	void handleAccessPoint(AsyncWebServerRequest*);
-#endif*/
+
 void handleScaleProp(AsyncWebServerRequest*);
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 

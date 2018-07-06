@@ -26,11 +26,10 @@
 #define PASS_JSON			"ps_id"
 
 typedef struct {
-	long offset;		/*  */
+	long offset;						/*  */
 	unsigned char average;				/*  */
 	unsigned char step;					/*  */
-	int accuracy;					/*  */
-	//unsigned char w_filter; /*! Значение для фильтра от 1-100 % */
+	int accuracy;						/*  */
 	unsigned int max;					/*  */
 	float scale;
 	int seal;
@@ -45,7 +44,7 @@ typedef struct{
 
 class BrowserServerClass;
 
-class ScaleClass : public HX711/* , public ExponentialFilter<long>*/{
+class ScaleClass : public HX711{
 	private:
 		float _weight;
 		char _buffer[10];
@@ -57,38 +56,25 @@ class ScaleClass : public HX711/* , public ExponentialFilter<long>*/{
 		t_save_value saveWeight;
 		t_scales_value _scales_value;
 		float _round;						/* множитиль для округления */
-		float _stable_step;					/* шаг для стабилизации */
-		//float _referenceWeight;				/*  */
-		//long _calibrateWeightValue;			/*  */
-				
-			
+		float _stable_step;					/* шаг для стабилизации */	
 		bool _downloadValue();
 
 	public:
 		ScaleClass(byte, byte);
 		~ScaleClass();
-		void setup(BrowserServerClass *server/*, const char * username, const char * password*/);	
+		void setup(BrowserServerClass *server);	
 		bool saveDate();
 		void saveValueCalibratedHttp(AsyncWebServerRequest *);
-		//void handleWeight(AsyncWebServerRequest*);
 		void fetchWeight();
 		void mathScale(float referenceW, long calibrateW);
 		void mathRound();
-		//void setScale(d_type scale = 1.f){_scales_value.scale = scale;};
-		//d_type getScale(){return _scales_value.scale;};
-		char * getBuffer(){return _buffer;};
-		float getTest(){return _weight;};
-		void setTest(float f){_weight = f;};	
 		void setOffset(long offset = 0){_scales_value.offset = offset;};
-		long getOffset(){return _scales_value.offset;};
 		void init();	
 		long readAverage();
 		long getValue();
-		void setAverage(unsigned char);
-		unsigned char getAverage(){return _scales_value.average;};	
+		void setAverage(unsigned char);	
 		void setSeal(int s){_scales_value.seal = s; };
 		int getSeal(){ return _scales_value.seal;};	
-		BrowserServerClass *getServer(){ return _server;};
 		void detectStable(float);
 		
 		float getUnits();
@@ -96,18 +82,14 @@ class ScaleClass : public HX711/* , public ExponentialFilter<long>*/{
 		void tare();
 		
 		void formatValue(float value, char* string);
-		float getStableStep(){return _stable_step;};
 		
 		float getRound(){return _round;};
-		bool getStableWeight(){return stableWeight;};
-		void setStableWeight(bool s){stableWeight = s;};
-			
+						
 		float isSave(){return saveWeight.isSave;};
 		float getSaveValue(){return saveWeight.value;};
 		void setIsSave(bool s){saveWeight.isSave = s;};
 		
 		size_t doData(JsonObject& json );
-		float forTest(uint32_t h);		
 };
 
 extern ScaleClass Scale;
