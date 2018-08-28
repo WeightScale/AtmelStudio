@@ -1,79 +1,121 @@
 <!DOCTYPE html>
 <html lang='en'>
+
 <head>
     <meta charset='UTF-8'>
-    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/>
-    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate'/>
-    <meta http-equiv='Pragma' content='no-cache'/>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no' />
+    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate' />
+    <meta http-equiv='Pragma' content='no-cache' />
     <title>WEB SCALES</title>
     <link rel='stylesheet' type='text/css' href='global.css'>
     <link rel='shortcut icon' href='favicon.png' type='image/png'>
-    <style>#w_style{background:#fff;font-size:80px;font-family:Arial,sans-serif;color:#618ad2;margin-left:auto;margin-right:auto;}table {width:100%;}input{font-size:20px;text-align:center;}</style>
+    <style>
+        #w_style {
+            background: #fff;
+            font-size: 80px;
+            font-family: Arial, sans-serif;
+            color: #618ad2;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        table {
+            width: 100%;
+        }
+
+        input {
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
     <script>
         var w;
-        function ScalesSocket(h, p, fm, fe)  {
-            var host=h;var protocol=p;var timerWeight;var timerSocket;var ws;
-            var startWeightTimeout = function()  {
+        var d = document;
+        function ScalesSocket(h, p, fm, fe) {
+            var host = h;
+            var protocol = p;
+            var timerWeight;
+            var timerSocket;
+            var ws;
+            var startWeightTimeout = function() {
                 clearTimeout(timerWeight);
-                timerWeight = setTimeout(function () {
+                timerWeight = setTimeout(function() {
                     fe();
-                },5000);
+                }, 5000);
             };
-            this.getWeight=function () {
+            this.getWeight = function() {
                 ws.send('/wt');
                 startWeightTimeout();
             };
-            this.openSocket=function(){
-                ws=new WebSocket(host,protocol);
-                ws.onopen=this.getWeight;
-                ws.onclose=function(e){clearTimeout(timerWeight);starSocketTimeout();fe();};
-                ws.onerror=function(e){fe();};
-                ws.onmessage=function(e){fm(JSON.parse(e.data));}
+            this.openSocket = function() {
+                ws = new WebSocket(host, protocol);
+                ws.onopen = this.getWeight;
+                ws.onclose = function(e) {
+                    clearTimeout(timerWeight);
+                    starSocketTimeout();
+                    fe();
+                };
+                ws.onerror = function(e) {
+                    fe();
+                };
+                ws.onmessage = function(e) {
+                    fm(JSON.parse(e.data));
+                }
             };
-
-            var starSocketTimeout=function () {
+            var starSocketTimeout = function() {
                 clearTimeout(timerSocket);
-                timerSocket=setTimeout(function(){this.prototype.openSocket();},5000);
+                timerSocket = setTimeout(function() {
+                    this.prototype.openSocket();
+                }, 5000);
             }
         }
+
         function go() {
-            document.getElementById('weight').innerHTML='---';
-            document.getElementById('charge_id').innerHTML='--%';
-            document.getElementById('buttonZero').style.visibility='visible';
-            //getWeight();
+            d.getElementById('weight').innerHTML = '---';
+            d.getElementById('charge_id').innerHTML = '--%';
+            d.getElementById('buttonZero').style.visibility = 'visible';
         }
-        function setZero(){
-            document.getElementById('buttonZero').style.visibility='hidden';
-            var request=new XMLHttpRequest();
-            document.getElementById('weight').innerHTML='...';
-            request.onreadystatechange=function(){
-                if (this.readyState===4 && this.status===204){
-                    document.getElementById('buttonZero').style.visibility='visible';
-                    w.getWeight();
-                }};
-            request.open('GET','/tp',true);
-            request.timeout=5000;
-            request.ontimeout=function(){go();};
-            request.onerror=function(){go();};
-            request.send(null);
-        }
-        window.onload=function(){onBodyLoad();};
-        function onBodyLoad(){
-            w = new ScalesSocket('ws://'+document.location.host+'/ws',['arduino'],function(e){
-                try{
-                    document.getElementById('weight').innerHTML=e.w;
-                    document.getElementById('charge_id').innerHTML=e.c+'%';
-                    if(e.s){
-                        document.getElementById('w_style').setAttribute('style','background: #fff;');
-                    }else{
-                        document.getElementById('w_style').setAttribute('style','background: #C4C4C4;');
-                    }
-                }catch(e){
-                    go();
-                }finally{
+
+        function setZero() {
+            d.getElementById('buttonZero').style.visibility = 'hidden';
+            var r = new XMLHttpRequest();
+            d.getElementById('weight').innerHTML = '...';
+            r.onreadystatechange = function() {
+                if (r.readyState === 4 && r.status === 204) {
+                    d.getElementById('buttonZero').style.visibility = 'visible';
                     w.getWeight();
                 }
-            },function(){
+            };
+            r.open('GET', '/tp', true);
+            r.timeout = 5000;
+            r.ontimeout = function() {
+                go();
+            };
+            r.onerror = function() {
+                go();
+            };
+            r.send(null);
+        }
+        window.onload = function() {
+            onBodyLoad();
+        };
+
+        function onBodyLoad() {
+            w = new ScalesSocket('ws://' + d.location.host + '/ws', ['arduino'], function(e) {
+                try {
+                    d.getElementById('weight').innerHTML = e.w;
+                    d.getElementById('charge_id').innerHTML = e.c + '%';
+                    if (e.s) {
+                        d.getElementById('w_style').setAttribute('style', 'background: #fff;');
+                    } else {
+                        d.getElementById('w_style').setAttribute('style', 'background: #C4C4C4;');
+                    }
+                } catch (e) {
+                    go();
+                } finally {
+                    w.getWeight();
+                }
+            }, function() {
                 go();
                 w.openSocket();
             });
@@ -81,20 +123,45 @@
         }
     </script>
 </head>
+
 <body>
 <div align='center'>
-    <table><tr><td ><img src='scales.png' style='height: 42px;' /></td><td align='right'><h3 id='brand_name'>scale.in.ua</h3></td></tr></table>
+    <table>
+        <tr>
+            <td><img src='scales.png' style='height: 42px;' /></td>
+            <td align='right'>
+                <h3 id='brand_name'>scale.in.ua</h3></td>
+        </tr>
+    </table>
     <p hidden='hidden' id='dnt'></p>
 </div>
 <hr>
-<div align='right' id='w_style'>
-    <b id='weight'>---</b>
-</div>
+<div align='right' id='w_style'><b id='weight'>---</b></div>
 <hr>
-<table><tr><td style='width:1%; white-space: nowrap'><img src='battery.png' alt='B'/></td><td><h3 id='charge_id' style='display: inline'>--%</h3></td><td align='right'><b><a href='javascript:setZero()' id='buttonZero' class='btn btn--s btn--blue'>&gt;0&lt;</a></b></td></tr></table>
+<table>
+    <tr>
+        <td style='width:1%; white-space: nowrap'><img src='battery.png' alt='B' /></td>
+        <td>
+            <h3 id='charge_id' style='display: inline'>--%</h3></td>
+        <td align='right'><b><a href='javascript:setZero()' id='buttonZero' class='btn btn--s btn--blue'>&gt;0&lt;</a></b></td>
+    </tr>
+</table>
 <hr>
-<table><tr><td><a href='/events.html' class='btn btn--m btn--blue'>события</a><br></td></tr><tr><td><br/><a href='/settings.html'>настройки</a><br></td></tr></table>
+<table>
+    <tr>
+        <td><a href='/events.html' class='btn btn--m btn--blue'>события</a>
+            <br>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            <br/><a href='/settings.html'>настройки</a>
+            <br>
+        </td>
+    </tr>
+</table>
 <hr>
 <footer align='center'>2018 © Powered by www.scale.in.ua</footer>
 </body>
+
 </html>

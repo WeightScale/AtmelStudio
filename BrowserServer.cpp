@@ -66,6 +66,7 @@ void BrowserServerClass::init(){
 	});
 #ifdef HTML_PROGMEM
 	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */
+	on("/global.css",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/css"),global_css);});					/* Стили */
 	rewrite("/sn", "/settings.html");
 	serveStatic("/", SPIFFS, "/");
 #else
@@ -152,7 +153,7 @@ void handleScaleProp(AsyncWebServerRequest * request){
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
 	if(type == WS_EVT_CONNECT){
 		client->ping();
-		}else if(type == WS_EVT_DATA){
+	}else if(type == WS_EVT_DATA){
 		String msg = "";
 		for(size_t i=0; i < len; i++) {
 			msg += (char) data[i];

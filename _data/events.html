@@ -6,23 +6,24 @@
     <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
     <meta http-equiv="Pragma" content="no-cache"/>
     <title>События</title>
-    <link rel="stylesheet" type="text/css" href="global.css">
-    <style>.table{width: 100%;border-collapse:collapse;}.td,.th{padding: 3px;border: 1px solid white;text-align:center;}.th{background:#a0a0a0;}.details{padding:3px;border: 1px solid white;}</style>
+    <style>
+        .table{width: 100%; border-collapse:collapse;}
+        .td,.th{padding: 3px; border: 1px solid white; text-align:center;}
+        .th{background:#a0a0a0;}
+        .details{padding:3px; border: 1px solid white;}
+    </style>
     <script>
         function loadJSON(){
             var array;
-            var http_request = new XMLHttpRequest();
-            http_request.overrideMimeType('application/json');
-            http_request.onreadystatechange = function(){
-                if (http_request.readyState === 4  ){
+            var r = new XMLHttpRequest();
+            r.overrideMimeType('application/json');
+            r.onreadystatechange = function(){
+                if (r.readyState === 4  ){
                     try{
-                        var json = JSON.parse(http_request.responseText);
-                        array = json.events;
+                        var j = JSON.parse(r.responseText);
+                        array = j.events;
                         array = _.filter(array, function(num){
-                            if(num.v !== ""){
-                                return true;
-                            }
-                            return false;
+                            return num.v !== "";
                         });
                         array.sort(function (a, b) {
                             var dateA=new Date(a.d), dateB=new Date(b.d);
@@ -39,7 +40,7 @@
                         div.innerHTML = "";
                         _.each (groupedByDay, function (day) {
                             var details = document.createElement("details");
-                            details.classList.add("details")
+                            details.classList.add("details");
                             details.innerHTML = "<summary>"+day[0].date+"</summary>";
                             var t = document.createElement("table");
                             t.classList.add('table');
@@ -56,32 +57,36 @@
                     }
                 }
             };
-            http_request.open("GET", "/events.json", true);
-            http_request.send(null);
+            r.open("GET", "/events.json", true);
+            r.send(null);
         }
 
         window.onload = function () {
-            load("underscore.js", "js", function () {
-                loadJSON();
+            load('global.css','css', function () {
+                load('underscore.js', 'js',function () {
+                    loadJSON();
+                })
             });
         };
 
         function load(e, t, n) {
+            let a;
+            var d = document;
             if ("js" === t) {
-                var a = document.createElement("script");
-                a.src = e,
-                    a.type = "text/javascript",
-                    a.async = !1,
-                    a.onload = function () { n() },
-                    document.getElementsByTagName("head")[0].appendChild(a)
+                a = d.createElement("script");
+                a.src = e;
+                a.type = "text/javascript";
+                a.async = !1;
+                a.onload = function () { n() };
+                d.getElementsByTagName("head")[0].appendChild(a)
             } else if ("css" === t) {
-                var a = document.createElement("link");
-                a.href = e,
-                    a.rel = "stylesheet",
-                    a.type = "text/css",
-                    a.async = !1,
-                    a.onload = function () { n() },
-                    document.getElementsByTagName("head")[0].appendChild(a)
+                a = d.createElement("link");
+                a.href = e;
+                a.rel = "stylesheet";
+                a.type = "text/css";
+                a.async = !1;
+                a.onload = function () { n() };
+                d.getElementsByTagName("head")[0].appendChild(a);
             }
         }
     </script>
@@ -94,7 +99,7 @@
 </table>
 <hr>
 <table class="table">
-    <tbody id="events"></tbody>
+    <tbody id="events"/>
 </table>
 <hr>
 <footer align="center">2018 © Powered by www.scale.in.ua</footer>

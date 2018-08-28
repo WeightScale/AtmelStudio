@@ -122,9 +122,9 @@ void connectWifi() {
 		if (n <= 0){
 			goto scan;
 		}
-		}else if (n > 0){
+	}else if (n > 0){
 		goto connect;
-		}else{
+	}else{
 		goto scan;
 	}
 	connect:
