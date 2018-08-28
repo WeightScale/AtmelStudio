@@ -28,7 +28,7 @@ void ScaleClass::setup(BrowserServerClass *server){
 		//request->send(200, "text/html", String("{\"w\":\""+String(getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(getStableWeight())+"}"));
 	});
 	_server->on(PAGE_FILE, [this](AsyncWebServerRequest * request) {							/* Открыть страницу калибровки.*/
-		if(!request->authenticate(_scales_value.user.c_str(), _scales_value.password.c_str()))
+		if(!request->authenticate(_scales_value->user, _scales_value->password))
 			if (!_server->checkAdminAuth(request)){
 				return request->requestAuthentication();
 			}
@@ -42,39 +42,64 @@ void ScaleClass::setup(BrowserServerClass *server){
 		tare();
 		request->send(204, TEXT_HTML, "");
 	});
-	_server->on("/sl", handleSeal);																/* Опломбировать */	
+	_server->on("/sl", handleSeal);																/* Опломбировать */
+	_server->on("/cdate.json",HTTP_ANY, [this](AsyncWebServerRequest * request){
+		if(!request->authenticate(_scales_value->user, _scales_value->password))
+			if (!browserServer.checkAdminAuth(request)){
+				return request->requestAuthentication();
+			}
+		AsyncResponseStream *response = request->beginResponseStream("application/json");
+		DynamicJsonBuffer jsonBuffer;
+		JsonObject &json = jsonBuffer.createObject();
+		
+		json[STEP_JSON] = _scales_value->step;
+		json[AVERAGE_JSON] = _scales_value->average;
+		json[WEIGHT_MAX_JSON] = _scales_value->max;
+		json[OFFSET_JSON] = _scales_value->offset;
+		json[ACCURACY_JSON] = _scales_value->accuracy;
+		json[SCALE_JSON] = _scales_value->scale;
+		json[FILTER_JSON] = GetFilterWeight();
+		json[SEAL_JSON] = _scales_value->seal;
+		json[USER_JSON] = _scales_value->user;
+		json[PASS_JSON] = _scales_value->password;
+		
+		json.printTo(*response);
+		request->send(response);
+		//reguest->send(SPIFFS, reguest->url());
+	});	
 }
 
 void ScaleClass::init(){
 	reset();
-	_downloadValue();
+	_scales_value = &CoreMemory.eeprom.scales_value;
+	//_downloadValue();
 	mathRound();
 	tare();
 	SetCurrent(readAverage());
 }
 
 void ScaleClass::mathRound(){
-	_round = pow(10.0, _scales_value.accuracy) / _scales_value.step; // множитель для округления}
+	_round = pow(10.0, _scales_value->accuracy) / _scales_value->step; // множитель для округления}
 	_stable_step = 1/_round;
 }
 
 void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 	if (request->args() > 0) {
 		if (request->hasArg("update")){
-			_scales_value.accuracy = request->arg("weightAccuracy").toInt();
-			_scales_value.step = request->arg("weightStep").toInt();
+			_scales_value->accuracy = request->arg("weightAccuracy").toInt();
+			_scales_value->step = request->arg("weightStep").toInt();
 			setAverage(request->arg("weightAverage").toInt());
 			SetFilterWeight(request->arg("weightFilter").toInt());
-			_scales_value.max = request->arg("weightMax").toInt();
+			_scales_value->max = request->arg("weightMax").toInt();
 			mathRound();
-			if (saveDate()){
+			if (CoreMemory.save()){
 				goto ok;
 			}
 			goto err;
 		}
 		
 		if (request->hasArg("zero")){
-			_scales_value.offset = readAverage();
+			_scales_value->offset = readAverage();
 		}
 		
 		if (request->hasArg("weightCal")){
@@ -84,9 +109,9 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 		}
 		
 		if (request->hasArg("user")){
-			_scales_value.user = request->arg("user");
-			_scales_value.password = request->arg("pass");
-			if (saveDate()){
+			request->arg("user").toCharArray(_scales_value->user,request->arg("user").length()+1);
+			request->arg("pass").toCharArray(_scales_value->password,request->arg("pass").length()+1);
+			if (CoreMemory.save()){
 				goto url;
 			}
 			goto err;
@@ -111,22 +136,23 @@ void ScaleClass::fetchWeight(){
 	detectStable(w);
 }
 
+/*
 bool ScaleClass::_downloadValue(){
-	_scales_value.average = 1;
-	_scales_value.step = 1;
-	_scales_value.accuracy = 0;
-	_scales_value.offset = 0;
-	_scales_value.max = 1000;
-	_scales_value.scale = 1;
+	_scales_value->average = 1;
+	_scales_value->step = 1;
+	_scales_value->accuracy = 0;
+	_scales_value->offset = 0;
+	_scales_value->max = 1000;
+	_scales_value->scale = 1;
 	SetFilterWeight(80);
-	_scales_value.user = "admin";
-	_scales_value.password = "1234";
+	_scales_value->user = "admin";
+	_scales_value->password = "1234";
 	File dateFile = SPIFFS.open(CDATE_FILE, "r");
-	/*if (SPIFFS.exists(CDATE_FILE)){
+	/ *if (SPIFFS.exists(CDATE_FILE)){
 		dateFile = SPIFFS.open(CDATE_FILE, "r");
 	}else{
 		dateFile = SPIFFS.open(CDATE_FILE, "w+");
-	}*/
+	}* /
 	if (!dateFile) {
 		//dateFile.close();
 		return false;
@@ -143,40 +169,41 @@ bool ScaleClass::_downloadValue(){
 	if (!json.success()) {
 		return false;
 	}
-	_scales_value.max = json[WEIGHT_MAX_JSON];
-	_scales_value.offset = json[OFFSET_JSON];
+	_scales_value->max = json[WEIGHT_MAX_JSON];
+	_scales_value->offset = json[OFFSET_JSON];
 	setAverage(json[AVERAGE_JSON]);
-	_scales_value.step = json[STEP_JSON];
-	_scales_value.accuracy = json[ACCURACY_JSON];
-	_scales_value.scale = json[SCALE_JSON];
+	_scales_value->step = json[STEP_JSON];
+	_scales_value->accuracy = json[ACCURACY_JSON];
+	_scales_value->scale = json[SCALE_JSON];
 	SetFilterWeight(json[FILTER_JSON]);
-	_scales_value.seal = json[SEAL_JSON];
+	_scales_value->seal = json[SEAL_JSON];
 	if (!json.containsKey(USER_JSON)){
-		_scales_value.user = "admin";
-		_scales_value.password = "1234";	
+		_scales_value->user = "admin";
+		_scales_value->password = "1234";	
 	}else{
-		_scales_value.user = json[USER_JSON].as<String>();
-		_scales_value.password = json[PASS_JSON].as<String>();
+		_scales_value->user = json[USER_JSON].as<String>();
+		_scales_value->password = json[PASS_JSON].as<String>();
 	}
 	
 	return true;
 	
-}
+}*/
 
+/*
 bool ScaleClass::saveDate() {	
 	DynamicJsonBuffer jsonBuffer;
 	JsonObject& json = jsonBuffer.createObject();
 	
-	json[STEP_JSON] = _scales_value.step;
-	json[AVERAGE_JSON] = _scales_value.average;
-	json[WEIGHT_MAX_JSON] = _scales_value.max;
-	json[OFFSET_JSON] = _scales_value.offset;
-	json[ACCURACY_JSON] = _scales_value.accuracy;
-	json[SCALE_JSON] = _scales_value.scale;
+	json[STEP_JSON] = _scales_value->step;
+	json[AVERAGE_JSON] = _scales_value->average;
+	json[WEIGHT_MAX_JSON] = _scales_value->max;
+	json[OFFSET_JSON] = _scales_value->offset;
+	json[ACCURACY_JSON] = _scales_value->accuracy;
+	json[SCALE_JSON] = _scales_value->scale;
 	json[FILTER_JSON] = GetFilterWeight();
-	json[SEAL_JSON] = _scales_value.seal;
-	json[USER_JSON] = _scales_value.user;
-	json[PASS_JSON] = _scales_value.password;
+	json[SEAL_JSON] = _scales_value->seal;
+	json[USER_JSON] = _scales_value->user;
+	json[PASS_JSON] = _scales_value->password;
 	
 	File cdateFile = SPIFFS.open(CDATE_FILE, "w");
 	if (!cdateFile) {
@@ -187,24 +214,24 @@ bool ScaleClass::saveDate() {
 	cdateFile.flush();
 	cdateFile.close();
 	return true;
-}
+}*/
 
 long ScaleClass::readAverage() {
 	long long sum = 0;
-	for (byte i = 0; i < _scales_value.average; i++) {
+	for (byte i = 0; i < _scales_value->average; i++) {
 		sum += read();
 	}
-	return _scales_value.average == 0?sum / 1:sum / _scales_value.average;
+	return _scales_value->average == 0?sum / 1:sum / _scales_value->average;
 }
 
 long ScaleClass::getValue() {
 	Filter(readAverage());
-	return Current() - _scales_value.offset;
+	return Current() - _scales_value->offset;
 }
 
 float ScaleClass::getUnits() {
 	float v = getValue();
-	return (v * _scales_value.scale);
+	return (v * _scales_value->scale);
 }
 
 float ScaleClass::getWeight(){
@@ -217,11 +244,11 @@ void ScaleClass::tare() {
 }
 
 void ScaleClass::setAverage(unsigned char a){
-	_scales_value.average = constrain(a, 1, 5);
+	_scales_value->average = constrain(a, 1, 5);
 }
 
 void ScaleClass::mathScale(float referenceW, long calibrateW){
-	_scales_value.scale = referenceW / float(calibrateW - _scales_value.offset);
+	_scales_value->scale = referenceW / float(calibrateW - _scales_value->offset);
 }
 
 /*! Функция для форматирования значения веса
@@ -231,7 +258,7 @@ void ScaleClass::mathScale(float referenceW, long calibrateW){
 	string - Выходная строка отфармотронова значение 
 */
 void ScaleClass::formatValue(float value, char* string){
-	dtostrf(value, 6-_scales_value.accuracy, _scales_value.accuracy, string);
+	dtostrf(value, 6-_scales_value->accuracy, _scales_value->accuracy, string);
 }
 
 /* */
@@ -271,7 +298,7 @@ void handleSeal(AsyncWebServerRequest * request){
 	randomSeed(Scale.readAverage());
 	Scale.setSeal(random(1000));
 	
-	if (Scale.saveDate()){
+	if (CoreMemory.save()){
 		request->send(200, TEXT_HTML, String(Scale.getSeal()));
 	}
 }

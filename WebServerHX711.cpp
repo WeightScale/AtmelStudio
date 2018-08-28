@@ -128,14 +128,15 @@ void connectWifi() {
 		goto scan;
 	}
 	connect:
-	if (CORE->getSSID().length()==0){
+	//if (CORE->getSSID().length()==0){
+	if (String(CORE->getSSID()).length()==0){
 		WiFi.setAutoConnect(false);
 		WiFi.setAutoReconnect(false);
 		taskConnectWiFi.pause();
 		return;
 	}
 	for (int i = 0; i < n; ++i)	{
-		if(WiFi.SSID(i) == CORE->getSSID().c_str()){
+		if(WiFi.SSID(i).equals(CORE->getSSID())){
 			//USE_SERIAL.println(CORE.getSSID());
 			//String ssid_scan;
 			//int32_t rssi_scan;
@@ -152,7 +153,7 @@ void connectWifi() {
 				}
 			}
 			WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
-			WiFi.begin ( CORE->getSSID().c_str(), CORE->getPASS().c_str(),chan_scan/*,BSSID_scan*/);
+			WiFi.begin ( CORE->getSSID(), CORE->getPASS(),chan_scan/*,BSSID_scan*/);
 			int status = WiFi.waitForConnectResult();
 			if(status == WL_CONNECTED ){
 				NBNS.begin(MY_HOST_NAME);

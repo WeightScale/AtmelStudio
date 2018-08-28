@@ -12,6 +12,7 @@
 #include "DateTime.h"
 #include "HttpUpdater.h"
 #include "web_server_config.h"
+#include "CoreMemory.h"
 
 /* */
 //ESP8266HTTPUpdateServer httpUpdater;
@@ -52,7 +53,33 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){
-	on("/settings.json",HTTP_ANY, handleFileReadAuth);
+	on("/settings.json",HTTP_ANY, [this](AsyncWebServerRequest * request){
+		if (!isAuthentified(request))
+		return request->requestAuthentication();
+		AsyncResponseStream *response = request->beginResponseStream("application/json");
+		DynamicJsonBuffer jsonBuffer;
+		JsonObject &root = jsonBuffer.createObject();
+		JsonObject& scale = root.createNestedObject(SCALE_JSON);
+		scale["id_n_admin"] = CoreMemory.eeprom.settings.scaleName;
+		scale["id_p_admin"] = CoreMemory.eeprom.settings.scalePass;
+		scale["id_auto"] = CoreMemory.eeprom.settings.autoIp;
+		scale["id_lan_ip"] = CoreMemory.eeprom.settings.scaleLanIp;
+		scale["id_gateway"] = CoreMemory.eeprom.settings.scaleGateway;
+		scale["id_subnet"] = CoreMemory.eeprom.settings.scaleSubnet;
+		scale["id_ssid"] = String(CoreMemory.eeprom.settings.wSSID);
+		scale["id_key"] = String(CoreMemory.eeprom.settings.wKey);
+		scale["bat_max"] = CoreMemory.eeprom.settings.bat_max;
+		scale["id_pe"] = CoreMemory.eeprom.settings.power_time_enable;
+		scale["id_pt"] = CoreMemory.eeprom.settings.time_off;
+		
+		JsonObject& server = root.createNestedObject(SERVER_JSON);
+		server["id_host"] = String(CoreMemory.eeprom.settings.hostUrl);
+		server["id_pin"] = CoreMemory.eeprom.settings.hostPin;
+		
+		root.printTo(*response);
+		request->send(response);
+		//reguest->send(SPIFFS, reguest->url());
+	});
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
 	on("/sv", handleScaleProp);									/* Получить значения. */	
 	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -118,7 +145,7 @@ void BrowserServerClass::restart_esp() {
 }*/
 
 bool BrowserServerClass::isAuthentified(AsyncWebServerRequest * request){
-	if (!request->authenticate(CORE->getNameAdmin().c_str(), CORE->getPassAdmin().c_str())){
+	if (!request->authenticate(CORE->getNameAdmin(), CORE->getPassAdmin())){
 		if (!checkAdminAuth(request)){
 			return false;
 		}

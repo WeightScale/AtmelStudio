@@ -10,6 +10,7 @@
 #endif*/
 #include "HX711.h"
 #include "BrowserServer.h"
+#include "CoreMemory.h"
 
 #define PAGE_FILE			"/calibr.html"
 #define CDATE_FILE			"/cdate.json"
@@ -25,17 +26,17 @@
 #define USER_JSON			"us_id"
 #define PASS_JSON			"ps_id"
 
-typedef struct {
-	long offset;						/*  */
-	unsigned char average;				/*  */
-	unsigned char step;					/*  */
-	int accuracy;						/*  */
-	unsigned int max;					/*  */
+/*typedef struct {
+	long offset;						
+	unsigned char average;				
+	unsigned char step;					
+	int accuracy;						
+	unsigned int max;					
 	float scale;
 	int seal;
 	String user;
 	String password;
-}t_scales_value;
+}t_scales_value;*/
 
 typedef struct{
 	bool isSave;
@@ -54,27 +55,27 @@ class ScaleClass : public HX711{
 		bool _authenticated;
 		bool stableWeight;
 		t_save_value saveWeight;
-		t_scales_value _scales_value;
+		t_scales_value * _scales_value;
 		float _round;						/* множитиль для округления */
 		float _stable_step;					/* шаг для стабилизации */	
-		bool _downloadValue();
+		//bool _downloadValue();
 
 	public:
 		ScaleClass(byte, byte);
 		~ScaleClass();
 		void setup(BrowserServerClass *server);	
-		bool saveDate();
+		//bool saveDate();
 		void saveValueCalibratedHttp(AsyncWebServerRequest *);
 		void fetchWeight();
 		void mathScale(float referenceW, long calibrateW);
 		void mathRound();
-		void setOffset(long offset = 0){_scales_value.offset = offset;};
+		void setOffset(long offset = 0){_scales_value->offset = offset;};
 		void init();	
 		long readAverage();
 		long getValue();
 		void setAverage(unsigned char);	
-		void setSeal(int s){_scales_value.seal = s; };
-		int getSeal(){ return _scales_value.seal;};	
+		void setSeal(int s){_scales_value->seal = s; };
+		int getSeal(){ return _scales_value->seal;};	
 		void detectStable(float);
 		
 		float getUnits();
