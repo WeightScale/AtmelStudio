@@ -1,11 +1,14 @@
 #include <ESP8266WiFi.h>
-//#include <ESP8266mDNS.h>
+#include <functional>
+#include "web_server_config.h"
 #include "BrowserServer.h"
-#include "ESP8266NetBIOS.h" 
+#include "ESP8266NetBIOS.h"
 #include "Core.h"
 #include "Task.h"
 #include "HttpUpdater.h"
 
+using namespace std;
+using namespace std::placeholders;
 /*
  * This example serves a "hello world" on a WLAN and a SoftAP at the same time.
  * The SoftAP allow you to configure WLAN parameters at run time. They are not setup in the sketch but saved on EEPROM.
@@ -20,14 +23,16 @@
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt);
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt);
-void takeBlink();
+//void takeBlink();
 void takeBattery();
 void takeWeight();
-void powerSwitchInterrupt();
+#if POWER_PLAN
+	void powerSwitchInterrupt();
+#endif
 void connectWifi();
 //
 TaskController taskController = TaskController();		/*  */
-Task taskBlink(takeBlink, 500);							/*  */
+//Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
 //Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
 Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедениться с точкой доступа каждые 20 секунд */
@@ -35,32 +40,37 @@ Task taskWeight(takeWeight,200);
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
 
-unsigned int COUNT_FLASH = 500;
-unsigned int COUNT_BLINK = 500;
+//unsigned int COUNT_FLASH = 500;
+//unsigned int COUNT_BLINK = 500;
 #define USE_SERIAL Serial
 
 void connectWifi();
 
 void setup() {
-	pinMode(EN_NCP, OUTPUT);
-	digitalWrite(EN_NCP, HIGH);
+	#if POWER_PLAN
+		pinMode(EN_NCP, OUTPUT);
+		digitalWrite(EN_NCP, HIGH);
+	#endif 	
 	pinMode(LED, OUTPUT);	
 	//Serial.begin(115200);
 	/*while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
 	};*/
-	
+	BLINK = new BlinkClass();
 	SPIFFS.begin();
 	//Scale.setup(&browserServer);		
 	browserServer.begin();
 	Scale.setup(&browserServer);
 	takeBattery();
-  
-	taskController.add(&taskBlink);
+  	
+	taskController.add(BLINK);
 	taskController.add(&taskBattery);
 	taskController.add(&taskWeight);
 	taskController.add(&taskConnectWiFi);
-	taskController.add(&POWER);	
+	#if POWER_PLAN
+		taskController.add(&POWER);
+	#endif
+		
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
@@ -80,11 +90,12 @@ void setup() {
 /*********************************/
 /* */
 /*********************************/
+/*
 void takeBlink() {
 	bool led = !digitalRead(LED);
 	digitalWrite(LED, led);	
 	taskBlink.setInterval(led ? COUNT_BLINK : COUNT_FLASH);
-}
+}*/
 
 /**/
 void takeBattery(){
@@ -96,6 +107,7 @@ void takeWeight(){
 	taskWeight.updateCache();
 }
 
+#if POWER_PLAN
 void powerSwitchInterrupt(){
 	if(digitalRead(PWR_SW)==HIGH){
 		unsigned long t = millis();
@@ -105,15 +117,19 @@ void powerSwitchInterrupt(){
 			if(t + 4000 < millis()){ // 
 				digitalWrite(LED, HIGH);
 				while(digitalRead(PWR_SW) == HIGH){delay(10);};// 
-				powerOff();			
+				CORE->powerOff();			
 				break;
 			}
 			digitalWrite(LED, !digitalRead(LED));
 		}
 	}
 }
+#endif
+
+
 
 void connectWifi() {
+	WiFi.setOutputPower(20.5);
 	WiFi.disconnect(false);
 	/*!  */
 	int n = WiFi.scanComplete();
@@ -137,22 +153,15 @@ void connectWifi() {
 	}
 	for (int i = 0; i < n; ++i)	{
 		if(WiFi.SSID(i).equals(CORE->getSSID())){
-			//USE_SERIAL.println(CORE.getSSID());
-			//String ssid_scan;
-			//int32_t rssi_scan;
-			//uint8_t sec_scan;
-			//uint8_t* BSSID_scan;
 			int32_t chan_scan = WiFi.channel(i);
-			//bool hidden_scan;
 			WiFi.setAutoConnect(true);
 			WiFi.setAutoReconnect(true);
-			//WiFi.getNetworkInfo(i, ssid_scan, sec_scan, rssi_scan, BSSID_scan, chan_scan, hidden_scan);
 			if (!CORE->isAuto()){
 				if (lanIp.fromString(CORE->getLanIp()) && gateway.fromString(CORE->getGateway())){
 					WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 				}
 			}
-			WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера
+			WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера			
 			WiFi.begin ( CORE->getSSID(), CORE->getPASS(),chan_scan/*,BSSID_scan*/);
 			int status = WiFi.waitForConnectResult();
 			if(status == WL_CONNECTED ){
@@ -176,23 +185,20 @@ void loop() {
 		CORE->saveEvent("weight", String(Scale.getSaveValue())+"_kg");
 		Scale.setIsSave(false);
 	}
-	powerSwitchInterrupt();
+	#if POWER_PLAN
+		powerSwitchInterrupt();
+	#endif
+	
 }
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
-	//Serial.println(String(evt.channel));
-	//WiFi.softAPdisconnect();
-	//WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
-	COUNT_FLASH = 50;
-	COUNT_BLINK = 3000;
+	BLINK->onRun(bind(&BlinkClass::blinkSTA,BLINK));
 }
 
 void onStationModeDisconnected(const WiFiEventStationModeDisconnected& evt) {
-	//Serial.println("DisconnectStation");
 	WiFi.scanDelete();
 	WiFi.scanNetworks(true);
 	taskConnectWiFi.resume();
-	COUNT_FLASH = 500;
-	COUNT_BLINK = 500;
+	BLINK->onRun(bind(&BlinkClass::blinkAP,BLINK));
 }

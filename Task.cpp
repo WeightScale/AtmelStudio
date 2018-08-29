@@ -1,5 +1,21 @@
 ﻿#include "Task.h"
 
+Task::Task(){};
+
+Task::Task(unsigned long _interval){
+	enabled = true;
+	_cached_next_run = 0;
+	last_run = millis();
+
+	TaskID = (int)this;
+	#ifdef USE_TASK_NAMES
+		TaskName = "Task ";
+		TaskName = TaskName + TaskID;
+	#endif
+
+	setInterval(_interval);
+};
+
 Task::Task(void (*callback)(void), unsigned long _interval){
 	enabled = true;
 	onRun(callback);
@@ -39,9 +55,10 @@ bool Task::shouldRun(unsigned long time){
 	return !time_remaining && enabled;
 }
 
+/*
 void Task::onRun(void (*callback)(void)){
 	_onRun = callback;
-}
+}*/
 
 void Task::run(){
 	if(_onRun != NULL && !_paused)

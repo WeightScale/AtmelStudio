@@ -13,10 +13,6 @@
 #define SECRET_FILE "/secret.json"
 #define TEXT_HTML	"text/html"
 
-#define MY_HOST_NAME "scl"
-#define SOFT_AP_SSID "SCALES"
-#define SOFT_AP_PASSWORD "12345678"
-
 // DNS server
 #define DNS_PORT 53
 
@@ -24,8 +20,6 @@ typedef struct {
 	String wwwUsername;
 	String wwwPassword;
 } strHTTPAuth;
-
-
 
 class AsyncWebServer;
 

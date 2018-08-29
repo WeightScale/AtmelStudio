@@ -1,7 +1,7 @@
 ﻿#include <FS.h>
 #include <ArduinoJson.h>
-#include "Scale.h"
 #include "web_server_config.h"
+#include "Scale.h"
 
 ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 
@@ -23,7 +23,9 @@ void ScaleClass::setup(BrowserServerClass *server){
 		JsonObject &json = jsonBuffer.createObject();
 		Scale.doData(json);
 		json.printTo(*response);
-		POWER.updateCache();
+		#if POWER_PLAN
+			POWER.updateCache();
+		#endif
 		request->send(response);
 		//request->send(200, "text/html", String("{\"w\":\""+String(getBuffer())+"\",\"c\":"+String(BATTERY.getCharge())+",\"s\":"+String(getStableWeight())+"}"));
 	});
@@ -263,28 +265,26 @@ void ScaleClass::formatValue(float value, char* string){
 
 /* */
 void ScaleClass::detectStable(float w){
-	static long int time,time1;
-	static float weight_temp;
 	static unsigned char stable_num;
-		if (weight_temp == w) {
-			if (stable_num > STABLE_NUM_MAX) {
-				if (!stableWeight){
-					if(fabs(w) > _stable_step && time > (time1 + 6000)){
+	if (saveWeight.value == w) {
+		if (stable_num > STABLE_NUM_MAX) {
+			if (!stableWeight){
+				if (millis() > saveWeight.time ){
+					if(fabs(w) > _stable_step){
 						saveWeight.isSave = true;
-						saveWeight.value = w;
-						time1 = millis();
+						saveWeight.time = millis() + 10000;
 					}
-					stableWeight = true;
-				}				
-				return;
-			}
-			stable_num++;
-		} else {
-			stable_num = 0;
-			stableWeight = false;
-			time = millis();
+				}
+				stableWeight = true;
+			}				
+			return;
 		}
-		weight_temp = w;
+		stable_num++;
+	} else {
+		stable_num = 0;
+		stableWeight = false;
+		saveWeight.value = w;
+	}
 }
 
 size_t ScaleClass::doData(JsonObject& json ){

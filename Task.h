@@ -3,6 +3,7 @@
 #ifndef _TASK_h
 #define _TASK_h
 #include <Arduino.h>
+#include <functional>
 /*
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "Arduino.h"
@@ -21,6 +22,7 @@
 // #define USE_TASK_NAMES	1
 
 class Task{
+	typedef std::function<void(void)> TaskFunction;
 protected:
 	/*! Интервал между запусками */
 	unsigned long interval;
@@ -45,7 +47,8 @@ protected:
 	void runned() { runned(millis()); }
 
 	// Callback for run() if not implemented
-	void (*_onRun)(void);		
+	//void (*_onRun)(void);
+	TaskFunction _onRun;		
 
 public:
 
@@ -59,7 +62,8 @@ public:
 		// Tasks Name (used for better UI).
 		String TaskName;			
 	#endif
-
+	Task();
+	Task(unsigned long _interval = 0);
 	Task(void (*callback)(void) = NULL, unsigned long _interval = 0);
 
 	// Set the desired interval for calls, and update _cached_next_run
@@ -72,7 +76,8 @@ public:
 	bool shouldRun() { return shouldRun(millis()); }
 
 	// Callback set
-	void onRun(void (*callback)(void));
+	//void onRun(void (*callback)(void));
+	void onRun(TaskFunction callback){_onRun = callback;};
 
 	/// Запуск
 	virtual void run();

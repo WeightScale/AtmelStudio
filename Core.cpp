@@ -1,16 +1,23 @@
 #include <ESP8266HTTPClient.h>
 #include <FS.h>
 #include <ArduinoJson.h>
+#include <functional>
+#include "web_server_config.h"
 #include "Core.h"
 #include "DateTime.h"
 #include "BrowserServer.h"
 #include "HttpUpdater.h"
-#include "web_server_config.h"
 #include "CoreMemory.h"
+
+using namespace std;
+using namespace std::placeholders;
 
 CoreClass * CORE;
 BatteryClass BATTERY;
-Task POWER;
+#if POWER_PLAN
+Task POWER(2400000);
+#endif
+BlinkClass * BLINK;
 
 CoreClass::CoreClass(const String& username, const String& password):
 _username(username),
@@ -25,10 +32,11 @@ void CoreClass::begin(){
 	Rtc.Begin();
 	CoreMemory.init();
 	_settings = &CoreMemory.eeprom.settings; //ссылка на переменную 
-	//_downloadSettings();
-	POWER.onRun(powerOff);
-	POWER.enabled = _settings->power_time_enable;	
-	POWER.setInterval(_settings->time_off);
+	#if POWER_PLAN
+		POWER.onRun(bind(&CoreClass::powerOff,CORE));
+		POWER.enabled = _settings->power_time_enable;	
+		POWER.setInterval(_settings->time_off);
+	#endif
 	BATTERY.setMax(_settings->bat_max);
 	if(BATTERY.callibrated()){		
 		_settings->bat_max = BATTERY.getMax();
@@ -113,14 +121,16 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 			request->arg("p_admin").toCharArray(_settings->scalePass,request->arg("p_admin").length()+1);
 			goto save;
 		}
-		if (request->hasArg("pt")){
-			if (request->hasArg("pe"))
-			POWER.enabled = _settings->power_time_enable = true;
-			else
-			POWER.enabled = _settings->power_time_enable = false;
-			_settings->time_off = request->arg("pt").toInt();
-			goto save;
-		}
+		#if POWER_PLAN
+			if (request->hasArg("pt")){
+				if (request->hasArg("pe"))
+					POWER.enabled = _settings->power_time_enable = true;
+				else
+					POWER.enabled = _settings->power_time_enable = false;
+					_settings->time_off = request->arg("pt").toInt();
+				goto save;
+			}
+		#endif
 		save:
 		if (CoreMemory.save()){
 			goto url;
@@ -574,15 +584,15 @@ bool CoreClass::_downloadSettings() {
 	return true;* /
 }*/
 
-
-
-void powerOff(){
+#if POWER_PLAN
+void CoreClass::powerOff(){
 	browserServer.stop();
 	SPIFFS.end();
 	Scale.power_down(); /// Выключаем ацп
 	digitalWrite(EN_NCP, LOW); /// Выключаем стабилизатор
 	ESP.reset();
 }
+#endif
 
 void reconnectWifi(AsyncWebServerRequest * request){
 	AsyncWebServerResponse *response = request->beginResponse_P(200, PSTR(TEXT_HTML), "RECONNECT...");

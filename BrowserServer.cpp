@@ -5,13 +5,13 @@
 #include <Hash.h>
 #include <AsyncJson.h>
 #include <functional>
+#include "web_server_config.h"
 #include "BrowserServer.h"
 #include "tools.h"
 #include "Core.h"
 #include "Version.h"
 #include "DateTime.h"
 #include "HttpUpdater.h"
-#include "web_server_config.h"
 #include "CoreMemory.h"
 
 /* */
@@ -55,7 +55,7 @@ void BrowserServerClass::begin() {
 void BrowserServerClass::init(){
 	on("/settings.json",HTTP_ANY, [this](AsyncWebServerRequest * request){
 		if (!isAuthentified(request))
-		return request->requestAuthentication();
+			return request->requestAuthentication();
 		AsyncResponseStream *response = request->beginResponseStream("application/json");
 		DynamicJsonBuffer jsonBuffer;
 		JsonObject &root = jsonBuffer.createObject();
@@ -85,11 +85,20 @@ void BrowserServerClass::init(){
 	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
 		request->send(200, "text/plain", String(ESP.getFreeHeap()));
 	});*/
-	on("/secret.json",[](AsyncWebServerRequest * reguest){
-		if (!browserServer.isAuthentified(reguest)){
+	on("/secret.json",[this](AsyncWebServerRequest * reguest){
+		if (!isAuthentified(reguest)){
 			return reguest->requestAuthentication();
 		}
 		reguest->send(SPIFFS, reguest->url());	
+	});
+	on("/rst",HTTP_ANY,[this](AsyncWebServerRequest * request){
+		if (!isAuthentified(request)){
+			return request->requestAuthentication();
+		}
+		if(CoreMemory.doDefault())
+			request->send(200,"text/html", "Установлено!");
+		else
+			request->send(400);
 	});
 #ifdef HTML_PROGMEM
 	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */
@@ -196,7 +205,9 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 					client->text(buffer);
 				}
 			}
-			POWER.updateCache();
+			#if POWER_PLAN
+				POWER.updateCache();
+			#endif
 		}
 	}
 }
