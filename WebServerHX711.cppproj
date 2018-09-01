@@ -87,9 +87,9 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/DNSServer/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESP_EEPROM/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Wire</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPUpdateServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
@@ -142,9 +142,9 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/DNSServer/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESP_EEPROM/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Wire</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPUpdateServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
@@ -733,7 +733,7 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
         <arduino.build.auto_discover_includes>1</arduino.build.auto_discover_includes>
         <custom_esp8266_generic_FlashMode>dout</custom_esp8266_generic_FlashMode>
         <custom_esp8266_generic_CpuFrequency>80</custom_esp8266_generic_CpuFrequency>
-        <custom_esp8266_generic_CrystalFreq>40</custom_esp8266_generic_CrystalFreq>
+        <custom_esp8266_generic_CrystalFreq>26</custom_esp8266_generic_CrystalFreq>
         <custom_esp8266_generic_LwIPVariant>v2mss536</custom_esp8266_generic_LwIPVariant>
         <custom_esp8266_generic_Debug>Disabled</custom_esp8266_generic_Debug>
         <debug.remote.portname>Serial</debug.remote.portname>
@@ -774,9 +774,9 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/DNSServer/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESP_EEPROM/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Wire</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPUpdateServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
@@ -829,9 +829,9 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/DNSServer/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ArduinoJson/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESP_EEPROM/src</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/Rtc_by_Makuna/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Wire</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/Hash/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPClient/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266HTTPUpdateServer/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
@@ -1420,7 +1420,7 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
         <arduino.build.auto_discover_includes>1</arduino.build.auto_discover_includes>
         <custom_esp8266_generic_FlashMode>dout</custom_esp8266_generic_FlashMode>
         <custom_esp8266_generic_CpuFrequency>80</custom_esp8266_generic_CpuFrequency>
-        <custom_esp8266_generic_CrystalFreq>40</custom_esp8266_generic_CrystalFreq>
+        <custom_esp8266_generic_CrystalFreq>26</custom_esp8266_generic_CrystalFreq>
         <custom_esp8266_generic_LwIPVariant>v2mss536</custom_esp8266_generic_LwIPVariant>
         <custom_esp8266_generic_Debug>Disabled</custom_esp8266_generic_Debug>
         <debug.remote.portname>Serial</debug.remote.portname>

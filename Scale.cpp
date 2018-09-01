@@ -45,7 +45,7 @@ void ScaleClass::setup(BrowserServerClass *server){
 		request->send(204, TEXT_HTML, "");
 	});
 	_server->on("/sl", handleSeal);																/* Опломбировать */
-	_server->on("/cdate.json",HTTP_ANY, [this](AsyncWebServerRequest * request){
+	_server->on("/cdate.json",HTTP_ANY, [this](AsyncWebServerRequest * request){									/* Получить значение АЦП усредненное. */
 		if(!request->authenticate(_scales_value->user, _scales_value->password))
 			if (!browserServer.checkAdminAuth(request)){
 				return request->requestAuthentication();
@@ -66,8 +66,7 @@ void ScaleClass::setup(BrowserServerClass *server){
 		json[PASS_JSON] = _scales_value->password;
 		
 		json.printTo(*response);
-		request->send(response);
-		//reguest->send(SPIFFS, reguest->url());
+		request->send(response);	
 	});	
 }
 

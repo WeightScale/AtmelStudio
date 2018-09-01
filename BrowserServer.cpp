@@ -53,33 +53,7 @@ void BrowserServerClass::begin() {
 }
 
 void BrowserServerClass::init(){
-	on("/settings.json",HTTP_ANY, [this](AsyncWebServerRequest * request){
-		if (!isAuthentified(request))
-			return request->requestAuthentication();
-		AsyncResponseStream *response = request->beginResponseStream("application/json");
-		DynamicJsonBuffer jsonBuffer;
-		JsonObject &root = jsonBuffer.createObject();
-		JsonObject& scale = root.createNestedObject(SCALE_JSON);
-		scale["id_n_admin"] = CoreMemory.eeprom.settings.scaleName;
-		scale["id_p_admin"] = CoreMemory.eeprom.settings.scalePass;
-		scale["id_auto"] = CoreMemory.eeprom.settings.autoIp;
-		scale["id_lan_ip"] = CoreMemory.eeprom.settings.scaleLanIp;
-		scale["id_gateway"] = CoreMemory.eeprom.settings.scaleGateway;
-		scale["id_subnet"] = CoreMemory.eeprom.settings.scaleSubnet;
-		scale["id_ssid"] = String(CoreMemory.eeprom.settings.wSSID);
-		scale["id_key"] = String(CoreMemory.eeprom.settings.wKey);
-		scale["bat_max"] = CoreMemory.eeprom.settings.bat_max;
-		scale["id_pe"] = CoreMemory.eeprom.settings.power_time_enable;
-		scale["id_pt"] = CoreMemory.eeprom.settings.time_off;
-		
-		JsonObject& server = root.createNestedObject(SERVER_JSON);
-		server["id_host"] = String(CoreMemory.eeprom.settings.hostUrl);
-		server["id_pin"] = CoreMemory.eeprom.settings.hostPin;
-		
-		root.printTo(*response);
-		request->send(response);
-		//reguest->send(SPIFFS, reguest->url());
-	});
+	on("/settings.json",HTTP_ANY, handleSettings);
 	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
 	on("/sv", handleScaleProp);									/* Получить значения. */	
 	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
@@ -103,6 +77,20 @@ void BrowserServerClass::init(){
 #ifdef HTML_PROGMEM
 	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */
 	on("/global.css",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/css"),global_css);});					/* Стили */
+	/*on("/favicon.png",[](AsyncWebServerRequest * request){
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", favicon_png, favicon_png_len);
+		request->send(response);
+	});*/
+	/*on("/battery.png",[](AsyncWebServerRequest * request){
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", battery_png, battery_png_len);
+		request->send(response);
+	});
+	on("/scales.png",[](AsyncWebServerRequest * request){
+		AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", scales_png, scales_png_len);
+		request->send(response);
+	});	*/
+	on("/battery.png",handleBatteryPng);
+	on("/scales.png",handleScalesPng);
 	rewrite("/sn", "/settings.html");
 	serveStatic("/", SPIFFS, "/");
 #else
@@ -119,7 +107,7 @@ bool BrowserServerClass::_downloadHTTPAuth() {
 	_httpAuth.wwwPassword = "343434";
 	File configFile = SPIFFS.open(SECRET_FILE, "r");
 	if (!configFile) {
-		configFile.close();
+		//configFile.close();
 		return false;
 	}
 	size_t size = configFile.size();
@@ -127,7 +115,7 @@ bool BrowserServerClass::_downloadHTTPAuth() {
 	std::unique_ptr<char[]> buf(new char[size]);
 	
 	configFile.readBytes(buf.get(), size);
-	configFile.close();
+	//configFile.close();
 	DynamicJsonBuffer jsonBuffer(256);
 	JsonObject& json = jsonBuffer.parseObject(buf.get());
 
@@ -162,6 +150,33 @@ bool BrowserServerClass::isAuthentified(AsyncWebServerRequest * request){
 	return true;
 }
 
+void handleSettings(AsyncWebServerRequest * request){
+	if (!browserServer.isAuthentified(request))
+		return request->requestAuthentication();
+	AsyncResponseStream *response = request->beginResponseStream("application/json");
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &root = jsonBuffer.createObject();
+	JsonObject& scale = root.createNestedObject(SCALE_JSON);
+	scale["id_auto"] = CoreMemory.eeprom.settings.autoIp;
+	scale["bat_max"] = CoreMemory.eeprom.settings.bat_max;
+	scale["id_pe"] = CoreMemory.eeprom.settings.power_time_enable;
+	scale["id_pt"] = CoreMemory.eeprom.settings.time_off;
+	scale["id_n_admin"] = CoreMemory.eeprom.settings.scaleName;
+	scale["id_p_admin"] = CoreMemory.eeprom.settings.scalePass;
+	scale["id_lan_ip"] = CoreMemory.eeprom.settings.scaleLanIp;
+	scale["id_gateway"] = CoreMemory.eeprom.settings.scaleGateway;
+	scale["id_subnet"] = CoreMemory.eeprom.settings.scaleSubnet;
+	scale["id_ssid"] = String(CoreMemory.eeprom.settings.wSSID);
+	scale["id_key"] = String(CoreMemory.eeprom.settings.wKey);
+	
+	JsonObject& server = root.createNestedObject(SERVER_JSON);
+	server["id_host"] = String(CoreMemory.eeprom.settings.hostUrl);
+	server["id_pin"] = CoreMemory.eeprom.settings.hostPin;
+	
+	root.printTo(*response);
+	request->send(response);
+}
+
 void handleFileReadAuth(AsyncWebServerRequest * request){
 	if (!browserServer.isAuthentified(request)){
 		return request->requestAuthentication();
@@ -186,7 +201,17 @@ void handleScaleProp(AsyncWebServerRequest * request){
 	request->send(response);
 }
 
-void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
+void handleBatteryPng(AsyncWebServerRequest * request){
+	AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", battery_png, battery_png_len);
+	request->send(response);
+}
+
+void handleScalesPng(AsyncWebServerRequest * request){
+	AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", scales_png, scales_png_len);
+	request->send(response);	
+}
+
+void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){	
 	if(type == WS_EVT_CONNECT){
 		client->ping();
 	}else if(type == WS_EVT_DATA){
@@ -194,7 +219,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 		for(size_t i=0; i < len; i++) {
 			msg += (char) data[i];
 		}
-		if (msg.equals("/wt")){
+		if (msg.equals("/wt")){			
 			DynamicJsonBuffer jsonBuffer;
 			JsonObject& json = jsonBuffer.createObject();
 			size_t len = Scale.doData(json);							

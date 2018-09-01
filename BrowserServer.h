@@ -39,6 +39,7 @@ class BrowserServerClass : public AsyncWebServer{
 		String getName(){ return _httpAuth.wwwUsername;};
 		String getPass(){ return _httpAuth.wwwPassword;};
 		void stop(){_server.end();};
+		
 };
 
 class CaptiveRequestHandler : public AsyncWebHandler {
@@ -68,8 +69,13 @@ extern IPAddress gateway;
 extern BrowserServerClass browserServer;
 extern AsyncWebSocket ws;
 
-void handleFileReadAuth(AsyncWebServerRequest*);
+#ifdef HTML_PROGMEM
+void handleBatteryPng(AsyncWebServerRequest*);
+void handleScalesPng(AsyncWebServerRequest*);
+void handleSettings(AsyncWebServerRequest * request);
+#endif
 
+void handleFileReadAuth(AsyncWebServerRequest*);
 void handleScaleProp(AsyncWebServerRequest*);
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 

@@ -45,6 +45,7 @@ class CoreMemoryClass : protected EEPROMClass{
 	void init();
 	bool save();
 	bool doDefault();
+	
 };
 
 extern CoreMemoryClass CoreMemory;

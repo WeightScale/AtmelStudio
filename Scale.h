@@ -10,7 +10,9 @@
 #endif*/
 #include "HX711.h"
 #include "BrowserServer.h"
+#include "Core.h"
 #include "CoreMemory.h"
+#include "DateTime.h"
 
 #define PAGE_FILE			"/calibr.html"
 #define CDATE_FILE			"/cdate.json"
