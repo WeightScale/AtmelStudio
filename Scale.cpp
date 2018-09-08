@@ -74,6 +74,7 @@ void ScaleClass::init(){
 	reset();
 	_scales_value = &CoreMemory.eeprom.scales_value;
 	//_downloadValue();
+	SetFilterWeight(_scales_value->filter);
 	mathRound();
 	tare();
 	SetCurrent(readAverage());
@@ -91,6 +92,7 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 			_scales_value->step = request->arg("weightStep").toInt();
 			setAverage(request->arg("weightAverage").toInt());
 			SetFilterWeight(request->arg("weightFilter").toInt());
+			_scales_value->filter = GetFilterWeight();
 			_scales_value->max = request->arg("weightMax").toInt();
 			mathRound();
 			if (CoreMemory.save()){

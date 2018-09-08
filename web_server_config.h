@@ -12,8 +12,8 @@
 #define EXTERNAL_POWER 0
 #define INTERNAL_POWER 1
 
-#define POWER_PLAN				INTERNAL_POWER
-//#define POWER_PLAN				EXTERNAL_POWER
+//#define POWER_PLAN				INTERNAL_POWER
+#define POWER_PLAN				EXTERNAL_POWER
 #define HTML_PROGMEM          //Использовать веб страницы из flash памяти
 
 #ifdef HTML_PROGMEM

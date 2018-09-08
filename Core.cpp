@@ -210,9 +210,9 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 
 
 bool CoreClass::saveEvent(const String& event, const String& value) {
-	String date = getDateTime();
-	bool flag = WiFi.status() == WL_CONNECTED?eventToServer(date, event, value):false;	
-	File readFile;
+	//String date = getDateTime();
+	return WiFi.status() == WL_CONNECTED?eventToServer(getDateTime(), event, value):false;	
+	/*File readFile;
 	readFile = SPIFFS.open("/events.json", "r");
     if (!readFile) {  
 		return false;
@@ -238,8 +238,8 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 			ev["s"] = false;
 			events.add(ev);	
 		}		
-		/*if (!json.success())
-			return false;*/
+		/ *if (!json.success())
+			return false;* /
     }
 	
 	long n = json["cur_num"];
@@ -264,7 +264,7 @@ bool CoreClass::saveEvent(const String& event, const String& value) {
 	json.printTo(saveFile);
 	//saveFile.flush();
 	saveFile.close();
-	return true;
+	return true;*/
 }
 
 

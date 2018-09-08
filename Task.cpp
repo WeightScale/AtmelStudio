@@ -8,10 +8,10 @@ Task::Task(unsigned long _interval){
 	last_run = millis();
 
 	TaskID = (int)this;
-	#ifdef USE_TASK_NAMES
-		TaskName = "Task ";
-		TaskName = TaskName + TaskID;
-	#endif
+#ifdef USE_TASK_NAMES
+	TaskName = "Task ";
+	TaskName = TaskName + TaskID;
+#endif
 
 	setInterval(_interval);
 };
@@ -54,11 +54,6 @@ bool Task::shouldRun(unsigned long time){
 	// Exceeded the time limit, AND is enabled? Then should run...
 	return !time_remaining && enabled;
 }
-
-/*
-void Task::onRun(void (*callback)(void)){
-	_onRun = callback;
-}*/
 
 void Task::run(){
 	if(_onRun != NULL && !_paused)

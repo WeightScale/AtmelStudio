@@ -1,8 +1,8 @@
 ﻿#ifndef _VERSION_h
 #define _VERSION_h
 
-#define SKETCH_VERSION "web_scales_async.007"
-#define SPIFFS_VERSION "web_scales_async.008"
+#define SKETCH_VERSION "web_scales_async.010"
+#define SPIFFS_VERSION "web_scales_async.009"
 
 /*
 Формат файла

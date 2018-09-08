@@ -1,7 +1,6 @@
 ﻿#include <Arduino.h>
 #include <WiFiClient.h>
 #include <WiFiServer.h>
-//#include <ESP8266WebServer.h>
 #include <ESP8266HTTPUpdateServer.h>
 #include <ESP8266httpUpdate.h>
 #include <WiFiUdp.h>
@@ -12,12 +11,7 @@ extern "C" uint32_t _SPIFFS_end;
 #include "StreamString.h"
 #include "Core.h"
 #include "HttpUpdater.h"
-//#include "tools.h"
 #include "Version.h"
-
-
-//HttpUpdaterClass httpUpdater;
-
 
 HttpUpdaterClass::HttpUpdaterClass(const String& username, const String& password)
 :_username(username),_password(password),_authenticated(false)
@@ -37,7 +31,7 @@ void HttpUpdaterClass::handleRequest(AsyncWebServerRequest *request){
 	Serial.println(String(Update.hasError()));
 	if(request->method() == HTTP_GET){
 		request->send_P(200, "text/html", serverIndex);
-		}else if (request->method()==HTTP_POST){
+	}else if (request->method()==HTTP_POST){
 		digitalWrite(2, LOW); //led off
 		if (_command == U_SPIFFS){
 			//delay(1000);
@@ -50,7 +44,7 @@ void HttpUpdaterClass::handleRequest(AsyncWebServerRequest *request){
 		if(_updaterError && _updaterError[0] != 0x00){
 			AsyncWebServerResponse * response = request->beginResponse(200, "text/html", _updaterError);
 			request->send(response);
-			}else{
+		}else{
 			AsyncWebServerResponse * response = request->beginResponse_P(200, "text/html", successResponse);
 			response->addHeader("Connection", "close");
 			request->send(response);
@@ -71,10 +65,10 @@ void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String
 		if(filename.indexOf("spiffs.bin",0) != -1) {
 			_command = U_SPIFFS;
 			size = ((size_t) &_SPIFFS_end - (size_t) &_SPIFFS_start);
-			}else if(filename.indexOf("ino.bin",0) != -1) {
+		}else if(filename.indexOf("ino.bin",0) != -1) {
 			_command = U_FLASH;
 			size = (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-			}else{
+		}else{
 			request->client()->close(true);
 			return;
 		}
@@ -104,7 +98,7 @@ void HttpUpdaterClass::setUpdaterError(){
 
 void HttpUpdaterClass::handleHttpStartUpdate(AsyncWebServerRequest * request){										/* Обновление чере интернет address/hu?host=sdb.net.ua/update.php */
 	if(!request->authenticate(_username.c_str(), _password.c_str()))
-	return request->requestAuthentication();
+		return request->requestAuthentication();
 	if(request->hasArg("host")){
 		String host = request->arg("host");
 		//_server->send(200, "text/plain", host);
@@ -121,14 +115,14 @@ void HttpUpdaterClass::handleHttpStartUpdate(AsyncWebServerRequest * request){		
 		}
 		switch(ret) {
 			case HTTP_UPDATE_FAILED:
-			request->send(404, "text/plain", ESPhttpUpdate.getLastErrorString());
+				request->send(404, "text/plain", ESPhttpUpdate.getLastErrorString());
 			break;
 			case HTTP_UPDATE_NO_UPDATES:
-			request->send(304, "text/plain", "Обновление не требуется");
+				request->send(304, "text/plain", "Обновление не требуется");
 			break;
 			case HTTP_UPDATE_OK:
-			request->client()->stop();
-			ESP.restart();
+				request->client()->stop();
+				ESP.restart();
 			break;
 		}
 		
