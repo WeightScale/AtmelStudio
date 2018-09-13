@@ -288,6 +288,26 @@ void ScaleClass::detectStable(float w){
 	}
 }
 
+/*
+double calculateDistance(double rssi) {
+	
+	double txPower = -41;   //hard coded power value. Usually ranges between -59 to -65
+	
+	/ *if(rssi == 0) {
+		return -1.0;
+	}
+
+	double ratio = rssi * 1.0 / txPower;
+	if (ratio < 1.0) {
+		return pow(ratio, 10);
+	}
+	else {
+		double distance =  (0.89976)*pow(ratio, 7.7095) + 0.111;
+		return distance;
+	}* /
+	return pow(10, ((double)txPower - rssi) / (10 * 2));
+}*/
+
 size_t ScaleClass::doData(JsonObject& json ){
 	json["w"]= String(_buffer);
 	json["c"]= BATTERY.getCharge();

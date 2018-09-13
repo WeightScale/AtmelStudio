@@ -74,6 +74,7 @@ void BrowserServerClass::init(){
 		else
 			request->send(400);
 	});
+	on("/rssi", handleRSSI);
 #ifdef HTML_PROGMEM
 	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */
 	on("/global.css",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/css"),global_css);});					/* Стили */
@@ -209,6 +210,10 @@ void handleBatteryPng(AsyncWebServerRequest * request){
 void handleScalesPng(AsyncWebServerRequest * request){
 	AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", scales_png, scales_png_len);
 	request->send(response);	
+}
+
+void handleRSSI(AsyncWebServerRequest * request){
+	request->send(200, TEXT_HTML, String(WiFi.RSSI()));
 }
 
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){	

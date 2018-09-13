@@ -77,6 +77,7 @@ void handleSettings(AsyncWebServerRequest * request);
 
 void handleFileReadAuth(AsyncWebServerRequest*);
 void handleScaleProp(AsyncWebServerRequest*);
+void handleRSSI(AsyncWebServerRequest*);
 void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len);
 
 #endif

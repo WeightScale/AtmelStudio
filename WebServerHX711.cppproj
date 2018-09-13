@@ -34,7 +34,7 @@
         <documentation help="" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.26.0" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.36.0" />
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
@@ -81,6 +81,7 @@
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncTCP-master/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncWebServer-master/src</Value>
@@ -95,15 +96,14 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/avr</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/libb64</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/spiffs</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/umm_malloc</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/variants/generic</Value>
-      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip2/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
@@ -136,6 +136,7 @@
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncTCP-master/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncWebServer-master/src</Value>
@@ -150,15 +151,14 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/avr</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/libb64</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/spiffs</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/umm_malloc</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/variants/generic</Value>
-      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip2/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
@@ -768,6 +768,7 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
   </armgcc.compiler.symbols.DefSymbols>
   <armgcc.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncTCP-master/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncWebServer-master/src</Value>
@@ -782,15 +783,14 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/avr</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/libb64</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/spiffs</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/umm_malloc</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/variants/generic</Value>
-      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip2/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
@@ -823,6 +823,7 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
   </armgcccpp.compiler.symbols.DefSymbols>
   <armgcccpp.compiler.directories.IncludePaths>
     <ListValues>
+      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WiFi/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncTCP-master/src</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries/ESPAsyncWebServer-master/src</Value>
@@ -837,15 +838,14 @@ vmresolved.tools.path=C:\Users\Kostya\AppData\Local\arduino15\packages\esp8266\t
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266httpUpdate/src</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries/ESP8266WebServer/src</Value>
       <Value>C:/Program Files (x86)/Arduino/libraries</Value>
-      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/Documents/Arduino/libraries</Value>
+      <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/libraries</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/avr</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/libb64</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/spiffs</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/cores/esp8266/umm_malloc</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/variants/generic</Value>
-      <Value>../../../WebServerHX711</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip2/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>

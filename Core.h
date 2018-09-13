@@ -46,25 +46,6 @@ const char netIndex[] PROGMEM = R"(<html lang='en'><meta name='viewport' content
 	const char settings_html[] PROGMEM = R"(<!DOCTYPE html><html lang='en'><head> <meta charset='UTF-8'> <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no'/> <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/> <meta http-equiv="Pragma" content="no-cache"/> <title>Настройки</title> <link rel="stylesheet" type="text/css" href="global.css"> <style>input:focus{background: #FA6; outline: none;}table{width: 100%;}input, select{width: 100%; text-align: right; font-size: 18px;}input[type=submit]{width: auto;}input[type=checkbox]{width: auto;}</style> <script>window.onload=function (){load('global.css','css', function (){load('settings.js', 'js',function (){GetSettings();})});}; function load(e, t, n){let a; var d=document; if ('js'===t){a=d.createElement("script"); a.src=e; a.type='text/javascript'; a.async=!1; a.onload=function (){n()}; d.getElementsByTagName('head')[0].appendChild(a)}else if ('css'===t){a=d.createElement('link'); a.href=e; a.rel='stylesheet'; a.type='text/css'; a.async=!1; a.onload=function (){n()}; d.getElementsByTagName('head')[0].appendChild(a)}}</script></head><body style='visibility: hidden'><a href='/' class='btn btn--s btn--blue'>&lt;</a>&nbsp;&nbsp;<strong>Настройки</strong><hr><fieldset> <details> <summary>Конфигурация сети</summary> <br><h5 align='left'><b>Точка доступа WiFi роутера</b></h5> <form id='form_id' action='javascript:formNet("form_id")'> Получать IP: <input type='checkbox' id='id_auto' name='auto' onclick='enableAuthFields(this);'/> <div id='id_ip'></div><table id='id_table_net'> <tr> <td>IP:</td><td> <input id='id_lan_ip' type='text' name='lan_ip' onfocus='setOnBlur(this)'/> </td></tr><tr> <td>ШЛЮЗ:</td><td> <input id='id_gateway' type='text' name='gateway' onfocus='setOnBlur(this)'/> </td></tr><tr> <td>МАСКА:</td><td> <input id='id_subnet' type='text' name='subnet' onfocus='setOnBlur(this)'/> </td></tr></table> <table> <tr> <td>СЕТЬ:</td><td> <input id='id_ssid' name='ssid' placeholder='имя сети'> </td></tr><tr> <td>КЛЮЧ:</td><td> <input id='id_key' type='password' name='key' placeholder='пароль'> </td></tr><tr> <td/> <td> <input type='submit' value='СОХРАНИТЬ'/> </td></tr></table> </form> </details></fieldset><br/><fieldset style='width: auto'> <details> <summary>Общии настройки</summary> <br><form action='javascript:sendDateTime()'> <h5 align='left'><b>Установка дата время</b></h5> <table> <tr> <td> <h5 id='id_date'>дата время</h5></td><td> <input type='submit' name='data' value='УСТАНОВИТЬ'/> </td></tr></table> </form> <hr> <form method='POST'> <h5>Настройки база данных интернет</h5> <table> <tr> <td>СЕРВЕР:</td><td> <input id='id_host' name='host' placeholder='сервер'> </td></tr><tr> <td>ПИН:</td><td> <input id='id_pin' name='pin' placeholder='пин весов'> </td></tr><tr> <td><a href='javascript:openSDB();'>открыть</a></td><td> <input id='id_submit_code' type='submit' value='СОХРАНИТЬ'/> </td></tr></table> </form> <hr> <form method='POST'> <h5>Доступ к настройкам</h5> <table> <tr> <td>ИМЯ:</td><td> <input id='id_n_admin' name='n_admin' placeholder='имя админ'> </td></tr><tr> <td>ПАРОЛЬ:</td><td> <input type='password' id='id_p_admin' name='p_admin' placeholder='пароль админ'> </td></tr><tr> <td/> <td> <input type='submit' value='СОХРАНИТЬ'/> </td></tr></table> </form> </details></fieldset><br/><fieldset> <details> <summary>Информация</summary> <br><span style='font-size: small; font-weight: bold'> <table> <tr> <td>Имя хоста:</td><td align='right' id='id_local_host'/> </tr></table> <hr> <h5 align='left'><b>Точка доступа весов</b></h5> <table> <tr> <td id='id_ap_ssid'/> <td align='right' id='id_ap_ip'/> </tr></table> <hr> <table> <tr> <td>MAC:</td><td align='right' id='id_mac'/> </tr></table> <hr> <table> <tr> <td>Пломба:</td><td align='right'><div id='sl_id'></div></td></tr></table> </span> <hr><a href='/calibr.html'>калибровка</a></details></fieldset><hr><footer align='center'>2018 © Powered by www.scale.in.ua</footer></body></html>)";
 #endif
 
-
-
-/*typedef struct {	
-	bool autoIp;
-	bool power_time_enable;
-	String scaleName;
-	String scalePass;
-	String scaleLanIp;
-	String scaleGateway;
-	String scaleSubnet;
-	String scaleWlanSSID;
-	String scaleWlanKey;
-	String hostUrl;
-	int hostPin;
-	int timeout;
-	int time_off;
-	int bat_max;	
-} settings_t;*/
-
 class CoreClass : public AsyncWebHandler{
 	private:
 		settings_t * _settings;
@@ -74,8 +55,7 @@ class CoreClass : public AsyncWebHandler{
 		bool _authenticated;
 	
 		bool saveAuth();
-		bool loadAuth();		
-		//bool _downloadSettings();
+		bool loadAuth();
 		
 	public:			
 		CoreClass(const String& username, const String& password);
@@ -89,17 +69,9 @@ class CoreClass : public AsyncWebHandler{
 		char* getSSID(){return _settings->wSSID;};
 		char* getLanIp(){return _settings->scaleLanIp;};
 		char* getGateway(){return _settings->scaleGateway;};
-		//void setSSID(const String& ssid){_settings->scaleWlanSSID = ssid;};
-		//void setPASS(const String& pass){_settings->scaleWlanKey = pass;};	
 		char* getPASS(){return _settings->wKey;};
 		bool saveEvent(const String&, const String&);
-		//void setBatMax(int m){_settings->bat_max = m;};
-		//String getIp();
 		bool eventToServer(const String&, const String&, const String&);
-		/*#if! HTML_PROGMEM
-			void saveValueSettingsHttp(AsyncWebServerRequest*);
-		#endif*/
-		//void handleSetAccessPoint(AsyncWebServerRequest*);
 		String getHash(const int, const String&, const String&, const String&);
 		int getPin(){return _settings->hostPin;};
 				

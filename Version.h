@@ -1,8 +1,16 @@
 ﻿#ifndef _VERSION_h
 #define _VERSION_h
+#include "web_server_config.h"
 
-#define SKETCH_VERSION "web_scales_async.010"
-#define SPIFFS_VERSION "web_scales_async.009"
+#if POWER_PLAN == INTERNAL_POWER
+	#define SKETCH_VERSION "web_scales_async.011"
+	#define SPIFFS_VERSION SKETCH_VERSION
+#else if POWER_PLAN == EXTERNAL_POWER
+	#define SKETCH_VERSION "web_scales_epwr.011"
+	#define SPIFFS_VERSION SKETCH_VERSION
+#endif
+
+
 
 /*
 Формат файла
