@@ -14,7 +14,7 @@
 template<class T> class ExponentialFilter{
 	protected:
 	// Weight for new values, as a percentage ([0..100])
-	T m_WeightNew;
+	T m_WeightNew = 100;
 
 	// Current filtered value.
 	T m_Current;

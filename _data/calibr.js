@@ -1,32 +1,30 @@
 var weight;
 var w;
-var doc = document;
+var d = document;
 
 function ScalesSocket(h, p, fm, fe) {
-    var host = h;
-    var protocol = p;
-    var timerWeight;
-    var timerSocket;
-    var ws;
-    var startWeightTimeout = function() {
-        clearTimeout(timerWeight);
-        timerWeight = setTimeout(function() {
+    let tw;
+    let ts;
+    let ws;
+    let startWeightTimeout = function() {
+        clearTimeout(tw);
+        tw = setTimeout(function() {
             fe();
         }, 5000);
     };
     this.getWeight = function() {
-        ws.send('/wt');
+        ws.send("{'cmd':'wt'}");
         startWeightTimeout();
     };
     this.openSocket = function() {
-        ws = new WebSocket(host, protocol);
+        ws = new WebSocket(h, p);
         ws.onopen = this.getWeight;
-        ws.onclose = function(e) {
-            clearTimeout(timerWeight);
+        ws.onclose = function() {
+            clearTimeout(tw);
             starSocketTimeout();
             fe();
         };
-        ws.onerror = function(e) {
+        ws.onerror = function() {
             fe();
         };
         ws.onmessage = function(e) {
@@ -34,30 +32,30 @@ function ScalesSocket(h, p, fm, fe) {
         }
     };
     var starSocketTimeout = function() {
-        clearTimeout(timerSocket);
-        timerSocket = setTimeout(function() {
+        clearTimeout(ts);
+        ts = setTimeout(function() {
             this.prototype.openSocket();
         }, 5000);
     }
 }
 
 function go() {
-    doc.getElementById('wt_id').innerHTML = '---';
+    d.getElementById('wt_id').innerHTML = '---';
 }
 
 function setMax() {
-    var f = new FormData(doc.getElementById('form_c_id'));
+    var f = new FormData(d.getElementById('form_c_id'));
     f.append('update', true);
     var r = new XMLHttpRequest();
     r.onreadystatechange = function() {
         if (r.readyState === 4) {
             if (r.responseText !== null) {
-                if (doc.getElementById("form_zero") === null) {
-                    doc.getElementById("id_bs").value = 'ОБНОВИТЬ';
-                    var f = doc.createElement('fieldset');
+                if (d.getElementById("form_zero") === null) {
+                    d.getElementById("id_bs").value = 'ОБНОВИТЬ';
+                    var f = d.createElement('fieldset');
                     f.id = 'form_zero';
                     f.innerHTML = "<legend>Нулевой вес</legend><form action='javascript:setZero()'><p>Перед установкой убедитесь что весы не нагружены.</p><input type='submit' value='УСТАНОВИТЬ НОЛЬ'/></form><br><div id='wt_id'>---</div>";
-                    doc.body.appendChild(f);
+                    d.body.appendChild(f);
                     setupWeight();
                 }
             }
@@ -68,18 +66,18 @@ function setMax() {
 }
 
 function setZero() {
-    var r = new XMLHttpRequest();
-    var f = new FormData();
+    let r = new XMLHttpRequest();
+    let f = new FormData();
     f.append('zero', true);
     f.append('weightCal', '0');
     r.onreadystatechange = function() {
         if (r.readyState === 4 && r.status === 200) {
             if (r.responseText !== null) {
-                doc.getElementById('form_zero').disabled = true;
-                var f = doc.createElement('fieldset');
+                d.getElementById('form_zero').disabled = true;
+                var f = d.createElement('fieldset');
                 f.id = 'form_weight';
                 f.innerHTML = "<legend>Калиброваный вес</legend><form action='javascript:setWeight()'><p>Перед установкой весы нагружаются контрольным весом. Дать некоторое время для стабилизации.Значение вводится с точностью которое выбрано в пункте Точность измерения.</p><table><tr><td>ГИРЯ:</td><td><input id='gr_id' value='0' type='number' step='any' required placeholder='Калиброваная гиря'/></td></tr><tr><td>ГРУЗ:</td><td><input id='id_cal_wt' value='0' type='number' step='any' title='Введите значение веса установленого на весах' max='100000' required placeholder='Калиброваный вес'/></td></tr><tr><td>ОШИБКА:</td><td><div id='dif_gr_id'></div></td></tr><tr><td><input type='submit' value='УСТАНОВИТЬ'/></td><td><a href='javascript:calculate();'>подобрать</a></td></tr></table></form>";
-                doc.body.appendChild(f);
+                d.body.appendChild(f);
             }
         }
 
@@ -90,18 +88,18 @@ function setZero() {
 
 function setWeight() {
     var fd = new FormData();
-    var w = parseFloat(doc.getElementById('id_cal_wt').value) + parseFloat(doc.getElementById('gr_id').value);
+    var w = parseFloat(d.getElementById('id_cal_wt').value) + parseFloat(d.getElementById('gr_id').value);
     fd.append('weightCal', w.toString());
     var r = new XMLHttpRequest();
     r.onreadystatechange = function() {
         if (r.readyState === 4) {
             if (r.status === 200) {
                 if (r.responseText !== null) {
-                    if (doc.getElementById('form_seal') === null) {
-                        var f = doc.createElement('fieldset');
+                    if (d.getElementById('form_seal') === null) {
+                        var f = d.createElement('fieldset');
                         f.id = 'form_seal';
                         f.innerHTML = "<legend>Пломбировка</legend><form action='javascript:setSeal()'><left><p>Сохранение процесса калибровки. Данные калибровки сохраняются в память весов.</p><input type='submit' value='ОПЛОМБИРОВАТЬ'/></left></form>";
-                        doc.body.appendChild(f);
+                        d.body.appendChild(f);
                     }
                 }
             } else if (r.status === 400) {
@@ -114,7 +112,7 @@ function setWeight() {
 }
 
 function setSeal() {
-    var r = new XMLHttpRequest();
+    let r = new XMLHttpRequest();
     r.onreadystatechange = function() {
         if (r.readyState === 4 && this.status === 200) {
             alert('Номер пломбы: ' + this.responseText);
@@ -126,21 +124,21 @@ function setSeal() {
 }
 
 function GetSettings() {
-    var r = new XMLHttpRequest();
+    let r = new XMLHttpRequest();
     r.overrideMimeType('application/json');
     r.onreadystatechange = function() {
         if (r.readyState === 4 && r.status === 200) {
             try {
-                var j = JSON.parse(r.responseText);
-                for (e in j) {
+                let j = JSON.parse(r.responseText.replace(/NaN/g,'null'));
+                for (let e in j) {
                     try {
-                        if (doc.getElementById(e) !== null) doc.getElementById(e).value = j[e];
+                        if (d.getElementById(e) !== null) d.getElementById(e).value = j[e];
                     } catch (e) {}
                 }
             } catch (e) {
                 alert(e.toString());
             }
-            doc.body.style.visibility = 'visible';
+            d.body.style.visibility = 'visible';
         }
     };
     r.open('GET', '/cdate.json', true);
@@ -148,7 +146,7 @@ function GetSettings() {
 }
 
 function saveValue() {
-    var f = new FormData(doc.getElementById('form_c_id'));
+    var f = new FormData(d.getElementById('form_c_id'));
     f.append('update', true);
     var r = new XMLHttpRequest();
     r.onreadystatechange = function() {
@@ -167,10 +165,9 @@ function saveValue() {
     };
     r.open('POST', 'calibr.html', true);
     r.send(f);
-};
-
+}
 function getWeight() {
-    w = new ScalesSocket('ws://' + doc.location.host + '/ws', ['arduino'], handleWeight, function() {
+    w = new ScalesSocket('ws://' + d.location.host + '/ws', ['arduino'], handleWeight, function() {
         go();
         w.openSocket();
     });
@@ -178,30 +175,36 @@ function getWeight() {
 }
 
 function calculate() {
-    var dif = weight - parseFloat(doc.getElementById('id_cal_wt').value);
-    dif = parseFloat(doc.getElementById('gr_id').value) / dif;
-    dif = parseFloat(doc.getElementById('id_cal_wt').value) * dif;
-    doc.getElementById('id_cal_wt').value = dif.toFixed(doc.getElementById('ac_id').value);
+    let dif = weight - parseFloat(d.getElementById('id_cal_wt').value);
+    dif = parseFloat(d.getElementById('gr_id').value) / dif;
+    dif = parseFloat(d.getElementById('id_cal_wt').value) * dif;
+    d.getElementById('id_cal_wt').value = dif.toFixed(d.getElementById('ac_id').value);
     setWeight();
 }
 
-function handleWeight(d) {
-    weight = d.w;
-    doc.getElementById('wt_id').innerHTML = weight;
-    try {
-        doc.getElementById('form_seal').disabled = (d.s === false);
-    } catch (e) {}
-    if (d.s) {
-        doc.getElementById('wt_id').setAttribute('style', 'background: #fff;');
-    } else {
-        doc.getElementById('wt_id').setAttribute('style', 'background: #C4C4C4;');
+function handleWeight(c) {
+    if (c.hasOwnProperty('cmd')) {
+        switch (c.cmd) {
+            case 'wt':
+                weight = c.w;
+                d.getElementById('wt_id').innerHTML = weight;
+                try {
+                    d.getElementById('form_seal').disabled = (c.s === false);
+                } catch (e) {}
+                if (c.s) {
+                    d.getElementById('wt_id').setAttribute('style', 'background: #fff;');
+                } else {
+                    d.getElementById('wt_id').setAttribute('style', 'background: #C4C4C4;');
+                }
+                try {
+                    var dif_gr = parseFloat(d.getElementById('id_cal_wt').value) + parseFloat(d.getElementById('gr_id').value);
+                    dif_gr -= weight;
+                    d.getElementById('dif_gr_id').innerHTML = dif_gr.toFixed(d.getElementById('ac_id').value);
+                } catch (e) {}
+                w.getWeight();
+                break;
+        }
     }
-    try {
-        var dif_gr = parseFloat(doc.getElementById('id_cal_wt').value) + parseFloat(doc.getElementById('gr_id').value);
-        dif_gr -= weight;
-        doc.getElementById('dif_gr_id').innerHTML = dif_gr.toFixed(doc.getElementById('ac_id').value);
-    } catch (e) {}
-    w.getWeight();
 }
 
 function setupWeight() {

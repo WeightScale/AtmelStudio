@@ -33,19 +33,10 @@
     <ClInclude Include="ESP8266NetBIOS.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Filter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="handleHttp.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="HttpUpdater.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="HX711.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="HX711_ADC.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Page.h">
@@ -54,19 +45,10 @@
     <ClInclude Include="Scale.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ScaleMem.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="ServerCore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Task.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TaskController.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="Terminal.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="tools.h">
@@ -76,6 +58,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="web_server_config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CoreMemory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -92,28 +77,10 @@
     <ClCompile Include="ESP8266NetBIOS.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="handleHttp.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="HttpUpdater.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="HX711.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="HX711_ADC.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Page.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Scale.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ScaleMem.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="ServerCore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Task.cpp">
@@ -126,6 +93,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WebServerHX711.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CoreMemory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

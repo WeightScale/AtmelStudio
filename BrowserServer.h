@@ -26,7 +26,7 @@ class AsyncWebServer;
 class BrowserServerClass : public AsyncWebServer{
 	protected:
 		strHTTPAuth _httpAuth;	
-		bool _downloadHTTPAuth();		
+		//bool _downloadHTTPAuth();		
 
 	public:
 	
@@ -70,11 +70,11 @@ extern BrowserServerClass browserServer;
 extern AsyncWebSocket ws;
 
 #ifdef HTML_PROGMEM
-void handleBatteryPng(AsyncWebServerRequest*);
-void handleScalesPng(AsyncWebServerRequest*);
-void handleSettings(AsyncWebServerRequest * request);
+	void handleBatteryPng(AsyncWebServerRequest*);
+	void handleScalesPng(AsyncWebServerRequest*);	
 #endif
 
+void handleSettings(AsyncWebServerRequest * request);
 void handleFileReadAuth(AsyncWebServerRequest*);
 void handleScaleProp(AsyncWebServerRequest*);
 void handleRSSI(AsyncWebServerRequest*);

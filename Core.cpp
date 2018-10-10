@@ -32,6 +32,8 @@ void CoreClass::begin(){
 	Rtc.Begin();
 	CoreMemory.init();
 	_settings = &CoreMemory.eeprom.settings; //ссылка на переменную 
+	_hostname = String(_settings->apSSID);
+	_hostname.toLowerCase();
 	#if POWER_PLAN
 		POWER.onRun(bind(&CoreClass::powerOff,CORE));
 		POWER.enabled = _settings->power_time_enable;	
@@ -86,6 +88,10 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 			request->arg("key").toCharArray(_settings->wKey, request->arg("key").length()+1);
 			goto save;
 		}
+		if (request->hasArg("assid")) {
+			request->arg("assid").toCharArray(_settings->apSSID, request->arg("assid").length() + 1);
+			goto save;
+		}
 		if(request->hasArg("data")){
 			DateTimeClass DateTime(request->arg("data"));
 			Rtc.SetDateTime(DateTime.toRtcDateTime());
@@ -122,17 +128,28 @@ void CoreClass::handleRequest(AsyncWebServerRequest *request){
 	#ifdef HTML_PROGMEM
 		request->send_P(200,F("text/html"), settings_html);
 	#else
-	if(request->url().equalsIgnoreCase("/sn"))
-		request->send_P(200, F("text/html"), netIndex);
+		if(request->url().equalsIgnoreCase("/sn"))
+			request->send_P(200, F("text/html"), netIndex);
 	else
-	request->send(SPIFFS, request->url());
+		request->send(SPIFFS, request->url());
 	#endif
 }
 
 
 bool CoreClass::saveEvent(const String& event, const String& value) {
-	//String date = getDateTime();
-	return WiFi.status() == WL_CONNECTED?eventToServer(getDateTime(), event, value):false;	
+	String date = getDateTime();
+	DynamicJsonBuffer jsonBuffer;
+	JsonObject &root = jsonBuffer.createObject();
+	root["cmd"] = "swt";
+	root["d"] = date;
+	root["v"] = value;
+	size_t len = root.measureLength();
+	AsyncWebSocketMessageBuffer *buffer = ws.makeBuffer(len);
+	if (buffer) {
+		root.printTo((char *)buffer->get(), len + 1);
+		ws.textAll(buffer);
+	}
+	return WiFi.status() == WL_CONNECTED?eventToServer(date, event, value):false;
 	/*File readFile;
 	readFile = SPIFFS.open("/events.json", "r");
     if (!readFile) {  
@@ -244,6 +261,8 @@ String CoreClass::getHash(const int code, const String& date, const String& type
 
 #if POWER_PLAN
 void CoreClass::powerOff(){
+	ws.closeAll();
+	delay(2000);
 	browserServer.stop();
 	SPIFFS.end();
 	Scale.power_down(); /// Выключаем ацп

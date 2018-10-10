@@ -81,9 +81,9 @@ void setup() {
 	WiFi.setAutoReconnect(true);
 	//WiFi.smartConfigDone();
 	WiFi.mode(WIFI_AP_STA);
-	WiFi.hostname(MY_HOST_NAME);
+	WiFi.hostname(CORE->getHostname());
 	WiFi.softAPConfig(apIP, apIP, netMsk);
-	WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD);
+	WiFi.softAP(CORE->getApSSID(), SOFT_AP_PASSWORD);
 	connectWifi();
 }
 
@@ -161,11 +161,10 @@ void connectWifi() {
 					WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
 				}
 			}
-			WiFi.softAP(SOFT_AP_SSID, SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера			
+			WiFi.softAP(CORE->getApSSID(), SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера			
 			WiFi.begin ( CORE->getSSID(), CORE->getPASS(),chan_scan/*,BSSID_scan*/);
-			int status = WiFi.waitForConnectResult();
-			if(status == WL_CONNECTED ){
-				NBNS.begin(MY_HOST_NAME);
+			if(WiFi.waitForConnectResult()){
+				NBNS.begin(CORE->getHostname().c_str());
 			}
 			return;
 		}
@@ -182,9 +181,9 @@ void loop() {
 	dnsServer.processNextRequest();
 	//HTTP
 	if (Scale.isSave()){
-		CORE->saveEvent("weight", String(Scale.getSaveValue())+"_kg");
+		CORE->saveEvent("weight", String(Scale.getSaveValue()));
 		Scale.setIsSave(false);
-	}
+	}	
 	#if POWER_PLAN
 		powerSwitchInterrupt();
 	#endif

@@ -56,8 +56,8 @@ class ScaleClass : public HX711{
 		BrowserServerClass *_server;
 		//char _buffer[10];
 		bool _authenticated;
-		bool stableWeight;
-		t_save_value saveWeight;
+		bool _stableWeight = true;
+		t_save_value _saveWeight;
 		t_scales_value * _scales_value;
 		float _round;						/* множитиль для округления */
 		float _stable_step;					/* шаг для стабилизации */	
@@ -89,11 +89,13 @@ class ScaleClass : public HX711{
 		
 		float getRound(){return _round;};
 						
-		float isSave(){return saveWeight.isSave;};
-		float getSaveValue(){return saveWeight.value;};
-		void setIsSave(bool s){saveWeight.isSave = s;};
+		bool isSave(){return _saveWeight.isSave;};
+		float getSaveValue(){return _saveWeight.value;};
+		void setIsSave(bool s){_saveWeight.isSave = s;};
 		
 		size_t doData(JsonObject& json );
+		
+		char *getBuffer(){return _buffer;};
 };
 
 extern ScaleClass Scale;

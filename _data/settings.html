@@ -4,8 +4,8 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no' />
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
-    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate' />
+    <meta http-equiv='Pragma' content='no-cache' />
     <title>Настройки</title>
     <link rel="stylesheet" type="text/css" href="global.css">
     <style>
@@ -34,35 +34,125 @@
         }
     </style>
     <script>
+        var d = document;
+        function setOnBlur(ip) {
+            setTimeout(function() {
+                if (d.activeElement === ip) {
+                    ip.onblur = function() {
+                        if (ip.value.length === 0 || !CheckIP(ip)) {
+                            setTimeout(function() {
+                                ip.focus()
+                            }, 0);
+                        } else ip.onblur = null;
+                    }
+                }
+            }, 0)
+        }
 
-        window.onload = function () {
-            load('global.css','css', function () {
-                load('settings.js', 'js',function () {
-                    GetSettings();
-                })
-            });
-        };
+        function CheckIP(ip) {
+            ipParts = ip.value.split(".");
+            if (ipParts.length === 4) {
+                for (i = 0; i < 4; i++) {
+                    TheNum = parseInt(ipParts[i]);
+                    if (TheNum >= 0 && TheNum <= 255) {} else break;
+                }
+                if (i === 4) return true;
+            }
+            return false;
+        }
+        function GetValue() {
+            var r = new XMLHttpRequest();
+            r.overrideMimeType('application/json');
+            r.onreadystatechange = function() {
+                if (r.readyState === 4) {
+                    if (r.status === 200) {
+                        var j = JSON.parse(r.responseText);
+                        for (e in j) {
+                            try {
+                                d.getElementById(e).innerHTML = j[e];
+                            } catch (e) {}
+                        }
+                    }
+                }
+            };
+            r.open('GET', '/sv', true);
+            r.send(null);
+        }
 
-        function load(e, t, n) {
-            let a;
-            var d = document;
-            if ('js' === t) {
-                a = d.createElement("script");
-                a.src = e;
-                a.type = 'text/javascript';
-                a.async = !1;
-                a.onload = function () { n() };
-                d.getElementsByTagName('head')[0].appendChild(a)
-            } else if ('css' === t) {
-                a = d.createElement('link');
-                a.href = e;
-                a.rel = 'stylesheet';
-                a.type = 'text/css';
-                a.async = !1;
-                a.onload = function () { n() };
-                d.getElementsByTagName('head')[0].appendChild(a)
+        function GetSettings() {
+            var r = new XMLHttpRequest();
+            r.overrideMimeType('application/json');
+            r.onreadystatechange = function() {
+                if (r.readyState === 4) {
+                    if (r.status === 200) {
+                        try {
+                            var j = JSON.parse(r.responseText);
+                            var s = j.scale;
+                            for (e in s) {
+                                try {
+                                    if (d.getElementById(e).type === 'checkbox') {
+                                        d.getElementById(e).checked = s[e];
+                                    } else d.getElementById(e).value = s[e];
+                                } catch (e) {}
+                            }
+                            var sr = j.server;
+                            for (en in sr) {
+                                try {
+                                    d.getElementById(en).value = sr[en];
+                                } catch (e) {}
+                            }
+                            enableAuthFields(document.getElementById('id_auto'));
+                        } catch (e) {
+                            alert("ОШИБКА " + e.toString());
+                        }
+                    } else {
+                        alert("ДАННЫЕ НАСТРОЕК НЕ НАЙДЕНЫ!!!");
+                    }
+                    d.body.style.visibility = 'visible';
+                    GetValue();
+                }
+            };
+            r.open('GET', '/settings.json', true);
+            r.send(null);
+        }
+
+        function openSDB() {
+            var url = 'https://' + d.getElementById('id_host').value + '/scale.php?code=' + d.getElementById('id_pin').value;
+            var win = window.open(url, '_blank');
+            win.focus();
+        }
+
+        function enableAuthFields(check) {
+            if (check.checked) {
+                d.getElementById('id_table_net').style.display = 'none';
+            } else {
+                d.getElementById('id_table_net').style.display = '';
             }
         }
+
+        function formNet(i) {
+            var f = new FormData(d.getElementById(i));
+            var r = new XMLHttpRequest();
+            r.onreadystatechange = function() {
+                if (r.readyState === 4) {
+                    if (r.status === 200) {
+                        var rec = confirm('Перегрузить');
+                        if (rec) {
+                            r.onreadystatechange = null;
+                            r.open('GET', '/rc', true);
+                            r.send(null);
+                        }
+                    } else if (r.status === 400) {
+                        alert('Настройки не изменились');
+                    }
+                }
+            };
+            r.open('POST', '/settings.html', true);
+            r.send(f);
+        }
+        window.onload = function () {
+            GetSettings();
+        };
     </script>
 </head>
 
@@ -124,15 +214,18 @@
     <details>
         <summary>Общии настройки</summary>
         <br>
-        <form action='javascript:sendDateTime()'>
-            <h5 align='left'><b>Установка дата время</b></h5>
+        <form id='form_assid_id' action='javascript:formNet("form_assid_id")'>
+            <h5 align='left'><b>Имя собственное</b></h5>
             <table>
                 <tr>
+                    <td>ИМЯ:</td>
                     <td>
-                        <h5 id='id_date'>дата время</h5></td>
+                        <input id='id_assid' name='assid'> </td>
+                </tr>
+                <tr>
+                    <td></td>
                     <td>
-                        <input type='submit' name='data' value='УСТАНОВИТЬ' />
-                    </td>
+                        <input type='submit' value='УСТАНОВИТЬ' /> </td>
                 </tr>
             </table>
         </form>
@@ -243,7 +336,9 @@
                 </tr>
             </table>
         </span>
-        <hr><a href='/calibr.html'>калибровка</a></details>
+        <hr><a href='/calibr.html'>калибровка</a>
+        <hr><a href='/rssi.html'>сигнал</a>
+    </details>
 </fieldset>
 <hr>
 <footer align='center'>2018 © Powered by www.scale.in.ua</footer>

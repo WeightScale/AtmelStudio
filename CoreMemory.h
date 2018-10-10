@@ -14,6 +14,7 @@ typedef struct {
 	char scaleSubnet[16];
 	char wSSID[33];
 	char wKey[33];
+	char apSSID[16];
 	char hostUrl[0xff];
 	int hostPin;
 	int time_off;

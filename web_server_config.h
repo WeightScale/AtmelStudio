@@ -20,14 +20,18 @@
 	#include "Page.h"
 #endif
 
-#define MY_HOST_NAME "scl"
-#define SOFT_AP_SSID "SCALES"
+//#define MY_HOST_NAME "scl"
+//#define SOFT_AP_SSID "SCALES"
 #define SOFT_AP_PASSWORD "12345678"
 #define HOST_URL "sdb.net.ua"		/** Адрес базы данных*/
 
 #define TIMEOUT_HTTP 3000			/** Время ожидания ответа HTTP запраса*/
 #define STABLE_NUM_MAX 10			/** Количество стабильных измерений*/
 #define MAX_EVENTS 100				/** Количество записей событий*/
+
+#define EN_NCP  12							/* сигнал включения питания  */
+#define PWR_SW  13							/* сигнал от кнопки питания */
+#define LED  2								/* индикатор работы */
 
 //#define MAX_CHG 1013//980	//делитель U2=U*(R2/(R1+R2)) 0.25
 //#define MIN_CHG 880			//ADC = (Vin * 1024)/Vref  Vref = 1V

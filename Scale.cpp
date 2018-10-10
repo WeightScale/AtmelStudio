@@ -8,8 +8,8 @@ ScaleClass Scale(16,14);		/*  gpio16 gpio0  */
 ScaleClass::ScaleClass(byte dout, byte pd_sck) : HX711(dout, pd_sck) /*, ExponentialFilter<long>()*/{
 	_server = NULL;	
 	_authenticated = false;	
-	saveWeight.isSave = false;
-	saveWeight.value = 0.0;
+	_saveWeight.isSave = false;
+	_saveWeight.value = 0.0;
 }
 
 ScaleClass::~ScaleClass(){}
@@ -74,10 +74,10 @@ void ScaleClass::init(){
 	reset();
 	_scales_value = &CoreMemory.eeprom.scales_value;
 	//_downloadValue();
-	SetFilterWeight(_scales_value->filter);
 	mathRound();
+	readAverage();
 	tare();
-	SetCurrent(readAverage());
+	SetFilterWeight(_scales_value->filter);
 }
 
 void ScaleClass::mathRound(){
@@ -224,12 +224,14 @@ long ScaleClass::readAverage() {
 	for (byte i = 0; i < _scales_value->average; i++) {
 		sum += read();
 	}
-	return _scales_value->average == 0?sum / 1:sum / _scales_value->average;
+	Filter(_scales_value->average == 0?sum / 1:sum / _scales_value->average);
+	return Current();
 }
 
 long ScaleClass::getValue() {
-	Filter(readAverage());
-	return Current() - _scales_value->offset;
+	//Filter(readAverage());
+	//return Current() - _scales_value->offset;
+	return readAverage() - _scales_value->offset;
 }
 
 float ScaleClass::getUnits() {
@@ -242,8 +244,10 @@ float ScaleClass::getWeight(){
 }
 
 void ScaleClass::tare() {
-	long sum = readAverage();
-	setOffset(sum);
+	if (_stableWeight){
+		SetCurrent(read());
+		setOffset(Current());	
+	}
 }
 
 void ScaleClass::setAverage(unsigned char a){
@@ -267,25 +271,46 @@ void ScaleClass::formatValue(float value, char* string){
 /* */
 void ScaleClass::detectStable(float w){
 	static unsigned char stable_num;
-	if (saveWeight.value == w) {
+	if (_saveWeight.value != w){
+		stable_num = 0;
+		_stableWeight = false;
+		_saveWeight.value = w;
+		return;
+	}
+	stable_num++;
+	if (stable_num < STABLE_NUM_MAX) {
+		return;
+	}	
+	if (_stableWeight) {
+		return;
+	}
+	_stableWeight = true;
+	if (millis() < _saveWeight.time)
+		return;
+	if (fabs(_saveWeight.value) > _stable_step) {
+		_saveWeight.isSave = true;
+		_saveWeight.time = millis() + 10000;
+	}
+
+	/*if (_saveWeight.value == w) {
 		if (stable_num > STABLE_NUM_MAX) {
-			if (!stableWeight){
-				if (millis() > saveWeight.time ){
+			if (!_stableWeight){
+				if (millis() > _saveWeight.time ){
 					if(fabs(w) > _stable_step){
-						saveWeight.isSave = true;
-						saveWeight.time = millis() + 10000;
+						_saveWeight.isSave = true;
+						_saveWeight.time = millis() + 10000;
 					}
 				}
-				stableWeight = true;
+				_stableWeight = true;
 			}				
 			return;
 		}
 		stable_num++;
 	} else {
 		stable_num = 0;
-		stableWeight = false;
-		saveWeight.value = w;
-	}
+		_stableWeight = false;
+		_saveWeight.value = w;
+	}*/
 }
 
 /*
@@ -311,7 +336,7 @@ double calculateDistance(double rssi) {
 size_t ScaleClass::doData(JsonObject& json ){
 	json["w"]= String(_buffer);
 	json["c"]= BATTERY.getCharge();
-	json["s"]= stableWeight;	
+	json["s"]= _stableWeight;	
 	return json.measureLength();
 }
 

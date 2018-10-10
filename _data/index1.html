@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang='en'>
+
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no' />
+    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate' />
+    <meta http-equiv='Pragma' content='no-cache' />
+    <title>WEB SCALES</title>
+    <link rel='stylesheet' type='text/css' href='global.css'>
+    <link rel='shortcut icon' href='favicon.png' type='image/png'>
+    <style>
+        #ws_id {
+            background: #fff;
+            font-size: 80px;
+            font-family: Arial, sans-serif;
+            color: #618ad2;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .td,.th{
+            padding: 3px;
+            border: 1px solid white;
+
+        }
+        .th{
+            background:#a0a0a0;
+            color: white;
+        }
+        #tw_id{
+            color: #618ad2;
+            font-size: small;
+            font-weight: bold;
+            text-align: center;
+        }
+        table {
+            width: 100%;
+            border-collapse:collapse;
+        }
+
+        input {
+            font-size: 20px;
+            text-align: center;
+        }
+    </style>
+    <script>
+        var w;
+        var d = document;
+        var  ob = [];
+
+        function ScalesSocket(h, p, fm, fe) {
+            var host = h;
+            var protocol = p;
+            var tw;
+            var ts;
+            var ws;
+            var wTimeout = function() {
+                clearTimeout(tw);
+                tw = setTimeout(function() {
+                    fe();
+                }, 5000);
+            };
+            this.snd = function (c) {
+                ws.send(c);
+            };
+            this.getWeight = function() {
+                ws.send("{'cmd':'wt'}");
+                wTimeout();
+            };
+            this.openSocket = function() {
+                ws = new WebSocket(host, protocol);
+                ws.onopen = this.getWeight;
+                ws.onclose = function() {
+                    clearTimeout(tw);
+                    sTimeout();
+                    fe();
+                };
+                ws.onerror = function() {
+                    fe();
+                };
+                ws.onmessage = function(e) {
+                    fm(JSON.parse(e.data));
+                }
+            };
+            var sTimeout = function() {
+                clearTimeout(ts);
+                ts = setTimeout(function() {
+                    this.prototype.openSocket();
+                }, 5000);
+            }
+        }
+
+        function go() {
+            d.getElementById('w_id').innerHTML = '---';
+            d.getElementById('c_id').innerHTML = '--%';
+            d.getElementById('b_id').style.visibility = 'visible';
+        }
+
+        function setZero() {
+            d.getElementById('b_id').style.visibility = 'hidden';
+            d.getElementById('w_id').innerHTML = '...';
+            w.snd("{'cmd':'tp'}");
+        }
+
+        function createList(p,a) {
+            d.getElementById(p).innerHTML = '';
+            var t = "<th class='th'>время</th><th class='th'>вес</th>";
+            let tr = d.createElement('tr');
+            tr.innerHTML = t;
+            d.getElementById(p).appendChild(tr);
+            a.forEach(function (o) {
+                var row = d.createElement('tr');
+                row.innerHTML = "<td style='color: forestgreen' class='td'><i/>" + o.d.split("-")[1] + "</td><td width='auto' class='td'><i/><b/>" + o.v + "</td>";
+                d.getElementById(p).appendChild(row);
+            });
+        }
+
+
+
+        window.onload = function() {
+            onBodyLoad();
+        };
+
+        function parseCommand(e) {
+            if (e.hasOwnProperty('cmd')) {
+                switch (e.cmd) {
+                    case 'wt':
+                        try {
+                            d.getElementById('w_id').innerHTML = e.w;
+                            d.getElementById('c_id').innerHTML = e.c + '%';
+                            if (e.s) {
+                                d.getElementById('ws_id').setAttribute('style', 'background: #fff;');
+                                d.getElementById('b_id').disabled = false;
+                            } else {
+                                d.getElementById('ws_id').setAttribute('style', 'background: #C4C4C4;');
+                                d.getElementById('b_id').disabled = true;
+                            }
+                        } catch (e) {
+                            go();
+                        } finally {
+                            w.getWeight();
+                        }
+                        break;
+                    case 'swt':
+                        var date = new Date();
+                        var dt = date.toLocaleDateString() + "-" + date.toLocaleTimeString();
+                        e.d = dt;
+                        ob.unshift(e);
+                        if (ob.length > 5 )
+                            ob.pop();
+                        createList('tw_id',ob);
+                        break;
+                    case 'tp':
+                        d.getElementById('b_id').style.visibility = 'visible';
+                        w.getWeight();
+                        break;
+                }
+            }
+        }
+
+        function onBodyLoad() {
+            w = new ScalesSocket('ws://' + d.location.host + '/ws', ['arduino'], parseCommand, function() {
+                go();
+                w.openSocket();
+            });
+            w.openSocket();
+        }
+    </script>
+</head>
+
+<body>
+<div align='center'>
+    <table>
+        <tr>
+            <td><img src='scales.png' style='height: 42px;' /></td>
+            <td align='right'>
+                <h3 id='brand_name'>scale.in.ua</h3></td>
+        </tr>
+    </table>
+</div>
+<hr>
+<div align='right' id='ws_id'><b id='w_id'>---</b></div>
+<hr>
+<table>
+    <tr>
+        <td style='width:1%; white-space: nowrap'><img src='battery.png' alt='B' /></td>
+        <td>
+            <h3 id='c_id' style='display: inline'>--%</h3></td>
+        <td align='right'><b><a href='javascript:setZero()' id='b_id' class='btn btn--s btn--blue'>&gt;0&lt;</a></b></td>
+    </tr>
+</table>
+<hr>
+<table id='tw_id'>
+</table>
+<table>
+    <tr>
+        <td>
+            <br/><a href='/settings.html'>настройки</a>
+            <br>
+        </td>
+    </tr>
+</table>
+<hr>
+<footer align='center'>2018 © Powered by www.scale.in.ua</footer>
+</body>
+
+</html>
