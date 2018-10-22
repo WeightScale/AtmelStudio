@@ -4,8 +4,8 @@
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no' />
-    <meta http-equiv='Cache-Control' content='no-cache, no-store, must-revalidate' />
-    <meta http-equiv='Pragma' content='no-cache' />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
     <title>Настройки</title>
     <link rel="stylesheet" type="text/css" href="global.css">
     <style>
@@ -60,6 +60,25 @@
             }
             return false;
         }
+
+        function sendDateTime() {
+            var f = new FormData();
+            var date = new Date();
+            var dt = date.toLocaleDateString();
+            dt += "-" + date.toLocaleTimeString();
+            f.append('data', dt.replace(/[^\x20-\x7E]+/g, ''));
+            var r = new XMLHttpRequest();
+            r.onreadystatechange = function() {
+                if (r.readyState === 4 && r.status === 200) {
+                    if (r.responseText !== null) {
+                        d.getElementById('id_date').innerHTML = "<div>Обновлено<br/>" + r.responseText + "</div>";
+                    }
+                }
+            };
+            r.open("POST", "settings.html?" + new Date().getTime(), true);
+            r.send(f);
+        }
+
         function GetValue() {
             var r = new XMLHttpRequest();
             r.overrideMimeType('application/json');
@@ -150,7 +169,7 @@
             r.open('POST', '/settings.html', true);
             r.send(f);
         }
-        window.onload = function () {
+        window.onload = function() {
             GetSettings();
         };
     </script>
@@ -164,46 +183,40 @@
         <br>
         <h5 align='left'><b>Точка доступа WiFi роутера</b></h5>
         <form id='form_id' action='javascript:formNet("form_id")'> Получать IP:
-            <input type='checkbox' id='id_auto' name='auto' onclick='enableAuthFields(this);'/>
+            <input type='checkbox' id='id_auto' name='auto' onclick='enableAuthFields(this);' />
             <div id='id_ip'></div>
             <table id='id_table_net'>
                 <tr>
                     <td>IP:</td>
                     <td>
-                        <input id='id_lan_ip' type='text' name='lan_ip' onfocus='setOnBlur(this)'/>
-                    </td>
+                        <input id='id_lan_ip' type='text' name='lan_ip' onfocus='setOnBlur(this)' /> </td>
                 </tr>
                 <tr>
                     <td>ШЛЮЗ:</td>
                     <td>
-                        <input id='id_gateway' type='text' name='gateway' onfocus='setOnBlur(this)'/>
-                    </td>
+                        <input id='id_gateway' type='text' name='gateway' onfocus='setOnBlur(this)' /> </td>
                 </tr>
                 <tr>
                     <td>МАСКА:</td>
                     <td>
-                        <input id='id_subnet' type='text' name='subnet' onfocus='setOnBlur(this)'/>
-                    </td>
+                        <input id='id_subnet' type='text' name='subnet' onfocus='setOnBlur(this)' /> </td>
                 </tr>
             </table>
             <table>
                 <tr>
                     <td>СЕТЬ:</td>
                     <td>
-                        <input id='id_ssid' name='ssid' placeholder='имя сети'>
-                    </td>
+                        <input id='id_ssid' name='ssid' placeholder='имя сети'> </td>
                 </tr>
                 <tr>
                     <td>КЛЮЧ:</td>
                     <td>
-                        <input id='id_key' type='password' name='key' placeholder='пароль'>
-                    </td>
+                        <input id='id_key' type='password' name='key' placeholder='пароль'> </td>
                 </tr>
                 <tr>
                     <td/>
                     <td>
-                        <input type='submit' value='СОХРАНИТЬ' />
-                    </td>
+                        <input type='submit' value='СОХРАНИТЬ' /> </td>
                 </tr>
             </table>
         </form>
@@ -214,7 +227,39 @@
     <details>
         <summary>Общии настройки</summary>
         <br>
-        <form id='form_assid_id' action='javascript:formNet("form_assid_id")'>
+        <form action='javascript:sendDateTime()'>
+            <h5 align='left'><b>Установка дата время</b></h5>
+            <table>
+                <tr>
+                    <td>
+                        <h5 id='id_date'>дата время</h5></td>
+                    <td>
+                        <input type='submit' name='data' value='УСТАНОВИТЬ' /> </td>
+                </tr>
+            </table>
+        </form>
+        <hr>
+        <form method='POST'>
+            <h5 align='left'><b>Время выключения</b></h5>
+            <table>
+                <tr>
+                    <td>
+                        <input type='checkbox' id='id_pe' name='pe' /> </td>
+                    <td>
+                        <select id='id_pt' name='pt' title="Время выключения">
+                            <option value='600000'>10мин</option>
+                            <option value='1200000'>20мин</option>
+                            <option value='1800000'>30мин</option>
+                            <option value='2400000'>40мин</option>
+                        </select>
+                    </td>
+                    <td>
+                        <input type='submit' value='УСТАНОВИТЬ' /> </td>
+                </tr>
+            </table>
+        </form>
+        <hr>
+        <form id='f_a_id' action='javascript:formNet("f_a_id")'>
             <h5 align='left'><b>Имя собственное</b></h5>
             <table>
                 <tr>
@@ -231,47 +276,22 @@
         </form>
         <hr>
         <form method='POST'>
-            <h5 align='left'><b>Время выключения</b></h5>
-            <table>
-                <tr>
-                    <td>
-                        <input type='checkbox' id='id_pe' name='pe'/>
-                    </td>
-                    <td>
-                        <select id='id_pt' name='pt' title="Время выключения">
-                            <option value='600000'>10мин</option>
-                            <option value='1200000'>20мин</option>
-                            <option value='1800000'>30мин</option>
-                            <option value='2400000'>40мин</option>
-                        </select>
-                    </td>
-                    <td>
-                        <input type='submit' value='УСТАНОВИТЬ' />
-                    </td>
-                </tr>
-            </table>
-        </form>
-        <hr>
-        <form method='POST'>
             <h5>Настройки база данных интернет</h5>
             <table>
                 <tr>
                     <td>СЕРВЕР:</td>
                     <td>
-                        <input id='id_host' name='host' placeholder='сервер'>
-                    </td>
+                        <input id='id_host' name='host' placeholder='сервер'> </td>
                 </tr>
                 <tr>
                     <td>ПИН:</td>
                     <td>
-                        <input id='id_pin' name='pin' placeholder='пин весов'>
-                    </td>
+                        <input id='id_pin' name='pin' placeholder='пин весов'> </td>
                 </tr>
                 <tr>
                     <td><a href='javascript:openSDB();'>открыть</a></td>
                     <td>
-                        <input id='id_submit_code' type='submit' value='СОХРАНИТЬ' />
-                    </td>
+                        <input id='id_submit_code' type='submit' value='СОХРАНИТЬ' /> </td>
                 </tr>
             </table>
         </form>
@@ -282,20 +302,17 @@
                 <tr>
                     <td>ИМЯ:</td>
                     <td>
-                        <input id='id_n_admin' name='n_admin' placeholder='имя админ'>
-                    </td>
+                        <input id='id_n_admin' name='n_admin' placeholder='имя админ'> </td>
                 </tr>
                 <tr>
                     <td>ПАРОЛЬ:</td>
                     <td>
-                        <input type='password' id='id_p_admin' name='p_admin' placeholder='пароль админ'>
-                    </td>
+                        <input type='password' id='id_p_admin' name='p_admin' placeholder='пароль админ'> </td>
                 </tr>
                 <tr>
                     <td/>
                     <td>
-                        <input type='submit' value='СОХРАНИТЬ' />
-                    </td>
+                        <input type='submit' value='СОХРАНИТЬ' /> </td>
                 </tr>
             </table>
         </form>
@@ -305,40 +322,9 @@
 <fieldset>
     <details>
         <summary>Информация</summary>
-        <br>
-        <span style='font-size: small; font-weight: bold'>
-            <table>
-                <tr>
-                    <td>Имя хоста:</td>
-                    <td align='right' id='id_local_host'/>
-                </tr>
-            </table>
-            <hr>
-            <h5 align='left'><b>Точка доступа весов</b></h5>
-            <table>
-                <tr>
-                    <td id='id_ap_ssid'/>
-                    <td align='right' id='id_ap_ip'/>
-                </tr>
-            </table>
-            <hr>
-            <table>
-                <tr>
-                    <td>MAC:</td>
-                    <td align='right' id='id_mac'/>
-                </tr>
-            </table>
-            <hr>
-            <table>
-                <tr>
-                    <td>Пломба:</td>
-                    <td align='right'><div id='sl_id'></div></td>
-                </tr>
-            </table>
-        </span>
+        <br><span style='font-size: small; font-weight: bold'> <table> <tr> <td>Имя хоста:</td><td align='right' id='id_local_host'/> </tr></table> <hr> <h5 align='left'><b>Точка доступа весов</b></h5> <table> <tr> <td id='id_ap_ssid'/> <td align='right' id='id_ap_ip'/> </tr></table> <hr> <table> <tr> <td>MAC:</td><td align='right' id='id_mac'/> </tr></table> <hr> <table> <tr> <td>Пломба:</td><td align='right'><div id='sl_id'></div></td></tr></table> </span>
         <hr><a href='/calibr.html'>калибровка</a>
-        <hr><a href='/rssi.html'>сигнал</a>
-    </details>
+        <hr><a href='/rssi.html'>сигнал</a></details>
 </fieldset>
 <hr>
 <footer align='center'>2018 © Powered by www.scale.in.ua</footer>
