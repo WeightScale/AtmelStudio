@@ -27,6 +27,7 @@
 #define SEAL_JSON			"sl_id"
 #define USER_JSON			"us_id"
 #define PASS_JSON			"ps_id"
+#define POWER_5V			"p5v_id"
 
 /*typedef struct {
 	long offset;						

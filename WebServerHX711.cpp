@@ -52,7 +52,7 @@ void setup() {
 		pinMode(EN_NCP, OUTPUT);
 		digitalWrite(EN_NCP, HIGH);
 	#endif 	
-	pinMode(LED, OUTPUT);	
+		pinMode(LED, OUTPUT);		
 	//Serial.begin(115200);
 	/*while (digitalRead(PWR_SW) == HIGH){
 		delay(100);
@@ -78,6 +78,11 @@ void setup() {
   
 	//ESP.eraseConfig();
 	WiFi.persistent(false);
+	if (!CORE->isAuto()) {
+		if (lanIp.fromString(CORE->getLanIp()) && gateway.fromString(CORE->getGateway())) {
+			WiFi.config(lanIp, gateway, netMsk);									// Надо сделать настройки ip адреса
+		}
+	}
 	WiFi.setAutoConnect(true);
 	WiFi.setAutoReconnect(true);
 	//WiFi.smartConfigDone();

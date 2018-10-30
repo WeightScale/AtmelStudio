@@ -54,6 +54,7 @@ void ScaleClass::setup(BrowserServerClass *server){
 		DynamicJsonBuffer jsonBuffer;
 		JsonObject &json = jsonBuffer.createObject();
 		
+		json[POWER_5V] = _scales_value->power5v;
 		json[STEP_JSON] = _scales_value->step;
 		json[AVERAGE_JSON] = _scales_value->average;
 		json[WEIGHT_MAX_JSON] = _scales_value->max;
@@ -71,8 +72,11 @@ void ScaleClass::setup(BrowserServerClass *server){
 }
 
 void ScaleClass::init(){
+	pinMode(EN_MT, OUTPUT);
+	
 	reset();
 	_scales_value = &CoreMemory.eeprom.scales_value;
+	digitalWrite(EN_MT, _scales_value->power5v);
 	//_downloadValue();
 	mathRound();
 	readAverage();
@@ -94,6 +98,11 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 			SetFilterWeight(request->arg("weightFilter").toInt());
 			_scales_value->filter = GetFilterWeight();
 			_scales_value->max = request->arg("weightMax").toInt();
+			if (request->hasArg("p5v"))
+				_scales_value->power5v = true;
+			else
+				_scales_value->power5v = false;
+			digitalWrite(EN_MT, _scales_value->power5v);
 			mathRound();
 			if (CoreMemory.save()){
 				goto ok;
@@ -244,10 +253,8 @@ float ScaleClass::getWeight(){
 }
 
 void ScaleClass::tare() {
-	if (_stableWeight){
-		SetCurrent(read());
-		setOffset(Current());	
-	}
+	SetCurrent(read());
+	setOffset(Current());
 }
 
 void ScaleClass::setAverage(unsigned char a){

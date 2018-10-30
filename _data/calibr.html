@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang='en'>
+
 <head>
     <meta charset='UTF-8'>
     <meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no' />
@@ -124,7 +125,6 @@
                         d.body.appendChild(f);
                     }
                 }
-
             };
             r.open('POST', 'calibr.html', true);
             r.send(f);
@@ -173,10 +173,14 @@
             r.onreadystatechange = function() {
                 if (r.readyState === 4 && r.status === 200) {
                     try {
-                        let j = JSON.parse(r.responseText.replace(/NaN/g,'null'));
+                        let j = JSON.parse(r.responseText.replace(/NaN/g, 'null'));
                         for (let e in j) {
                             try {
-                                if (d.getElementById(e) !== null) d.getElementById(e).value = j[e];
+                                if (d.getElementById(e) !== null){
+                                    if (d.getElementById(e).type === 'checkbox') {
+                                        d.getElementById(e).checked = j[e];
+                                    } else d.getElementById(e).value = j[e];
+                                }
                             } catch (e) {}
                         }
                     } catch (e) {
@@ -195,10 +199,9 @@
             var r = new XMLHttpRequest();
             r.onreadystatechange = function() {
                 if (r.readyState === 4) {
-                    if (r.status === 200)
-                        window.open('/', '_self');
-                    else if(r.status === 400){
-                        if(confirm('Настройки не изменились. Выйти?')){
+                    if (r.status === 200) window.open('/', '_self');
+                    else if (r.status === 400) {
+                        if (confirm('Настройки не изменились. Выйти?')) {
                             window.open('/', '_self');
                         }
                     }
@@ -210,6 +213,7 @@
             r.open('POST', 'calibr.html', true);
             r.send(f);
         }
+
         function getWeight() {
             w = new ScalesSocket('ws://' + d.location.host + '/ws', ['arduino'], handleWeight, function() {
                 go();
@@ -254,7 +258,7 @@
         function setupWeight() {
             getWeight();
         }
-        window.onload = function () {
+        window.onload = function() {
             GetSettings();
         };
     </script>
@@ -266,6 +270,12 @@
     <legend>Общии настройки</legend>
     <form id='form_c_id' action='javascript:setMax()'>
         <table>
+            <tr>
+                <td>Питание датчик 5v</td>
+                <td>
+                    <input type='checkbox' id='p5v_id' name='p5v' />
+                </td>
+            </tr>
             <tr>
                 <td>Точность измерения</td>
                 <td>
@@ -320,14 +330,12 @@
             <tr>
                 <td>НВП</td>
                 <td>
-                    <input title='Максимальный вес' type='number' min='1' max='100000' id='mw_id' name='weightMax' placeholder='Найбольший предел'>
-                </td>
+                    <input title='Максимальный вес' type='number' min='1' max='100000' id='mw_id' name='weightMax' placeholder='Найбольший предел'> </td>
             </tr>
             <tr>
                 <td><a href='javascript:saveValue();'>сохранить и выйти</a></td>
                 <td>
-                    <input id='id_bs' type='submit' value='ДАЛЬШЕ >>' />
-                </td>
+                    <input id='id_bs' type='submit' value='ДАЛЬШЕ >>' /> </td>
             </tr>
         </table>
     </form>
@@ -340,20 +348,17 @@
                 <tr>
                     <td>ИМЯ:</td>
                     <td>
-                        <input id='us_id' name='user' placeholder='имя админ'>
-                    </td>
+                        <input id='us_id' name='user' placeholder='имя админ'> </td>
                 </tr>
                 <tr>
                     <td>ПАРОЛЬ:</td>
                     <td>
-                        <input type='password' id='ps_id' name='pass' placeholder='пароль админ'>
-                    </td>
+                        <input type='password' id='ps_id' name='pass' placeholder='пароль админ'> </td>
                 </tr>
                 <tr>
                     <td></td>
                     <td>
-                        <input type='submit' value='СОХРАНИТЬ' />
-                    </td>
+                        <input type='submit' value='СОХРАНИТЬ' /> </td>
                 </tr>
             </table>
         </form>

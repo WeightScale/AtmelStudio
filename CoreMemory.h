@@ -1,4 +1,4 @@
-#ifndef _COREMEMORY_h
+﻿#ifndef _COREMEMORY_h
 #define _COREMEMORY_h
 
 #include <Arduino.h>
@@ -22,6 +22,7 @@ typedef struct {
 } settings_t;
 
 typedef struct {
+	bool power5v;
 	long offset; /*  */
 	unsigned char average; /*  */
 	unsigned char step; /*  */

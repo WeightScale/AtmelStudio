@@ -107,7 +107,6 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/Temp/VMBuilds/SlaveScales/esp8266_generic/Release/core</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -163,7 +162,6 @@
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/Temp/VMBuilds/SlaveScales/esp8266_generic/Release/core</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -817,7 +815,6 @@ build.path=C:\Users\Kostya\AppData\Local\Temp\VMBuilds\WebServerHX711\esp8266_ge
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/Temp/VMBuilds/SlaveScales/esp8266_generic/Release/core</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>
@@ -873,7 +870,6 @@ build.path=C:\Users\Kostya\AppData\Local\Temp\VMBuilds\WebServerHX711\esp8266_ge
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/lwip/include</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/hardware/esp8266/2.4.2/tools/sdk/libc/xtensa-lx106-elf/include</Value>
-      <Value>C:/Users/Kostya/AppData/Local/Temp/VMBuilds/SlaveScales/esp8266_generic/Release/core</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include/c++/4.8.2/xtensa-lx106-elf</Value>
       <Value>C:/Users/Kostya/AppData/Local/arduino15/packages/esp8266/tools/xtensa-lx106-elf-gcc/1.20.0-26-gb404fb9-2/xtensa-lx106-elf/include</Value>

@@ -49,8 +49,8 @@ class CoreClass : public AsyncWebHandler{
 		String _password;
 		bool _authenticated;
 	
-		bool saveAuth();
-		bool loadAuth();
+		//bool saveAuth();
+		//bool loadAuth();
 		
 	public:			
 		CoreClass(const String& username, const String& password);
@@ -112,7 +112,7 @@ class BlinkClass : public Task {
 		if (clk < 6){
 			led ? _flash = 70 : _flash = 40;
 			clk++;
-			}else{
+		}else{
 			_flash = 2000;
 			digitalWrite(LED, HIGH);
 			clk = 0;

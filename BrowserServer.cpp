@@ -1,4 +1,4 @@
-#include <ESPAsyncTCP.h>
+п»ї#include <ESPAsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <SPIFFSEditor.h>
 #include <ArduinoJson.h>
@@ -20,7 +20,7 @@
 IPAddress apIP(192,168,4,1);
 IPAddress netMsk(255, 255, 255, 0);
 
-IPAddress lanIp;			// Надо сделать настройки ip адреса
+IPAddress lanIp;			// РќР°РґРѕ СЃРґРµР»Р°С‚СЊ РЅР°СЃС‚СЂРѕР№РєРё ip Р°РґСЂРµСЃР°
 IPAddress gateway;
 
 BrowserServerClass browserServer(80);
@@ -56,8 +56,8 @@ void BrowserServerClass::begin() {
 
 void BrowserServerClass::init(){
 	on("/settings.json",HTTP_ANY, handleSettings);
-	on("/rc", reconnectWifi);									/* Пересоединиться по WiFi. */
-	on("/sv", handleScaleProp);									/* Получить значения. */	
+	on("/rc", reconnectWifi);									/* РџРµСЂРµСЃРѕРµРґРёРЅРёС‚СЊСЃСЏ РїРѕ WiFi. */
+	on("/sv", handleScaleProp);									/* РџРѕР»СѓС‡РёС‚СЊ Р·РЅР°С‡РµРЅРёСЏ. */	
 	/*on("/heap", HTTP_GET, [](AsyncWebServerRequest *request){
 		request->send(200, "text/plain", String(ESP.getFreeHeap()));
 	});*/
@@ -72,14 +72,14 @@ void BrowserServerClass::init(){
 			return request->requestAuthentication();
 		}
 		if(CoreMemory.doDefault())
-			request->send(200,"text/html", "Установлено!");
+			request->send(200,"text/html", "РЈСЃС‚Р°РЅРѕРІР»РµРЅРѕ!");
 		else
 			request->send(400);
 	});
 	on("/rssi", handleRSSI);
 #ifdef HTML_PROGMEM
-	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Главная страница. */	 
-	on("/global.css",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/css"),global_css);});					/* Стили */
+	on("/",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/html"),index_html);});								/* Р“Р»Р°РІРЅР°СЏ СЃС‚СЂР°РЅРёС†Р°. */	 
+	on("/global.css",[](AsyncWebServerRequest * reguest){	reguest->send_P(200,F("text/css"),global_css);});					/* РЎС‚РёР»Рё */
 	/*on("/favicon.png",[](AsyncWebServerRequest * request){
 		AsyncWebServerResponse *response = request->beginResponse_P(200, "image/png", favicon_png, favicon_png_len);
 		request->send(response);
@@ -245,7 +245,7 @@ void onWsEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventT
 		if (!root.success()) {
 			return;
 		}		
-		const char *command = root["cmd"];			/* Получить показания датчика*/
+		const char *command = root["cmd"];			/* РџРѕР»СѓС‡РёС‚СЊ РїРѕРєР°Р·Р°РЅРёСЏ РґР°С‚С‡РёРєР°*/
 		JsonObject& json = jsonBuffer.createObject();
 		json["cmd"] = command;
 		if (strcmp(command, "wt") == 0){			
