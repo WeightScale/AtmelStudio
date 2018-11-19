@@ -18,24 +18,28 @@
             margin-left: auto;
             margin-right: auto;
         }
-        .td,.th{
+
+        .td,
+        .th {
             padding: 3px;
             border: 1px solid white;
-
         }
-        .th{
-            background:#a0a0a0;
+
+        .th {
+            background: #a0a0a0;
             color: white;
         }
-        #tw_id{
+
+        #tw_id {
             color: #618ad2;
             font-size: small;
             font-weight: bold;
             text-align: center;
         }
+
         table {
             width: 100%;
-            border-collapse:collapse;
+            border-collapse: collapse;
         }
 
         input {
@@ -46,7 +50,7 @@
     <script>
         var w;
         var d = document;
-        var  ob = [];
+        var ob = [];
 
         function ScalesSocket(h, p, fm, fe) {
             var host = h;
@@ -60,7 +64,7 @@
                     fe();
                 }, 5000);
             };
-            this.snd = function (c) {
+            this.snd = function(c) {
                 ws.send(c);
             };
             this.getWeight = function() {
@@ -102,21 +106,18 @@
             w.snd("{'cmd':'tp'}");
         }
 
-        function createList(p,a) {
+        function createList(p, a) {
             d.getElementById(p).innerHTML = '';
             var t = "<th class='th'>время</th><th class='th'>вес</th>";
             let tr = d.createElement('tr');
             tr.innerHTML = t;
             d.getElementById(p).appendChild(tr);
-            a.forEach(function (o) {
+            a.forEach(function(o) {
                 var row = d.createElement('tr');
                 row.innerHTML = "<td style='color: forestgreen' class='td'><i/>" + o.d.split("-")[1] + "</td><td width='auto' class='td'><i/><b/>" + o.v + "</td>";
                 d.getElementById(p).appendChild(row);
             });
         }
-
-
-
         window.onload = function() {
             onBodyLoad();
         };
@@ -126,14 +127,12 @@
                 switch (e.cmd) {
                     case 'wt':
                         try {
-                            d.getElementById('w_id').innerHTML = e.w;
+                            d.getElementById('w_id').innerHTML = e.w.toFixed(e.a);
                             d.getElementById('c_id').innerHTML = e.c + '%';
                             if (e.s) {
-                                d.getElementById('ws_id').setAttribute('style', 'background: #fff;');
-                                d.getElementById('b_id').disabled = false;
-                            } else {
                                 d.getElementById('ws_id').setAttribute('style', 'background: #C4C4C4;');
-                                d.getElementById('b_id').disabled = true;
+                            } else {
+                                d.getElementById('ws_id').setAttribute('style', 'background: #fff;');
                             }
                         } catch (e) {
                             go();
@@ -146,9 +145,8 @@
                         var dt = date.toLocaleDateString() + "-" + date.toLocaleTimeString();
                         e.d = dt;
                         ob.unshift(e);
-                        if (ob.length > 5 )
-                            ob.pop();
-                        createList('tw_id',ob);
+                        if (ob.length > 5) ob.pop();
+                        createList('tw_id', ob);
                         break;
                     case 'tp':
                         d.getElementById('b_id').style.visibility = 'visible';
@@ -190,8 +188,7 @@
     </tr>
 </table>
 <hr>
-<table id='tw_id'>
-</table>
+<table id='tw_id'></table>
 <table>
     <tr>
         <td>

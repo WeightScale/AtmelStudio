@@ -143,9 +143,10 @@ void ScaleClass::saveValueCalibratedHttp(AsyncWebServerRequest * request) {
 }
 
 void ScaleClass::fetchWeight(){
-	float w = getWeight();
-	formatValue(w,_buffer);
-	detectStable(w);
+	//float w = getWeight();
+	//formatValue(w,_buffer);
+	_weight = getWeight();
+	detectStable(_weight);
 }
 
 /*
@@ -277,15 +278,17 @@ void ScaleClass::formatValue(float value, char* string){
 
 /* */
 void ScaleClass::detectStable(float w){
-	static unsigned char stable_num;
+	//static unsigned char stable_num;
 	if (_saveWeight.value != w){
-		stable_num = 0;
+		_saveWeight.stabNum = STABLE_NUM_MAX;
+		//stable_num = STABLE_NUM_MAX;
 		_stableWeight = false;
 		_saveWeight.value = w;
 		return;
 	}
-	stable_num++;
-	if (stable_num < STABLE_NUM_MAX) {
+	
+	if (_saveWeight.stabNum) {
+		_saveWeight.stabNum--;
 		return;
 	}	
 	if (_stableWeight) {
@@ -341,9 +344,11 @@ double calculateDistance(double rssi) {
 }*/
 
 size_t ScaleClass::doData(JsonObject& json ){
-	json["w"]= String(_buffer);
+	//json["w"]= String(_buffer);
+	json["w"] = _weight;
+	json["a"] = _scales_value->accuracy;
 	json["c"]= BATTERY.getCharge();
-	json["s"]= _stableWeight;	
+	json["s"]= _saveWeight.stabNum;	
 	return json.measureLength();
 }
 

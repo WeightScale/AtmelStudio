@@ -28,11 +28,13 @@ void HttpUpdaterClass::handleRequest(AsyncWebServerRequest *request){
 	if(_username.length() && _password.length() && !request->authenticate(_username.c_str(), _password.c_str()))
 	return request->requestAuthentication();
 	_authenticated = true;
-	Serial.println(String(Update.hasError()));
+	//Serial.println(String(Update.hasError()));
 	if(request->method() == HTTP_GET){
-		request->send_P(200, "text/html", serverIndex);
+		request->send_P(200, "text/html", serverIndex);		
 	}else if (request->method()==HTTP_POST){
 		digitalWrite(2, LOW); //led off
+		taskWeight.resume();
+		taskBattery.resume();
 		if (_command == U_SPIFFS){
 			//delay(1000);
 			CoreMemory.save();
@@ -54,9 +56,9 @@ void HttpUpdaterClass::handleRequest(AsyncWebServerRequest *request){
 }
 
 void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String& filename, size_t index, uint8_t *data, size_t len, bool final){
-	digitalWrite(LED, !digitalRead(LED));	//led on
-	
 	if(!index){
+		taskWeight.pause();
+		taskBattery.pause();
 		_updaterError = String();
 		if(!_authenticated){
 			return;
@@ -79,6 +81,7 @@ void HttpUpdaterClass::handleUpload(AsyncWebServerRequest *request, const String
 		}
 	}
 	if(!Update.hasError()){
+		digitalWrite(LED, !digitalRead(LED));	//led on
 		if(Update.write(data, len) != len){
 			setUpdaterError();
 		}

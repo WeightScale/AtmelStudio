@@ -36,8 +36,8 @@ TaskController taskController = TaskController();		/*  */
 //Task taskBlink(takeBlink, 500);							/*  */
 Task taskBattery(takeBattery, 20000);					/* 20 Обновляем заряд батареи */
 //Task taskPower(powerOff, 2400000);						/* 10 минут бездействия и выключаем */
-Task taskConnectWiFi(connectWifi, 20000);				/* Пытаемся соедениться с точкой доступа каждые 20 секунд */
-Task taskWeight(takeWeight,200);
+Task taskConnectWiFi(connectWifi, 30000);				/* Пытаемся соедениться с точкой доступа каждые 20 секунд */
+Task taskWeight(takeWeight,100);
 WiFiEventHandler stationModeConnectedHandler;
 WiFiEventHandler stationModeDisconnectedHandler;
 
@@ -63,15 +63,6 @@ void setup() {
 	browserServer.begin();
 	Scale.setup(&browserServer);
 	takeBattery();
-  	
-	taskController.add(BLINK);
-	taskController.add(&taskBattery);
-	taskController.add(&taskWeight);
-	
-	#if POWER_PLAN
-		taskController.add(&POWER);
-	#endif
-		
 
 	stationModeConnectedHandler = WiFi.onStationModeConnected(&onStationModeConnected);	
 	stationModeDisconnectedHandler = WiFi.onStationModeDisconnected(&onStationModeDisconnected);
@@ -93,6 +84,13 @@ void setup() {
 	delay(500);
 	taskController.add(&taskConnectWiFi);
 	connectWifi();
+	taskController.add(BLINK);
+	taskController.add(&taskBattery);
+	taskController.add(&taskWeight);
+
+	#if POWER_PLAN
+		taskController.add(&POWER);
+	#endif
 }
 
 /*********************************/
@@ -150,7 +148,7 @@ void connectWifi() {
 	int n = WiFi.scanComplete();
 	if (n == -2) {
 		WiFi.scanNetworksAsync(prinScanResult, true);
-		}else if (n > 0) {
+	}else if (n > 0) {
 		prinScanResult(n);
 	}
 }

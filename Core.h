@@ -29,6 +29,7 @@ extern TaskController taskController;		/*  */
 extern Task taskBlink;								/*  */
 extern Task taskBattery;							/*  */
 extern Task taskConnectWiFi;
+extern Task taskWeight;
 extern void connectWifi();
 
 const char netIndex[] PROGMEM = R"(<html lang='en'><meta name='viewport' content='width=device-width, initial-scale=1, maximum-scale=1'/><body><form method='POST'><input name='ssid'><br/><input type='password' name='key'><br/><input type='submit' value='СОХРАНИТЬ'></form></body></html>)";

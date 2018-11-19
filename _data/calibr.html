@@ -176,7 +176,7 @@
                         let j = JSON.parse(r.responseText.replace(/NaN/g, 'null'));
                         for (let e in j) {
                             try {
-                                if (d.getElementById(e) !== null){
+                                if (d.getElementById(e) !== null) {
                                     if (d.getElementById(e).type === 'checkbox') {
                                         d.getElementById(e).checked = j[e];
                                     } else d.getElementById(e).value = j[e];
@@ -234,15 +234,15 @@
             if (c.hasOwnProperty('cmd')) {
                 switch (c.cmd) {
                     case 'wt':
-                        weight = c.w;
+                        .weight = c.w.toFixed(c.a);
                         d.getElementById('wt_id').innerHTML = weight;
                         try {
-                            d.getElementById('form_seal').disabled = (c.s === false);
+                            d.getElementById('form_seal').disabled = (c.s > 0);
                         } catch (e) {}
                         if (c.s) {
-                            d.getElementById('wt_id').setAttribute('style', 'background: #fff;');
-                        } else {
                             d.getElementById('wt_id').setAttribute('style', 'background: #C4C4C4;');
+                        } else {
+                            d.getElementById('wt_id').setAttribute('style', 'background: #fff;');
                         }
                         try {
                             var dif_gr = parseFloat(d.getElementById('id_cal_wt').value) + parseFloat(d.getElementById('gr_id').value);
@@ -273,8 +273,7 @@
             <tr>
                 <td>Питание датчик 5v</td>
                 <td>
-                    <input type='checkbox' id='p5v_id' name='p5v' />
-                </td>
+                    <input type='checkbox' id='p5v_id' name='p5v' /> </td>
             </tr>
             <tr>
                 <td>Точность измерения</td>

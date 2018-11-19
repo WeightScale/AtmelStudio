@@ -43,6 +43,7 @@
 
 typedef struct{
 	bool isSave;
+	int stabNum;
 	float value;
 	long int time;
 }t_save_value;
@@ -52,7 +53,7 @@ class BrowserServerClass;
 class ScaleClass : public HX711{
 	private:
 		float _weight;
-		char _buffer[10];
+		//char _buffer[10];
 	protected:
 		BrowserServerClass *_server;
 		//char _buffer[10];
@@ -96,7 +97,7 @@ class ScaleClass : public HX711{
 		
 		size_t doData(JsonObject& json );
 		
-		char *getBuffer(){return _buffer;};
+		//char *getBuffer(){return _buffer;};
 };
 
 extern ScaleClass Scale;
