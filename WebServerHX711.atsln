@@ -12,7 +12,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{36E3EE02-829C-4BA8-B5F9-7268533AF6CC}.Debug|ARM.ActiveCfg = Debug|ARM
-		{36E3EE02-829C-4BA8-B5F9-7268533AF6CC}.Debug|ARM.Build.0 = Debug|ARM
 		{36E3EE02-829C-4BA8-B5F9-7268533AF6CC}.Release|ARM.ActiveCfg = Release|ARM
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution

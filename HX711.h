@@ -1,13 +1,5 @@
-﻿#ifndef _HX711_h
-#define _HX711_h
-
-#if ARDUINO >= 100
-	#include "Arduino.h"
-#else
-	#include "WProgram.h"
-#endif
-
-#pragma once
+﻿#pragma once
+#include "Arduino.h"
 /*
 * Implements a simple linear recursive exponential filter.
 * See: http://www.statistics.com/glossary&term_id=756 */
@@ -99,11 +91,3 @@ class HX711 : public ExponentialFilter<long> {
 			power_up();
 		};
 };
-
-#endif /* HX711_h */
-
-
-
-
-
-

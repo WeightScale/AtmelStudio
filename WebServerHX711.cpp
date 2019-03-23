@@ -30,7 +30,7 @@ void takeWeight();
 	void powerSwitchInterrupt();
 #endif
 void connectWifi();
-void prinScanResult(int networksFound);
+void scanResultForConnect(int networksFound);
 //
 TaskController taskController = TaskController();		/*  */
 //Task taskBlink(takeBlink, 500);							/*  */
@@ -147,13 +147,13 @@ void connectWifi() {
 	/*!  */
 	int n = WiFi.scanComplete();
 	if (n == -2) {
-		WiFi.scanNetworksAsync(prinScanResult, true);
+		WiFi.scanNetworksAsync(scanResultForConnect, true);
 	}else if (n > 0) {
-		prinScanResult(n);
+		scanResultForConnect(n);
 	}
 }
 
-void prinScanResult(int networksFound) {
+void scanResultForConnect(int networksFound) {
 	for (int i = 0; i < networksFound; ++i) {
 		if (WiFi.SSID(i).equals(CORE->getSSID())) {
 			WiFi.persistent(true);
@@ -165,56 +165,8 @@ void prinScanResult(int networksFound) {
 	taskConnectWiFi.resume();
 }
 
-/*
-void connectWifi() {
-	WiFi.setOutputPower(20.5);
-	WiFi.disconnect(false);
-	/ *!  * /
-	int n = WiFi.scanComplete();
-	if(n == -2){
-		n = WiFi.scanNetworks();
-		if (n <= 0){
-			goto scan;
-		}
-	}else if (n > 0){
-		goto connect;
-	}else{
-		goto scan;
-	}
-	connect:
-	//if (CORE->getSSID().length()==0){
-	if (String(CORE->getSSID()).length()==0){
-		WiFi.setAutoConnect(false);
-		WiFi.setAutoReconnect(false);
-		taskConnectWiFi.pause();
-		return;
-	}
-	for (int i = 0; i < n; ++i)	{
-		if(WiFi.SSID(i).equals(CORE->getSSID())){
-			int32_t chan_scan = WiFi.channel(i);
-			WiFi.setAutoConnect(true);
-			WiFi.setAutoReconnect(true);
-			if (!CORE->isAuto()){
-				if (lanIp.fromString(CORE->getLanIp()) && gateway.fromString(CORE->getGateway())){
-					WiFi.config(lanIp,gateway, netMsk);									// Надо сделать настройки ip адреса
-				}
-			}
-			WiFi.softAP(CORE->getApSSID(), SOFT_AP_PASSWORD, chan_scan); //Устанавливаем канал как роутера			
-			WiFi.begin ( CORE->getSSID(), CORE->getPASS(),chan_scan/ *,BSSID_scan* /);
-			if(WiFi.waitForConnectResult()){
-				NBNS.begin(CORE->getHostname().c_str());
-			}
-			return;
-		}
-	}					
-	scan:
-	WiFi.scanDelete();
-	WiFi.scanNetworks(true);
-	
-}*/
-
 void loop() {
-	taskController.run();	
+	taskController.run();
 	//DNS
 	dnsServer.processNextRequest();
 	//HTTP
@@ -230,7 +182,7 @@ void loop() {
 
 void onStationModeConnected(const WiFiEventStationModeConnected& evt) {
 	taskConnectWiFi.pause();
-	WiFi.softAP(CORE->getApSSID(), SOFT_AP_PASSWORD, evt.channel); //Устанавливаем канал как роутера
+	WiFi.softAP(CORE->getApSSID(), SOFT_AP_PASSWORD, evt.channel);  //Устанавливаем канал как роутера
 	WiFi.setAutoConnect(true);
 	WiFi.setAutoReconnect(true);
 	NBNS.begin(CORE->getHostname().c_str());

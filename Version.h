@@ -3,10 +3,10 @@
 #include "web_server_config.h"
 
 #if POWER_PLAN == INTERNAL_POWER
-	#define SKETCH_VERSION "web_scales_async.015"
+	#define SKETCH_VERSION "web_scales_async.016"
 	#define SPIFFS_VERSION SKETCH_VERSION
 #else if POWER_PLAN == EXTERNAL_POWER
-	#define SKETCH_VERSION "web_scales_epwr.015"
+	#define SKETCH_VERSION "web_scales_epwr.017"
 	#define SPIFFS_VERSION SKETCH_VERSION
 #endif
 

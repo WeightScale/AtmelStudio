@@ -234,7 +234,7 @@
             if (c.hasOwnProperty('cmd')) {
                 switch (c.cmd) {
                     case 'wt':
-                        .weight = c.w.toFixed(c.a);
+                        .weight = c.w ;
                         d.getElementById('wt_id').innerHTML = weight;
                         try {
                             d.getElementById('form_seal').disabled = (c.s > 0);

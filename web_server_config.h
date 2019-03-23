@@ -12,8 +12,8 @@
 #define EXTERNAL_POWER 0
 #define INTERNAL_POWER 1
 
-//#define POWER_PLAN				INTERNAL_POWER
-#define POWER_PLAN				EXTERNAL_POWER
+#define POWER_PLAN				INTERNAL_POWER
+//#define POWER_PLAN				EXTERNAL_POWER
 #define HTML_PROGMEM          //Использовать веб страницы из flash памяти
 
 #ifdef HTML_PROGMEM
@@ -41,7 +41,7 @@
 #if POWER_PLAN == INTERNAL_POWER
 	#define MIN_CHG 500			//ADC = (Vin * 1024)/Vref  Vref = 1V  Vin = 0.49v  3.5v-4.3v
 #else if POWER_PLAN == EXTERNAL_POWER
-	#define MIN_CHG 670			//ADC = (Vin * 1024)/Vref  Vref = 1V	Vin = 0.75 5.5v-6.5v
+	#define MIN_CHG 820			//ADC = (Vin * 1024)/Vref  Vref = 1V	Vin = 0.75 5.5v-6.5v
 #endif
 
 

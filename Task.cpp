@@ -1,6 +1,8 @@
 ﻿#include "Task.h"
 
-Task::Task(){};
+Task::Task(){
+	TaskID = (int)this;	
+};
 
 Task::Task(unsigned long _interval){
 	enabled = true;
@@ -62,6 +64,3 @@ void Task::run(){
 	// Update last_run and _cached_next_run
 	runned();
 }
-
-
-

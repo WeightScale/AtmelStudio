@@ -1,8 +1,8 @@
-﻿
-#include "Task.h"
-#include "TaskController.h"
+﻿#include "TaskController.h"
 
-TaskController::TaskController(unsigned long _interval): Task(_interval){
+TaskController::TaskController(unsigned long _interval)
+	: Task(_interval)
+	, _tasks(LinkedList<Task *>([](Task *c){ delete c; })) {
 	cached_size = 0;
 
 	clear();
@@ -24,17 +24,12 @@ void TaskController::run(){
 		_onRun();
 
 	unsigned long time = millis();
-	int checks = 0;
-	for(int i = 0; i < MAX_TASKS && checks <= cached_size; i++){
-		// Object exists? Is enabled? Timeout exceeded?
-		if(task[i]){
-			checks++;
-			if(task[i]->shouldRun(time)){
-				task[i]->run();
-			}
-		}
+	//int checks = 0;
+	for (const auto& t : _tasks) {
+		if (t->shouldRun(time)){
+			t->run();
+		}						
 	}
-
 	// ThreadController extends Thread, so we should flag as runned thread
 	runned();
 }
@@ -45,73 +40,49 @@ void TaskController::run(){
 */
 bool TaskController::add(Task* _task){
 	// Check if the Thread already exists on the array
-	for(int i = 0; i < MAX_TASKS; i++){
-		if(task[i] != NULL && task[i]->TaskID == _task->TaskID)
-			return true;
+	for(const auto& t : _tasks) {
+		if (t!= NULL && t->TaskID == _task->TaskID)
+			return true;					
 	}
-
-	// Find an empty slot
-	for(int i = 0; i < MAX_TASKS; i++){
-		if(!task[i]){
-			// Found a empty slot, now add Thread
-			task[i] = _task;
-			cached_size++;
-			return true;
-		}
-	}
-
+	if (_tasks.length() < MAX_TASKS){
+		_tasks.add(_task);
+		cached_size++;
+		return true;
+	}	
 	// Array is full
 	return false;
 }
 
-void TaskController::remove(int id){
-	// Find Tasks with the id, and removes
-	bool found = false;
-	for(int i = 0; i < MAX_TASKS; i++){
-		if(task[i]->TaskID == id){
-			task[i] = NULL;
-			cached_size--;
-			return;
-		}
-	}
-}
-
 void TaskController::remove(Task* _task){
-	remove(_task->TaskID);
+	if (!_task)
+		return;			
+	_tasks.remove(_task);
+	cached_size--;
 }
 
 void TaskController::clear(){
-	for(int i = 0; i < MAX_TASKS; i++){
-		task[i] = NULL;
-	}
+	_tasks.free();
 	cached_size = 0;
 }
 
 int TaskController::size(bool cached){
 	if(cached)
 		return cached_size;
-
-	int size = 0;
-	for(int i = 0; i < MAX_TASKS; i++){
-		if(task[i])
-			size++;
-	}
-	cached_size = size;
+	cached_size = _tasks.length();
 
 	return cached_size;
 }
 
 Task* TaskController::get(int index){
 	int pos = -1;
-	for(int i = 0; i < MAX_TASKS; i++){
-		if(task[i] != NULL){
+	for (const auto& t : _tasks) {
+		if (t != NULL) {
 			pos++;
 
-			if(pos == index)
-				return task[i];
-		}
+			if (pos == index)
+				return t;
+		}					
 	}
-
 	return NULL;
 }
 
